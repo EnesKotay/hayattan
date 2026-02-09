@@ -14,12 +14,18 @@ const REQUIRED_VARS = [
     "DIRECT_DATABASE_URL",
     "AUTH_SECRET",
     "AUTH_URL",
+    "R2_ACCOUNT_ID",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_BUCKET_NAME",
+    "R2_ENDPOINT",
 ] as const;
 
 const OPTIONAL_VARS = [
     "NEXT_PUBLIC_SITE_URL",
     "KV_REST_API_URL",
     "KV_REST_API_TOKEN",
+    "R2_PUBLIC_BASE_URL",
 ] as const;
 
 /**
