@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   // Experimental: View Transitions API support
   experimental: {
     viewTransition: true,
