@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: "Hayattan.Net - Hayatın Engelsiz Tarafı",
-    template: "%s",
+    template: "%s | Hayattan.Net",
   },
   description: "Hayattan.Net - Hayatın Engelsiz Tarafı",
   openGraph: {

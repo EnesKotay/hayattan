@@ -110,7 +110,7 @@ export function validateAndLogEnv(): void {
         result.warnings.forEach((warning) => console.warn(`  - ${warning}`));
     }
 
-    if (result.valid && result.warnings.length === 0) {
+    if (result.valid && result.warnings.length === 0 && process.env.NODE_ENV === "development") {
         console.log("✅ Environment variables validated successfully");
     }
 }

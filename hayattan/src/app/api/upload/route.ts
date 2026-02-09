@@ -101,12 +101,10 @@ export async function POST(request: Request) {
     // Local development: public/uploads klasörüne kaydet
     try {
       const dir = path.join(process.cwd(), UPLOAD_DIR);
-      console.log("Upload directory:", dir);
 
       await mkdir(dir, { recursive: true });
 
       const filePath = path.join(dir, safeName);
-      console.log("File path:", filePath);
 
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
@@ -134,13 +132,7 @@ export async function POST(request: Request) {
       // Çünkü "next start" ile çalışırken runtime'da eklenen static dosyalar sunulmaz.
       const url = `/api/uploads/${safeName}`;
 
-      console.log("[Upload API] File uploaded:", {
-        filename: safeName,
-        path: filePath,
-        url,
-        size: file.size,
-        cwd: process.cwd(),
-      });
+
 
       return NextResponse.json({ url });
     } catch (fsError) {
