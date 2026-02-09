@@ -25,21 +25,6 @@ export default async function FotografhanePage({
     const skip = (page - 1) * YAZILAR_PER_PAGE;
 
     // Sadece 'fotografhane' kategorisindeki yazıları filtrele
-    try {
-        const cat = await prisma.kategori.findUnique({
-            where: { slug: 'fotografhane' }
-        });
-        console.log("Category 'fotografhane' status:", cat);
-
-        if (!cat) {
-            const similar = await prisma.kategori.findMany({
-                where: { slug: { contains: 'foto' } }
-            });
-            console.log("Similar categories found:", similar);
-        }
-    } catch (e) {
-        console.error("Error checking category:", e);
-    }
 
     const whereConditions: Prisma.YaziWhereInput = {
         publishedAt: { lte: new Date() },

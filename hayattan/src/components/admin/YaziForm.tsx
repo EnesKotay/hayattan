@@ -101,8 +101,8 @@ export function YaziForm({
             // 3 saniye sonra mesajı kaldır
             setTimeout(() => setStatusMessage(null), 3000);
         } catch (error) {
-            console.error(error);
-            setStatusMessage({ type: "error", text: "Kaydedilirken bir hata oluştu." });
+            const errorMessage = error instanceof Error ? error.message : "Kaydedilirken bir hata oluştu.";
+            setStatusMessage({ type: "error", text: errorMessage });
         } finally {
             setIsSubmitting(false);
         }
