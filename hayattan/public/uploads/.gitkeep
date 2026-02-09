@@ -1,0 +1,2 @@
+# Bu dosya uploads klasörünün git'te tutulmasını sağlar
+# Gerçek upload edilen dosyalar .gitignore'da ignore edilir
