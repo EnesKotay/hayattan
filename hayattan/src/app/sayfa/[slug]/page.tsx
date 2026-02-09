@@ -8,6 +8,8 @@ import { isExternalImageUrl } from "@/lib/image";
 import { isFotoğrafhanePageSlug, FOTOGRAFHANE_CATEGORY_WHERE } from "@/lib/site-categories";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 const YAZILAR_PER_PAGE = 12;
 
 type Props = {

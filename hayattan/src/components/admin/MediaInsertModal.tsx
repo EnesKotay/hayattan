@@ -74,17 +74,13 @@ export function MediaInsertModal({
     setUploading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.set("file", file);
-
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const { uploadToR2 } = await import("@/lib/r2-client-utils");
+      const { url } = await uploadToR2(file);
 
-      if (!res.ok) {
-        throw new Error("Yükleme başarısız");
+      if (!url) {
+        throw new Error("Yükleme başarılı ancak URL alınamadı.");
       }
-
-      const data = await res.json();
 
       // Determine type based on mime type or extension
       const mime = file.type;
@@ -93,14 +89,14 @@ export function MediaInsertModal({
       else if (mime.startsWith("audio/")) type = "audio";
 
       setUploadedFile({
-        url: data.url, // Ensure API returns { url: ... }
+        url: url,
         name: file.name,
         type: type
       });
 
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setError("Dosya yüklenirken bir hata oluştu.");
+      setError(e.message || "Dosya yüklenirken bir hata oluştu.");
     } finally {
       setUploading(false);
     }
