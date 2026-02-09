@@ -73,11 +73,8 @@ export function ImageUpload({
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
-    const formData = new FormData();
-    formData.set("file", file);
-
     try {
-      // Simüle edilmiş progress (gerçek progress için XMLHttpRequest kullanılabilir ama fetch daha basit)
+      // Simüle edilmiş progress
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev < 90) return prev + 10;
@@ -85,38 +82,17 @@ export function ImageUpload({
         });
       }, 200);
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-        signal: abortController.signal,
-      });
+      // r2-client-utils'den gelen yardımcı fonksiyonu kullan
+      const { uploadToR2 } = await import("@/lib/r2-client-utils");
+
+      const { url } = await uploadToR2(file);
 
       clearInterval(progressInterval);
-      setUploadProgress(90);
-
-      // Response'u parse etmeden önce kontrol et
-      let data;
-      try {
-        const text = await res.text();
-        if (!text) {
-          throw new Error("Sunucu boş yanıt döndürdü");
-        }
-        data = JSON.parse(text);
-      } catch (parseError) {
-        console.error("Failed to parse response:", parseError);
-        throw new Error(`Sunucu hatası: ${res.status} ${res.statusText}`);
-      }
-
-      if (!res.ok) {
-        throw new Error(data.error || `Yükleme başarısız (${res.status})`);
-      }
-
-      if (!data.url) {
-        throw new Error("Sunucu URL döndürmedi");
-      }
-
-      const url = data.url.trim();
       setUploadProgress(100);
+
+      if (!url) {
+        throw new Error("Yükleme başarılı ancak URL alınamadı.");
+      }
 
       // Kısa bir gecikme ile state'i güncelle (kullanıcıya progress görmesi için)
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -126,13 +102,12 @@ export function ImageUpload({
       setImageError(false);
       setIsImageLoading(true);
       onChange?.(url);
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") {
-        // Upload iptal edildi, sessizce çık
+    } catch (err: any) {
+      if (err.name === "AbortError") {
         return;
       }
       console.error("Upload error:", err);
-      const errorMessage = err instanceof Error ? err.message : "Yükleme başarısız";
+      const errorMessage = err.message || "Yükleme başarısız";
       setError(errorMessage);
       setUploadProgress(0);
     } finally {

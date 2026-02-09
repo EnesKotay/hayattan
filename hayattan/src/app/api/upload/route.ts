@@ -82,35 +82,6 @@ export async function POST(request: Request) {
     const randomStr = Math.random().toString(36).slice(2, 9);
     const safeName = `${timestamp}-${randomStr}${ext}`;
 
-    // Cloudflare R2 (S3) Upload
-    if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY) {
-      try {
-        const { PutObjectCommand } = await import("@aws-sdk/client-s3");
-        const { s3Client, R2_BUCKET_NAME, R2_PUBLIC_DOMAIN } = await import("@/lib/s3");
-
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        await s3Client.send(
-          new PutObjectCommand({
-            Bucket: R2_BUCKET_NAME,
-            Key: `uploads/${safeName}`,
-            Body: buffer,
-            ContentType: file.type,
-          })
-        );
-
-        const url = R2_PUBLIC_DOMAIN
-          ? `https://${R2_PUBLIC_DOMAIN}/uploads/${safeName}`
-          : `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${R2_BUCKET_NAME}/uploads/${safeName}`;
-
-        return NextResponse.json({ url });
-      } catch (r2Error) {
-        console.error("R2 upload error:", r2Error);
-        // Hata durumunda diğer yöntemlere (Blob/Local) devam et veya hata dön
-      }
-    }
-
     // Vercel'de Blob kullan (ücretsiz kota), local'de public/uploads
     if (process.env.BLOB_READ_WRITE_TOKEN) {
       try {
