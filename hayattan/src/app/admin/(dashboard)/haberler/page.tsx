@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { deleteHaber } from "../../actions";
 import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
 import { AdminFeedback } from "@/components/admin/AdminFeedback";
+import { Haber } from "@prisma/client";
 
 export default async function AdminHaberlerPage({
     searchParams,
@@ -64,7 +65,7 @@ export default async function AdminHaberlerPage({
                                 </tr>
                             </thead>
                             <tbody>
-                                {haberler.map((haber) => (
+                                {haberler.map((haber: Haber) => (
                                     <tr key={haber.id} className="border-b border-[#eee] last:border-0 hover:bg-gray-50/50">
                                         <td className="px-4 py-3 font-medium text-foreground">{haber.sortOrder}</td>
                                         <td className="px-4 py-3 font-medium text-foreground">{haber.title}</td>
