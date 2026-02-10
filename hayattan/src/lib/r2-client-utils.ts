@@ -1,29 +1,29 @@
 /**
  * Cloudflare R2'ye dosyayı server-side yükleyen yardımcı fonksiyon.
- * SSL sorunlarını önlemek için presigned URL yerine server upload kullanır.
+ * SSL sorunlarını önlemek için server üzerinden upload yapar.
  */
 export async function uploadToR2(file: File) {
     // FormData oluştur
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     // Server-side upload endpoint'ine gönder
-    const res = await fetch("/api/r2/upload", {
+    const response = await fetch("/api/r2/upload", {
         method: "POST",
         body: formData,
     });
 
-    const data = await res.json();
+    const data = await response.json();
 
-    if (!res.ok) {
-        throw new Error(data?.error || "Dosya yüklenemedi.");
+    if (!response.ok) {
+        throw new Error(data?.error || "Dosya yükleme hatası.");
     }
 
     if (!data.success) {
         throw new Error(data?.error || "Upload başarısız.");
     }
 
-    // Sitenin geri kalanında kullanılacak URL
+    // Başarılı response
     return {
         url: data.url,
         key: data.key

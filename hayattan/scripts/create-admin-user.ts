@@ -48,7 +48,7 @@ async function createAdminUser() {
     });
     
     console.log('\n📋 Tüm admin kullanıcıları:');
-    admins.forEach((admin: any, index: number) => {
+    admins.forEach((admin, index) => {
       console.log(`   ${index + 1}. ${admin.name} (${admin.email}) - ${admin.role}`);
     });
     

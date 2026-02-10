@@ -20,14 +20,14 @@ async function checkXMLAuthors() {
     const xmlContent = readFileSync(xmlPath, 'utf-8');
     
     console.log('🔍 XML parse ediliyor...');
-    const result = await parseXML(xmlContent) as any;
+    const result = await parseXML(xmlContent);
     const channel = result.rss.channel[0];
     
     // XML'deki yazarları listele
     console.log('👤 XML\'DEKİ YAZARLAR:');
     const authors = channel['wp:author'] || [];
     
-    authors.forEach((author: any, index: number) => {
+    authors.forEach((author, index) => {
       const authorId = extractText(author['wp:author_id']);
       const login = extractText(author['wp:author_login']);
       const email = extractText(author['wp:author_email']);
@@ -50,7 +50,7 @@ async function checkXMLAuthors() {
     
     const creatorCounts = new Map();
     
-    items.slice(0, 20).forEach((item: any, index: number) => {
+    items.slice(0, 20).forEach((item, index) => {
       const title = extractText(item.title);
       const creator = extractText(item['dc:creator']);
       const postType = extractText(item['wp:post_type']);
@@ -65,7 +65,7 @@ async function checkXMLAuthors() {
     console.log('\n📊 TÜM YAZILARDAKI YAZAR DAĞILIMI:');
     const allCreators = new Map();
     
-    items.forEach((item: any) => {
+    items.forEach(item => {
       const creator = extractText(item['dc:creator']);
       const postType = extractText(item['wp:post_type']);
       const postStatus = extractText(item['wp:status']);
@@ -77,7 +77,7 @@ async function checkXMLAuthors() {
     
     Array.from(allCreators.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([creator, count]: [string, number]) => {
+      .forEach(([creator, count]) => {
         console.log(`   "${creator}": ${count} yazı`);
       });
     

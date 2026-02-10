@@ -341,14 +341,14 @@ async function finalCorrectImport() {
     console.log('\n📋 BULUNAN POST STATUS DAĞILIMI:');
     Array.from(statusCounts.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([status, count]: [string, any]) => {
+      .forEach(([status, count]) => {
         console.log(`   ${status}: ${count} adet`);
       });
     
     console.log('\n📋 BULUNAN POST TYPE DAĞILIMI:');
     Array.from(typeCounts.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([type, count]: [string, any]) => {
+      .forEach(([type, count]) => {
         console.log(`   ${type}: ${count} adet`);
       });
     

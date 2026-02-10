@@ -431,7 +431,7 @@ async function fullContentImport() {
       }
     });
     
-    authorStats.forEach((author: any, index: number) => {
+    authorStats.forEach((author, index) => {
       console.log(`   ${index + 1}. ${author.name}: ${author._count.yazilar} yazı`);
     });
     

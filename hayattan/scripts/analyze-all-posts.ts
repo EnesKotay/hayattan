@@ -8,7 +8,7 @@ async function analyzeAllPosts() {
     const sqlContent = readFileSync(sqlPath, 'utf-8');
     
     // wp_posts INSERT'lerini bul
-    const postsInsertRegex = /INSERT INTO `wp_posts`[^;]+;/g;
+    const postsInsertRegex = /INSERT INTO `wp_posts`[^;]+;/gs;
     const postsMatches = sqlContent.match(postsInsertRegex);
     
     console.log(`📊 Bulunan wp_posts INSERT statement'ı: ${postsMatches?.length || 0}`);
@@ -37,7 +37,7 @@ async function analyzeAllPosts() {
     for (const insertStatement of postsMatches) {
       try {
         // VALUES kısmını bul
-        const valuesMatch = insertStatement.match(/VALUES\s*(.+)$/);
+        const valuesMatch = insertStatement.match(/VALUES\s*(.+)$/s);
         if (!valuesMatch) continue;
         
         let valuesString = valuesMatch[1];
@@ -105,14 +105,14 @@ async function analyzeAllPosts() {
     console.log('\n📋 POST STATUS DAĞILIMI:');
     Array.from(postStatuses.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([status, count]: [string, any]) => {
+      .forEach(([status, count]) => {
         console.log(`   ${status}: ${count} adet`);
       });
     
     console.log('\n📋 POST TYPE DAĞILIMI:');
     Array.from(postTypes.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([type, count]: [string, any]) => {
+      .forEach(([type, count]) => {
         console.log(`   ${type}: ${count} adet`);
       });
     

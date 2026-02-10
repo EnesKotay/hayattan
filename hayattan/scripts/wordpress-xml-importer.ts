@@ -78,7 +78,7 @@ async function importWordPressXML() {
     if (!xmlPath) {
       console.log('\n❌ XML dosyası bulunamadı!');
       console.log('Lütfen WordPress export XML dosyasını şu isimlerden biriyle kaydedin:');
-      possiblePaths.forEach((path: any) => console.log(`   - ${path}`));
+      possiblePaths.forEach(path => console.log(`   - ${path}`));
       return;
     }
     
@@ -86,7 +86,7 @@ async function importWordPressXML() {
     
     // XML'i oku ve parse et
     const xmlContent = readFileSync(xmlPath, 'utf-8');
-    const result = await parseXML(xmlContent) as any;
+    const result = await parseXML(xmlContent);
     
     const channel = result.rss.channel[0];
     const items = channel.item || [];
@@ -171,12 +171,12 @@ async function importWordPressXML() {
     // Yazıları ve sayfaları import et
     console.log('\n📝 İçerikler import ediliyor...');
     
-    const posts = items.filter((item: any) => 
+    const posts = items.filter(item => 
       item['wp:post_type']?.[0] === 'post' && 
       item['wp:status']?.[0] === 'publish'
     );
     
-    const pages = items.filter((item: any) => 
+    const pages = items.filter(item => 
       item['wp:post_type']?.[0] === 'page' && 
       item['wp:status']?.[0] === 'publish'
     );

@@ -44,7 +44,7 @@ const commonUsernames = [
 ];
 
 console.log('🎯 Test edilebilecek yaygın kullanıcı adları:');
-commonUsernames.forEach((username: any, index: number) => {
+commonUsernames.forEach((username, index) => {
   console.log(`   ${index + 1}. ${username}`);
 });
 

@@ -11,7 +11,7 @@ async function extractDbInfoFromSQL() {
     const lines = sqlContent.split('\n').slice(0, 100);
     
     console.log('📄 SQL dosyasının başlangıcı:');
-    lines.slice(0, 20).forEach((line: any, index: number) => {
+    lines.slice(0, 20).forEach((line, index) => {
       if (line.trim() && !line.startsWith('--') && !line.startsWith('/*!')) {
         console.log(`${(index + 1).toString().padStart(3, ' ')}: ${line}`);
       }

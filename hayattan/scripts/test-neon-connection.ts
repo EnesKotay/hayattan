@@ -41,7 +41,7 @@ async function testNeonConnection() {
     });
 
     console.log('📝 Son yazılar:');
-    sonYazilar.forEach((yazi: any) => {
+    sonYazilar.forEach(yazi => {
       console.log(`   - ${yazi.title} (${yazi.author.name})`);
     });
 

@@ -22,7 +22,7 @@ async function fixCategoryMapping() {
     const xmlContent = readFileSync(xmlPath, 'utf-8');
     
     console.log('🔍 XML parse ediliyor...');
-    const result = await parseXML(xmlContent) as any;
+    const result = await parseXML(xmlContent);
     const channel = result.rss.channel[0];
     
     // Mevcut kategorileri al
@@ -31,7 +31,7 @@ async function fixCategoryMapping() {
     
     // Kategori slug mapping'i oluştur
     const kategoriMap = new Map();
-    dbKategoriler.forEach((kat: any) => {
+    dbKategoriler.forEach(kat => {
       kategoriMap.set(kat.slug, kat.id);
       console.log(`   ${kat.name} → ${kat.slug}`);
     });
@@ -95,7 +95,7 @@ async function fixCategoryMapping() {
                 where: { id: existingYazi.id },
                 data: {
                   kategoriler: {
-                    connect: categoryIds.map((id: any) => ({ id }))
+                    connect: categoryIds.map(id => ({ id }))
                   }
                 }
               });
