@@ -13,7 +13,7 @@ ALLOWED_ORIGINS = "https://hayattan.net,https://www.hayattan.net,http://localhos
 MAX_FILE_SIZE = "104857600" # 100MB
 AUTH_SECRET = "hayattan-net-super-secret-auth-key-2024"
 
-# Custom domain routing (optional)
-[routes]
-pattern = "hayattan.net/api/upload/*"
-zone_name = "hayattan.net"
+# Custom domain routing (optional - comment out for initial deploy)
+# [routes]
+# pattern = "hayattan.net/api/upload/*"
+# zone_name = "hayattan.net"
