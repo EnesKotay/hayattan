@@ -83,9 +83,9 @@ export function ImageUpload({
       }, 200);
 
       // r2-client-utils'den gelen yardımcı fonksiyonu kullan
-      const { uploadToR2 } = await import("@/lib/r2-client-utils");
-
-      const { url } = await uploadToR2(file);
+      const { secureUploadToR2 } = await import("@/lib/secure-upload");
+      
+      const { url } = await secureUploadToR2(file);
 
       clearInterval(progressInterval);
       setUploadProgress(100);
