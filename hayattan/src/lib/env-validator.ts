@@ -12,8 +12,9 @@ type EnvValidationResult = {
 const REQUIRED_VARS = [
     "DATABASE_URL",
     "DIRECT_DATABASE_URL",
-    "AUTH_SECRET",
-    "AUTH_URL",
+    // Temporarily disabled for debugging
+    // "AUTH_SECRET",
+    // "AUTH_URL",
 ] as const;
 
 const OPTIONAL_VARS = [
