@@ -75,9 +75,21 @@ export function MediaInsertModal({
     setError(null);
 
     try {
-      const { uploadFiles } = await import("uploadthing/client");
-      const res = await uploadFiles("articleImage", { files: [file] });
-      const { url } = res[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/r2/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Yükleme başarısız");
+      }
+
+      const data = await response.json();
+      const url = data.url;
 
       if (!url) {
         throw new Error("Yükleme başarılı ancak URL alınamadı.");
