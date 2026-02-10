@@ -72,7 +72,7 @@ export const authConfig = {
 
         await logSuccessfulLogin(
           user.id,
-          user.email,
+          user.email || "",
           ipAddress,
           userAgent
         );
