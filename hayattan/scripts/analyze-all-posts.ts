@@ -8,7 +8,7 @@ async function analyzeAllPosts() {
     const sqlContent = readFileSync(sqlPath, 'utf-8');
     
     // wp_posts INSERT'lerini bul
-    const postsInsertRegex = /INSERT INTO `wp_posts`[^;]+;/gs;
+    const postsInsertRegex = /INSERT INTO `wp_posts`[^;]+;/g;
     const postsMatches = sqlContent.match(postsInsertRegex);
     
     console.log(`📊 Bulunan wp_posts INSERT statement'ı: ${postsMatches?.length || 0}`);
