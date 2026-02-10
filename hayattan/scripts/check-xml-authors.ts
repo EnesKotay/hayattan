@@ -27,7 +27,7 @@ async function checkXMLAuthors() {
     console.log('👤 XML\'DEKİ YAZARLAR:');
     const authors = channel['wp:author'] || [];
     
-    authors.forEach((author, index) => {
+    authors.forEach((author: any, index: number) => {
       const authorId = extractText(author['wp:author_id']);
       const login = extractText(author['wp:author_login']);
       const email = extractText(author['wp:author_email']);
