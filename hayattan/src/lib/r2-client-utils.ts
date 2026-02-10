@@ -1,38 +1,36 @@
 /**
- * Uploadthing ile dosya yükleme - SSL sorunları yok!
- * R2 SSL sorunları nedeniyle Uploadthing kullanıyoruz.
+ * Cloudflare R2 ile dosya yükleme - Server-side proxy ile SSL bypass
+ * Client → Vercel → R2 (SSL sorunları server tarafında çözülür)
  */
 export async function uploadToR2(file: File) {
-    // FormData ile uploadthing endpoint'ine gönder
+    // FormData ile R2 server-side endpoint'ine gönder
     const formData = new FormData();
-    formData.append("files", file);
+    formData.append("file", file);
     
     try {
-        const response = await fetch("/api/uploadthing", {
+        const response = await fetch("/api/r2/upload", {
             method: "POST",
             body: formData,
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Upload hatası: ${response.status} - ${errorText}`);
+            throw new Error(`R2 Upload hatası: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
         
-        if (!data || !data[0]) {
-            throw new Error("Upload response boş");
+        if (!data.success) {
+            throw new Error(data.error || "R2 upload başarısız");
         }
 
-        const uploadedFile = data[0];
-        
-        // Uploadthing URL formatı
+        // Cloudflare R2 URL formatı
         return {
-            url: uploadedFile.url,
-            key: uploadedFile.key || uploadedFile.name
+            url: data.url,
+            key: data.key
         };
         
     } catch (error: any) {
-        throw new Error("Upload hatası: " + error.message);
+        throw new Error("Cloudflare R2 hatası: " + error.message);
     }
 }
