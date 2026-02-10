@@ -73,7 +73,7 @@ async function importWordPressXML() {
     
     // XML'i parse et
     console.log('🔍 XML parse ediliyor...');
-    const result = await parseXML(xmlContent);
+    const result = await parseXML(xmlContent) as any;
     const channel = result.rss.channel[0];
     
     console.log(`✅ XML başarıyla parse edildi`);

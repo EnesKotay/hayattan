@@ -86,7 +86,7 @@ async function importWordPressXML() {
     
     // XML'i oku ve parse et
     const xmlContent = readFileSync(xmlPath, 'utf-8');
-    const result = await parseXML(xmlContent);
+    const result = await parseXML(xmlContent) as any;
     
     const channel = result.rss.channel[0];
     const items = channel.item || [];
