@@ -37,7 +37,7 @@ async function analyzeAllPosts() {
     for (const insertStatement of postsMatches) {
       try {
         // VALUES kısmını bul
-        const valuesMatch = insertStatement.match(/VALUES\s*(.+)$/s);
+        const valuesMatch = insertStatement.match(/VALUES\s*(.+)$/);
         if (!valuesMatch) continue;
         
         let valuesString = valuesMatch[1];
