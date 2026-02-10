@@ -25,7 +25,7 @@ export const authConfig = {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
+        const user = await prisma.yazar.findUnique({
           where: { email: credentials.email as string },
         });
 
