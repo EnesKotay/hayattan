@@ -48,7 +48,7 @@ async function testR2Connection() {
       
       if (response.Contents && response.Contents.length > 0) {
         console.log('\n📁 ÖRNEK DOSYALAR:');
-        response.Contents.slice(0, 3).forEach((obj, index) => {
+        response.Contents.slice(0, 3).forEach((obj: any, index: number) => {
           console.log(`   ${index + 1}. ${obj.Key} (${Math.round((obj.Size || 0) / 1024)} KB)`);
         });
       }

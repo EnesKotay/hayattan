@@ -13,7 +13,7 @@ async function analyzeWordPressSQL() {
     // İlk 50 satırı göster
     const lines = sqlContent.split('\n');
     console.log('\n📋 İlk 50 satır:');
-    lines.slice(0, 50).forEach((line, index) => {
+    lines.slice(0, 50).forEach((line: any, index: number) => {
       if (line.trim()) {
         console.log(`${(index + 1).toString().padStart(3, ' ')}: ${line.substring(0, 100)}${line.length > 100 ? '...' : ''}`);
       }
@@ -24,7 +24,7 @@ async function analyzeWordPressSQL() {
     console.log('\n🏗️ CREATE TABLE statements:', createTableMatches?.length || 0);
     
     if (createTableMatches) {
-      createTableMatches.slice(0, 10).forEach((match, index) => {
+      createTableMatches.slice(0, 10).forEach((match: any, index: number) => {
         const tableName = match.match(/CREATE TABLE\s+`?([^`\s]+)`?/i)?.[1];
         console.log(`   ${index + 1}. ${tableName}`);
       });
@@ -35,7 +35,7 @@ async function analyzeWordPressSQL() {
     console.log('\n📝 INSERT INTO statements:', insertMatches?.length || 0);
     
     if (insertMatches) {
-      insertMatches.slice(0, 10).forEach((match, index) => {
+      insertMatches.slice(0, 10).forEach((match: any, index: number) => {
         const tableName = match.match(/INSERT INTO\s+`?([^`\s]+)`?/i)?.[1];
         console.log(`   ${index + 1}. ${tableName}`);
       });

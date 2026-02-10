@@ -173,7 +173,7 @@ async function importFeaturedImages() {
       take: 5
     });
     
-    samplePosts.forEach((post, index) => {
+    samplePosts.forEach((post: any, index: number) => {
       console.log(`   ${index + 1}. "${post.title.substring(0, 40)}..." → ${post.featuredImage}`);
     });
     

@@ -63,7 +63,7 @@ async function main() {
     if (group.length <= 1) continue;
     // Ana yazar: en çok yazısı olan (veya ilk oluşturulan)
     const primary = group.sort((a, b) => b._count.yazilar - a._count.yazilar)[0];
-    const duplicates = group.filter((y) => y.id !== primary.id);
+    const duplicates = group.filter((y: any) => y.id !== primary.id);
     totalMerged += await mergeGroup(primary, duplicates);
   }
 

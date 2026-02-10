@@ -32,7 +32,7 @@ async function testR2Upload() {
     
     if (listResponse.Contents && listResponse.Contents.length > 0) {
       console.log('\n📁 MEVCUT DOSYALAR:');
-      listResponse.Contents.slice(0, 3).forEach((obj, index) => {
+      listResponse.Contents.slice(0, 3).forEach((obj: any, index: number) => {
         console.log(`   ${index + 1}. ${obj.Key} (${Math.round((obj.Size || 0) / 1024)} KB)`);
       });
     }

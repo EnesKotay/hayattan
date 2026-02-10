@@ -117,8 +117,8 @@ async function main() {
        FROM wp_postmeta pm
        WHERE pm.meta_key = '_thumbnail_id' AND pm.meta_value != '' AND pm.meta_value REGEXP '^[0-9]+$'`
     );
-    const thumbPostIds = thumbRows.map((r) => parseInt(r.post_id, 10));
-    const thumbAttachmentIds = [...new Set(thumbRows.map((r) => parseInt(r.attachment_id, 10)))];
+    const thumbPostIds = thumbRows.map((r: any) => parseInt(r.post_id, 10));
+    const thumbAttachmentIds = [...new Set(thumbRows.map((r: any) => parseInt(r.attachment_id, 10)))];
 
     let thumbUrls: Map<number, string> = new Map();
     if (thumbAttachmentIds.length > 0) {
@@ -127,7 +127,7 @@ async function main() {
         `SELECT ID, guid FROM wp_posts WHERE ID IN (${placeholders}) AND post_type = 'attachment'`,
         thumbAttachmentIds
       );
-      const idToUrl = new Map(attachments.map((a) => [a.ID, a.guid || ""]));
+      const idToUrl = new Map(attachments.map((a: any) => [a.ID, a.guid || ""]));
       for (const r of thumbRows) {
         const url = idToUrl.get(parseInt(r.attachment_id, 10));
         if (url) thumbUrls.set(parseInt(r.post_id, 10), url);
@@ -181,7 +181,7 @@ async function main() {
           publishedAt,
           featuredImage,
           authorId,
-          ...(kategoriIds.length > 0 && { kategoriler: { connect: kategoriIds.map((id) => ({ id })) } }),
+          ...(kategoriIds.length > 0 && { kategoriler: { connect: kategoriIds.map((id: any) => ({ id })) } }),
         },
       });
       created++;

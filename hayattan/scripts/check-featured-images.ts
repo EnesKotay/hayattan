@@ -98,7 +98,7 @@ async function checkFeaturedImages() {
     console.log(`   Fotoğrafsız yazı (XML): ${xmlTotalPosts - xmlPostsWithImages}`);
     
     console.log('\n🖼️ ÖRNEK FOTOĞRAF URL\'LERİ:');
-    imageExamples.forEach((url, index) => {
+    imageExamples.forEach((url: any, index: number) => {
       console.log(`   ${index + 1}. ${url}`);
     });
     

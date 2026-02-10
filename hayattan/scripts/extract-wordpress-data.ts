@@ -20,7 +20,7 @@ async function extractWordPressData() {
       // İlk birkaç INSERT'i analiz et
       console.log('\n📋 wp_posts örnek veriler:');
       
-      postsMatches.slice(0, 3).forEach((insert, index) => {
+      postsMatches.slice(0, 3).forEach((insert: any, index: number) => {
         console.log(`\n--- INSERT ${index + 1} ---`);
         console.log(insert.substring(0, 500) + '...');
       });
@@ -44,7 +44,7 @@ async function extractWordPressData() {
     
     if (usersMatches) {
       console.log('\n📋 wp_users örnek veriler:');
-      usersMatches.slice(0, 2).forEach((insert, index) => {
+      usersMatches.slice(0, 2).forEach((insert: any, index: number) => {
         console.log(`\n--- USER ${index + 1} ---`);
         console.log(insert.substring(0, 300) + '...');
       });
@@ -59,7 +59,7 @@ async function extractWordPressData() {
     
     if (termsMatches) {
       console.log('\n📋 wp_terms örnek veriler:');
-      termsMatches.slice(0, 2).forEach((insert, index) => {
+      termsMatches.slice(0, 2).forEach((insert: any, index: number) => {
         console.log(`\n--- TERM ${index + 1} ---`);
         console.log(insert.substring(0, 200) + '...');
       });
@@ -71,7 +71,7 @@ async function extractWordPressData() {
     const tableMatches = [...sqlContent.matchAll(createTableRegex)];
     
     const tables = tableMatches.map(match => match[1]).filter(Boolean);
-    tables.forEach((table, index) => {
+    tables.forEach((table: any, index: number) => {
       console.log(`   ${index + 1}. ${table}`);
     });
     

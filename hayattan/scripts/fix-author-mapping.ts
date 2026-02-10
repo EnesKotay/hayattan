@@ -184,7 +184,7 @@ async function fixAuthorMapping() {
     console.log('\n📊 DOĞRU YAZAR DAĞILIMI:');
     Array.from(authorStats.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([authorName, count]) => {
+      .forEach(([authorName, count]: [string, any]) => {
         console.log(`   ${authorName}: ${count} yazı`);
       });
     

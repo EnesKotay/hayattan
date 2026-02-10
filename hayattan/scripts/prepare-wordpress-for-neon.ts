@@ -16,7 +16,7 @@ async function prepareWordPressForNeon() {
     const tables = tableMatches ? tableMatches.map(match => match.match(/`([^`]+)`/)?.[1]).filter(Boolean) : [];
     
     console.log('📋 Bulunan tablolar:');
-    tables.forEach((table, index) => {
+    tables.forEach((table: any, index: number) => {
       console.log(`   ${index + 1}. ${table}`);
     });
     
@@ -39,7 +39,7 @@ async function prepareWordPressForNeon() {
       importantTables.some(important => table?.includes(important.replace('wp_', '')))
     );
     
-    foundImportantTables.forEach((table, index) => {
+    foundImportantTables.forEach((table: any, index: number) => {
       console.log(`   ${index + 1}. ${table}`);
     });
     
