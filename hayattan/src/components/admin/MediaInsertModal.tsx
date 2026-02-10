@@ -75,21 +75,59 @@ export function MediaInsertModal({
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      let url: string;
+      const DIRECT_UPLOAD_LIMIT = 4 * 1024 * 1024; // 4MB
 
-      const response = await fetch("/api/r2/upload", {
-        method: "POST",
-        body: formData,
-      });
+      if (file.size <= DIRECT_UPLOAD_LIMIT) {
+        // Küçük dosyalar: doğrudan upload
+        const formData = new FormData();
+        formData.append("file", file);
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || "Yükleme başarısız");
+        const response = await fetch("/api/r2/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || "Yükleme başarısız");
+        }
+
+        const data = await response.json();
+        url = data.url;
+      } else {
+        // Büyük dosyalar (video/audio): presigned URL ile doğrudan R2'ye yükle
+        // 1. Presigned URL al
+        const presignRes = await fetch("/api/r2/presign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: file.name,
+            contentType: file.type,
+            size: file.size,
+          }),
+        });
+
+        if (!presignRes.ok) {
+          const errData = await presignRes.json().catch(() => ({}));
+          throw new Error(errData.error || "Presign hatası");
+        }
+
+        const { uploadUrl, publicUrl } = await presignRes.json();
+
+        // 2. Dosyayı doğrudan R2'ye yükle (Vercel'den geçmez!)
+        const uploadRes = await fetch(uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error("Dosya R2'ye yüklenemedi");
+        }
+
+        url = publicUrl;
       }
-
-      const data = await response.json();
-      const url = data.url;
 
       if (!url) {
         throw new Error("Yükleme başarılı ancak URL alınamadı.");

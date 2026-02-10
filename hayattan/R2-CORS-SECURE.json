@@ -2,9 +2,12 @@
   {
     "AllowedOrigins": [
       "https://hayattan.net",
-      "https://www.hayattan.net"
+      "https://www.hayattan.net",
+      "https://*.vercel.app",
+      "http://localhost:3000"
     ],
     "AllowedMethods": [
+      "GET",
       "PUT",
       "HEAD"
     ],
