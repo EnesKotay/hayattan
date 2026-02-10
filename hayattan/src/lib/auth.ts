@@ -25,6 +25,13 @@ export const authConfig = {
           return null;
         }
 
+        // Sadece izin verilen e-posta adresleri giriş yapabilir
+        const ALLOWED_EMAILS = ["omerfarukkotay@gmail.com"];
+        const email = (credentials.email as string).toLowerCase().trim();
+        if (!ALLOWED_EMAILS.includes(email)) {
+          return null;
+        }
+
         const user = await prisma.yazar.findUnique({
           where: { email: credentials.email as string },
         });
