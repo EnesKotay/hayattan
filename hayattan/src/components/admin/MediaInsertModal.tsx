@@ -75,8 +75,9 @@ export function MediaInsertModal({
     setError(null);
 
     try {
-      const { secureUploadToR2 } = await import("@/lib/secure-upload");
-      const { url } = await secureUploadToR2(file);
+      const { uploadFiles } = await import("uploadthing/client");
+      const res = await uploadFiles("articleImage", { files: [file] });
+      const { url } = res[0];
 
       if (!url) {
         throw new Error("Yükleme başarılı ancak URL alınamadı.");
