@@ -29,72 +29,60 @@ export async function GET(
 
         const bucket = process.env.R2_BUCKET_NAME!;
         const rangeHeader = request.headers.get("range");
+        const MAX_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB parça limiti
 
-        // Range isteklerinde önce dosya boyutunu öğren
+        // Dosya bilgilerini al (Boyut ve tür)
+        const headCommand = new HeadObjectCommand({ Bucket: bucket, Key: key });
+        const headResponse = await r2.send(headCommand);
+        const totalSize = headResponse.ContentLength || 0;
+        const contentType = headResponse.ContentType || "application/octet-stream";
+
+        // Range isteği varsa veya dosya büyükse (chunking yapalım)
+        let start = 0;
+        let end = totalSize - 1;
+
         if (rangeHeader) {
-            // Dosya bilgilerini al
-            const headCommand = new HeadObjectCommand({ Bucket: bucket, Key: key });
-            const headResponse = await r2.send(headCommand);
-            const totalSize = headResponse.ContentLength || 0;
-            const contentType = headResponse.ContentType || "application/octet-stream";
-
-            // Range parse: "bytes=0-" veya "bytes=0-1023"
             const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
-            if (!match) {
-                return new NextResponse("Invalid Range", { status: 416 });
+            if (match) {
+                start = parseInt(match[1], 10);
+                if (match[2]) {
+                    end = parseInt(match[2], 10);
+                }
             }
-
-            const start = parseInt(match[1], 10);
-            const end = match[2] ? parseInt(match[2], 10) : totalSize - 1;
-
-            if (start >= totalSize || end >= totalSize) {
-                return new NextResponse("Range Not Satisfiable", {
-                    status: 416,
-                    headers: { "Content-Range": `bytes */${totalSize}` },
-                });
-            }
-
-            // R2'den sadece istenen aralığı çek
-            const getCommand = new GetObjectCommand({
-                Bucket: bucket,
-                Key: key,
-                Range: `bytes=${start}-${end}`,
-            });
-            const getResponse = await r2.send(getCommand);
-
-            if (!getResponse.Body) {
-                return NextResponse.json({ error: "Dosya bulunamadı" }, { status: 404 });
-            }
-
-            const bytes = await getResponse.Body.transformToByteArray();
-
-            return new NextResponse(Buffer.from(bytes), {
-                status: 206,
-                headers: {
-                    "Content-Type": contentType,
-                    "Content-Length": String(end - start + 1),
-                    "Content-Range": `bytes ${start}-${end}/${totalSize}`,
-                    "Accept-Ranges": "bytes",
-                    "Cache-Control": "public, max-age=31536000, immutable",
-                },
-            });
         }
 
-        // Normal istek (Range yok) — tüm dosyayı döndür
-        const command = new GetObjectCommand({ Bucket: bucket, Key: key });
-        const response = await r2.send(command);
+        // Eğer istenen aralık 5MB'dan büyükse, chunk boyutunu sınırla
+        // Bu sayede Vercel memory/timeout limitlerine takılmadan video stream edilir
+        if (end - start + 1 > MAX_CHUNK_SIZE) {
+            end = start + MAX_CHUNK_SIZE - 1;
+        }
 
-        if (!response.Body) {
+        // Sınır aşımı kontrolü
+        if (end >= totalSize) {
+            end = totalSize - 1;
+        }
+
+        // R2'den belirtilen byte aralığını çek
+        const getCommand = new GetObjectCommand({
+            Bucket: bucket,
+            Key: key,
+            Range: `bytes=${start}-${end}`,
+        });
+        const getResponse = await r2.send(getCommand);
+
+        if (!getResponse.Body) {
             return NextResponse.json({ error: "Dosya bulunamadı" }, { status: 404 });
         }
 
-        const bytes = await response.Body.transformToByteArray();
+        const bytes = await getResponse.Body.transformToByteArray();
 
+        // 206 Partial Content döndür
         return new NextResponse(Buffer.from(bytes), {
-            status: 200,
+            status: 206, // Partial Content
             headers: {
-                "Content-Type": response.ContentType || "application/octet-stream",
-                "Content-Length": String(response.ContentLength || bytes.length),
+                "Content-Type": contentType,
+                "Content-Length": String(end - start + 1),
+                "Content-Range": `bytes ${start}-${end}/${totalSize}`,
                 "Accept-Ranges": "bytes",
                 "Cache-Control": "public, max-age=31536000, immutable",
             },
