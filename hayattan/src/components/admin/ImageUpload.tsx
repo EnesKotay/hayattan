@@ -83,7 +83,7 @@ export function ImageUpload({
       }, 200);
 
       // Kendi R2 upload API'mizi kullan
-      const DIRECT_UPLOAD_LIMIT = 4 * 1024 * 1024; // 4MB
+      const DIRECT_UPLOAD_LIMIT = 2 * 1024 * 1024; // 2MB - Vercel body limit güvenliği
       let url: string;
 
       if (file.size <= DIRECT_UPLOAD_LIMIT) {
