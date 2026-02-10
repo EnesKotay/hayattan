@@ -92,7 +92,7 @@ async function deepPostAnalysis() {
               rowCount++;
               
               // Field'ları temizle
-              const cleanFields = fields.map(f => f.replace(/^'|'$/g, ''));
+              const cleanFields = fields.map((f: any) => f.replace(/^'|'$/g, ''));
               
               const post_id = cleanFields[0];
               const post_title = cleanFields[5];

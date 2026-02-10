@@ -221,7 +221,7 @@ async function importWordPressXML() {
                   publishedAt: postDate ? new Date(postDate) : new Date(),
                   authorId: author.id,
                   kategoriler: {
-                    set: categoryIds.map(id => ({ id }))
+                    set: categoryIds.map((id: any) => ({ id }))
                   }
                 },
                 create: {
@@ -234,7 +234,7 @@ async function importWordPressXML() {
                   featuredImage: null,
                   showInSlider: false,
                   kategoriler: {
-                    connect: categoryIds.map(id => ({ id }))
+                    connect: categoryIds.map((id: any) => ({ id }))
                   }
                 }
               });

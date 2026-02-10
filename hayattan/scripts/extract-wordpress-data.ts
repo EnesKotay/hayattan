@@ -70,7 +70,7 @@ async function extractWordPressData() {
     const createTableRegex = /CREATE TABLE[^`]*`([^`]+)`/gi;
     const tableMatches = [...sqlContent.matchAll(createTableRegex)];
     
-    const tables = tableMatches.map(match => match[1]).filter(Boolean);
+    const tables = tableMatches.map((match: any) => match[1]).filter(Boolean);
     tables.forEach((table: any, index: number) => {
       console.log(`   ${index + 1}. ${table}`);
     });
@@ -98,7 +98,7 @@ async function extractWordPressData() {
       
       if (insertMatches) {
         extractedData += `-- ${tableName} verileri (${insertMatches.length} kayıt)\n`;
-        insertMatches.forEach(insert => {
+        insertMatches.forEach((insert: any) => {
           extractedData += insert + '\n';
         });
         extractedData += '\n';

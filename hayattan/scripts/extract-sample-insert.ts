@@ -110,7 +110,7 @@ async function extractSampleInsert() {
       let postCount = 0;
       let pageCount = 0;
       
-      postsMatches.forEach(insert => {
+      postsMatches.forEach((insert: any) => {
         if (insert.includes("'publish'")) publishCount++;
         if (insert.includes("'draft'")) draftCount++;
         if (insert.includes("'post'")) postCount++;

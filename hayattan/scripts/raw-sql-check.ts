@@ -37,7 +37,7 @@ async function rawSqlCheck() {
     console.log(`✅ INSERT INTO sayısı: ${insertCount}`);
     
     console.log('\n📋 İlk 10 wp_posts satırı:');
-    wpPostsLines.slice(0, 10).forEach(line => {
+    wpPostsLines.slice(0, 10).forEach((line: any) => {
       console.log(`   ${line}`);
     });
     

@@ -31,7 +31,7 @@ async function fixCategoryMapping() {
     
     // Kategori slug mapping'i oluştur
     const kategoriMap = new Map();
-    dbKategoriler.forEach(kat => {
+    dbKategoriler.forEach((kat: any) => {
       kategoriMap.set(kat.slug, kat.id);
       console.log(`   ${kat.name} → ${kat.slug}`);
     });
@@ -95,7 +95,7 @@ async function fixCategoryMapping() {
                 where: { id: existingYazi.id },
                 data: {
                   kategoriler: {
-                    connect: categoryIds.map(id => ({ id }))
+                    connect: categoryIds.map((id: any) => ({ id }))
                   }
                 }
               });

@@ -13,7 +13,7 @@ function extractInsertData(sql: string, tableName: string) {
   
   const allData: any[] = [];
   
-  matches.forEach(insertStatement => {
+  matches.forEach((insertStatement: any) => {
     // VALUES kısmını çıkar
     const valuesMatch = insertStatement.match(/VALUES\s*(.+);$/i);
     if (!valuesMatch) return;
@@ -24,10 +24,10 @@ function extractInsertData(sql: string, tableName: string) {
     const rowMatches = valuesString.match(/\([^)]+\)/g);
     if (!rowMatches) return;
     
-    rowMatches.forEach(row => {
+    rowMatches.forEach((row: any) => {
       // Parantezleri kaldır ve değerleri ayır
       const cleanRow = row.slice(1, -1);
-      const values = cleanRow.split(',').map(val => {
+      const values = cleanRow.split(',').map((val: any) => {
         val = val.trim();
         // String değerleri temizle
         if (val.startsWith("'") && val.endsWith("'")) {
@@ -85,8 +85,8 @@ async function importWordPressToPrisma() {
     
     // Kategorileri (taxonomy = 'category' olanları) filtrele
     const categories = wpTermTaxonomy
-      .filter(tax => tax[2] === 'category') // taxonomy column
-      .map(tax => {
+      .filter((tax: any) => tax[2] === 'category') // taxonomy column
+      .map((tax: any) => {
         const term = wpTerms.find(t => t[0] === tax[0]); // term_id eşleştir
         return term ? {
           id: tax[0],
@@ -162,7 +162,7 @@ async function importWordPressToPrisma() {
     console.log(`   Bulunan gönderiler: ${wpPosts.length}`);
     
     // Sadece yayınlanmış yazıları al
-    const publishedPosts = wpPosts.filter(post => post[7] === 'publish' && post[1] === 'post'); // post_status, post_type
+    const publishedPosts = wpPosts.filter((post: any) => post[7] === 'publish' && post[1] === 'post'); // post_status, post_type
     console.log(`   Yayınlanmış yazılar: ${publishedPosts.length}`);
     
     // Yazarları al

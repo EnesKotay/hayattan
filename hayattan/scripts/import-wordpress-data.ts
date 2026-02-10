@@ -164,7 +164,7 @@ function extractInsertData(sqlContent: string, tableName: string): any[] {
         if (valuesMatch) {
           const valuesStr = valuesMatch[1];
           // Basit parsing - gerçek projede daha gelişmiş parser kullanın
-          const values = valuesStr.split('),').map(v => v.replace(/^\(|\)$/g, ''));
+          const values = valuesStr.split('),').map((v: any) => v.replace(/^\(|\)$/g, ''));
           
           for (const value of values.slice(0, 50)) { // İlk 50 kayıt
             const fields = parseValueString(value);
