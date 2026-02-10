@@ -1,33 +1,38 @@
 /**
- * Uploadthing ile dosya yükleme - SSL sorunları yok!
- * Geçici çözüm olarak Uploadthing kullanıyoruz.
+ * Geçici çözüm: FormData ile server-side upload
+ * Uploadthing API karmaşık olduğu için basit server endpoint kullanıyoruz
  */
 export async function uploadToR2(file: File) {
-    // Uploadthing client kullan
-    const { uploadFiles } = await import("uploadthing/client");
+    // FormData ile uploadthing endpoint'ine gönder
+    const formData = new FormData();
+    formData.append("files", file);
     
     try {
-        const response = await uploadFiles("articleImage", {
-            files: [file]
+        const response = await fetch("/api/uploadthing", {
+            method: "POST",
+            body: formData,
         });
 
-        if (!response || response.length === 0) {
-            throw new Error("Upload başarısız - response boş");
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Upload hatası: ${response.status} - ${errorText}`);
         }
 
-        const uploadedFile = response[0];
+        const data = await response.json();
         
-        if (uploadedFile.error) {
-            throw new Error(uploadedFile.error.message);
+        if (!data || !data[0]) {
+            throw new Error("Upload response boş");
         }
 
+        const uploadedFile = data[0];
+        
         // Uploadthing URL formatı
         return {
             url: uploadedFile.url,
-            key: uploadedFile.key
+            key: uploadedFile.key || uploadedFile.name
         };
         
     } catch (error: any) {
-        throw new Error("Uploadthing hatası: " + error.message);
+        throw new Error("Upload hatası: " + error.message);
     }
 }
