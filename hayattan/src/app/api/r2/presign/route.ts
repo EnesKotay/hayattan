@@ -51,9 +51,10 @@ export async function POST(req: Request) {
 
     const uploadUrl = await getSignedUrl(r2, cmd, { expiresIn: 60 });
 
-    const publicUrl = process.env.R2_PUBLIC_BASE_URL
-        ? `${process.env.R2_PUBLIC_BASE_URL}/${key}`
-        : null;
+    const baseUrl = process.env.R2_PUBLIC_BASE_URL;
+    const publicUrl = baseUrl
+        ? `${baseUrl}/${key}`
+        : `/api/r2/file/${key}`;
 
     return NextResponse.json({ key, uploadUrl, publicUrl });
 }
