@@ -40,21 +40,12 @@ export async function GET(
       return NextResponse.json({ error: "Geçersiz dosya yolu" }, { status: 400 });
     }
 
+    // Sadece dosya adını al (path traversal koruması için)
     const safeFilename = path.basename(filename);
-    const publicBase = process.env.R2_PUBLIC_BASE_URL;
-
-    // --- 1. Production: Always redirect to R2 ---
-    if (process.env.NODE_ENV === "production" && publicBase) {
-      return NextResponse.redirect(`${publicBase}/uploads/${safeFilename}`, 302);
-    }
-
-    // --- 2. Development/Fallback: Local file system ---
     const filePath = path.join(process.cwd(), UPLOAD_DIR, safeFilename);
 
+    // Dosyanın var olup olmadığını kontrol et
     if (!existsSync(filePath)) {
-      if (publicBase) {
-        return NextResponse.redirect(`${publicBase}/uploads/${safeFilename}`, 302);
-      }
       return NextResponse.json({ error: "Dosya bulunamadı" }, { status: 404 });
     }
 
@@ -79,6 +70,7 @@ export async function GET(
     };
     const contentType = contentTypeMap[ext] || "application/octet-stream";
 
+    // Range header (video streaming için kritik)
     const range = request.headers.get("range");
 
     if (range) {
@@ -104,7 +96,7 @@ export async function GET(
         "Content-Length": fileSize.toString(),
         "Content-Type": contentType,
         "Accept-Ranges": "bytes",
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cache-Control": "public, max-age=0, must-revalidate",
       };
       const fileStream = streamFile(filePath);
       return new NextResponse(fileStream, {

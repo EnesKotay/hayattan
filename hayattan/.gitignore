@@ -34,3 +34,9 @@ next-env.d.ts
 
 # Uploads (Large files)
 /public/uploads
+
+# Prisma
+/prisma/migrations/dev.db*
+
+# Build artifacts
+*.tgz
