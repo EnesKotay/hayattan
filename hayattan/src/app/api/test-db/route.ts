@@ -6,14 +6,31 @@ export async function GET() {
     // Basit database bağlantı testi
     const result = await prisma.$queryRaw`SELECT 1 as test`;
     
-    // Kategori sayısını kontrol et
-    const kategoriCount = await prisma.kategori.count();
+    // Tüm tablo sayılarını kontrol et
+    const [kategoriCount, yazarCount, yaziCount, pageCount, haberCount] = await Promise.all([
+      prisma.kategori.count(),
+      prisma.yazar.count(), 
+      prisma.yazi.count(),
+      prisma.page.count(),
+      prisma.haber.count()
+    ]);
     
-    // Yazar sayısını kontrol et
-    const yazarCount = await prisma.yazar.count();
+    // Son yazıları kontrol et
+    const sonYazilar = await prisma.yazi.findMany({
+      take: 3,
+      orderBy: { publishedAt: 'desc' },
+      select: {
+        title: true,
+        slug: true,
+        publishedAt: true,
+        author: { select: { name: true } }
+      }
+    });
     
-    // Yazı sayısını kontrol et
-    const yaziCount = await prisma.yazi.count();
+    // Admin kullanıcıları kontrol et
+    const adminCount = await prisma.yazar.count({
+      where: { role: 'ADMIN' }
+    });
     
     return NextResponse.json({
       success: true,
@@ -23,8 +40,13 @@ export async function GET() {
         counts: {
           kategoriler: kategoriCount,
           yazarlar: yazarCount,
-          yazilar: yaziCount
-        }
+          yazilar: yaziCount,
+          sayfalar: pageCount,
+          haberler: haberCount,
+          adminler: adminCount
+        },
+        sonYazilar,
+        status: yaziCount > 0 ? 'ready' : 'needs_seed'
       }
     });
     
