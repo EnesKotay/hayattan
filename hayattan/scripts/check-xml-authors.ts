@@ -50,7 +50,7 @@ async function checkXMLAuthors() {
     
     const creatorCounts = new Map();
     
-    items.slice(0, 20).forEach((item, index) => {
+    items.slice(0, 20).forEach((item: any, index: number) => {
       const title = extractText(item.title);
       const creator = extractText(item['dc:creator']);
       const postType = extractText(item['wp:post_type']);
@@ -65,7 +65,7 @@ async function checkXMLAuthors() {
     console.log('\n📊 TÜM YAZILARDAKI YAZAR DAĞILIMI:');
     const allCreators = new Map();
     
-    items.forEach(item => {
+    items.forEach((item: any) => {
       const creator = extractText(item['dc:creator']);
       const postType = extractText(item['wp:post_type']);
       const postStatus = extractText(item['wp:status']);
@@ -77,7 +77,7 @@ async function checkXMLAuthors() {
     
     Array.from(allCreators.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([creator, count]) => {
+      .forEach(([creator, count]: [string, number]) => {
         console.log(`   "${creator}": ${count} yazı`);
       });
     

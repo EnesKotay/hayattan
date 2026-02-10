@@ -282,14 +282,14 @@ async function importAllStatuses() {
     console.log('\n📋 BULUNAN POST STATUS DAĞILIMI:');
     Array.from(statusCounts.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([status, count]) => {
+      .forEach(([status, count]: [string, any]) => {
         console.log(`   ${status}: ${count} adet`);
       });
     
     console.log('\n📋 BULUNAN POST TYPE DAĞILIMI:');
     Array.from(typeCounts.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([type, count]) => {
+      .forEach(([type, count]: [string, any]) => {
         console.log(`   ${type}: ${count} adet`);
       });
     

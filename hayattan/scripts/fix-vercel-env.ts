@@ -30,7 +30,7 @@ async function fixVercelEnv() {
   ];
   
   console.log('\n🔍 ZORUNLU ENVIRONMENT VARIABLES:');
-  requiredVars.forEach((varName, index) => {
+  requiredVars.forEach((varName: any, index: number) => {
     console.log(`   ${index + 1}. ${varName}`);
   });
   

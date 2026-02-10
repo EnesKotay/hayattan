@@ -13,7 +13,7 @@ async function checkCategories() {
     });
     
     console.log(`   Toplam ${kategoriler.length} kategori bulundu:`);
-    kategoriler.forEach((kat, index) => {
+    kategoriler.forEach((kat: any, index: number) => {
       console.log(`   ${index + 1}. ${kat.name} (${kat.slug})`);
     });
     
@@ -35,7 +35,7 @@ async function checkCategories() {
     });
     
     console.log(`   İlk 10 yazının kategori durumu:`);
-    yaziKategoriIliskileri.forEach((yazi, index) => {
+    yaziKategoriIliskileri.forEach((yazi: any, index: number) => {
       console.log(`   ${index + 1}. "${yazi.title.substring(0, 50)}..."`);
       if (yazi.kategoriler.length > 0) {
         yazi.kategoriler.forEach(kat => {

@@ -105,14 +105,14 @@ async function analyzeAllPosts() {
     console.log('\n📋 POST STATUS DAĞILIMI:');
     Array.from(postStatuses.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([status, count]) => {
+      .forEach(([status, count]: [string, any]) => {
         console.log(`   ${status}: ${count} adet`);
       });
     
     console.log('\n📋 POST TYPE DAĞILIMI:');
     Array.from(postTypes.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([type, count]) => {
+      .forEach(([type, count]: [string, any]) => {
         console.log(`   ${type}: ${count} adet`);
       });
     

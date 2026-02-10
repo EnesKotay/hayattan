@@ -22,7 +22,7 @@ async function deepPostAnalysis() {
       
       if (alternativeMatches) {
         console.log('\n📋 İlk birkaç INSERT örneği:');
-        alternativeMatches.slice(0, 3).forEach((match, index) => {
+        alternativeMatches.slice(0, 3).forEach((match: any, index: number) => {
           console.log(`\n--- INSERT ${index + 1} ---`);
           console.log(match.substring(0, 300) + '...');
         });
@@ -130,19 +130,19 @@ async function deepPostAnalysis() {
     console.log('\n📋 POST STATUS DAĞILIMI:');
     Array.from(statusCounts.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([status, count]) => {
+      .forEach(([status, count]: [string, any]) => {
         console.log(`   ${status}: ${count} adet`);
       });
     
     console.log('\n📋 POST TYPE DAĞILIMI:');
     Array.from(typeCounts.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([type, count]) => {
+      .forEach(([type, count]: [string, any]) => {
         console.log(`   ${type}: ${count} adet`);
       });
     
     console.log('\n📝 ÖRNEK POSTLAR:');
-    samplePosts.forEach((post, index) => {
+    samplePosts.forEach((post: any, index: number) => {
       console.log(`   ${index + 1}. [${post.status}] ${post.title} (${post.type})`);
     });
     

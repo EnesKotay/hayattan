@@ -21,7 +21,7 @@ console.log("");
 console.log("Vercel Dashboard'da şu environment variables'ları ekleyin/düzeltin:");
 console.log("");
 
-Object.entries(correctEnvVars).forEach(([key, value]) => {
+Object.entries(correctEnvVars).forEach(([key, value]: [string, any]) => {
   console.log(`${key}:`);
   console.log(`${value}`);
   console.log("");

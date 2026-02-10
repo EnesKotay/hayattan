@@ -399,7 +399,7 @@ async function importAllContent() {
       }
     });
     
-    authorStats.forEach((author, index) => {
+    authorStats.forEach((author: any, index: number) => {
       console.log(`   ${index + 1}. ${author.name}: ${author._count.yazilar} yazı`);
     });
     
