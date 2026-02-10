@@ -111,7 +111,7 @@ function simpleParseInsert(insertStatement: string): any[] {
 function parseSimpleRow(rowContent: string): any[] {
   // Çok basit parsing - sadece temel alanları al
   const parts = rowContent.split("', '");
-  return parts.map(part => {
+  return parts.map((part: any) => {
     let cleaned = part.replace(/^'|'$/g, '');
     cleaned = cleaned.replace(/\\'/g, "'");
     cleaned = cleaned.replace(/\\"/g, '"');

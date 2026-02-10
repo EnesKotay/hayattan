@@ -33,6 +33,11 @@ async function fixTypescriptStrict() {
       {
         pattern: /\.forEach\(\(\[(\w+),\s*(\w+)\]\) =>/g,
         replacement: '.forEach(([$1, $2]: [string, any]) =>'
+      },
+      // .forEach(item => {  (arrow function without parentheses)
+      {
+        pattern: /\.forEach\((\w+) =>/g,
+        replacement: '.forEach(($1: any) =>'
       }
     ];
     
@@ -54,6 +59,11 @@ async function fixTypescriptStrict() {
       {
         pattern: /\.map\(\((\w+),\s*(\w+)\) =>/g,
         replacement: '.map(($1: any, $2: number) =>'
+      },
+      // .map(item => {  (arrow function without parentheses)
+      {
+        pattern: /\.map\((\w+) =>/g,
+        replacement: '.map(($1: any) =>'
       }
     ];
     
@@ -70,6 +80,11 @@ async function fixTypescriptStrict() {
     const filterPatterns = [
       {
         pattern: /\.filter\(\((\w+)\) =>/g,
+        replacement: '.filter(($1: any) =>'
+      },
+      // .filter(item => {  (arrow function without parentheses)
+      {
+        pattern: /\.filter\((\w+) =>/g,
         replacement: '.filter(($1: any) =>'
       }
     ];

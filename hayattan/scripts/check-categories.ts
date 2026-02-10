@@ -38,7 +38,7 @@ async function checkCategories() {
     yaziKategoriIliskileri.forEach((yazi: any, index: number) => {
       console.log(`   ${index + 1}. "${yazi.title.substring(0, 50)}..."`);
       if (yazi.kategoriler.length > 0) {
-        yazi.kategoriler.forEach(kat => {
+        yazi.kategoriler.forEach((kat: any) => {
           console.log(`      → ${kat.name}`);
         });
       } else {

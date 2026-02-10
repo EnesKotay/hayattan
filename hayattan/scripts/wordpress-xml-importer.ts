@@ -78,7 +78,7 @@ async function importWordPressXML() {
     if (!xmlPath) {
       console.log('\n❌ XML dosyası bulunamadı!');
       console.log('Lütfen WordPress export XML dosyasını şu isimlerden biriyle kaydedin:');
-      possiblePaths.forEach(path => console.log(`   - ${path}`));
+      possiblePaths.forEach((path: any) => console.log(`   - ${path}`));
       return;
     }
     
@@ -171,12 +171,12 @@ async function importWordPressXML() {
     // Yazıları ve sayfaları import et
     console.log('\n📝 İçerikler import ediliyor...');
     
-    const posts = items.filter(item => 
+    const posts = items.filter((item: any) => 
       item['wp:post_type']?.[0] === 'post' && 
       item['wp:status']?.[0] === 'publish'
     );
     
-    const pages = items.filter(item => 
+    const pages = items.filter((item: any) => 
       item['wp:post_type']?.[0] === 'page' && 
       item['wp:status']?.[0] === 'publish'
     );
