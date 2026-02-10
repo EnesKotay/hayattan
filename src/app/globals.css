@@ -1,0 +1,340 @@
+@import "tailwindcss";
+
+/* Hayattan.Net - Tema Renkleri */
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --primary: #8b1538;
+  --primary-hover: #6b1029;
+  --primary-light: #f8e8ec;
+  --accent: #c41e3a;
+  --accent-2: #0d9488;
+  --muted: #6b7280;
+  --muted-bg: #f3f4f6;
+  --border: #e5e7eb;
+  --surface: #ffffff;
+  --ring: rgba(139, 21, 56, 0.25);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.1);
+  --prose-max-width: 65ch;
+  --content-max-width: 1280px;
+}
+
+.dark {
+  --background: #0c0c0e;
+  --foreground: #fafafa;
+  --primary: #f472b6;
+  --primary-hover: #fb7185;
+  --primary-light: #1f1315;
+  --accent: #f87171;
+  --accent-2: #2dd4bf;
+  --muted: #a1a1aa;
+  --muted-bg: #18181b;
+  --border: #27272a;
+  --surface: #141416;
+  --ring: rgba(244, 114, 182, 0.4);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --card-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-muted-bg: var(--muted-bg);
+  --color-border: var(--border);
+  --font-sans: var(--font-source-sans);
+  --font-serif: var(--font-merriweather);
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-source-sans), system-ui, sans-serif;
+  transition: background-color 0.18s ease-out, color 0.18s ease-out;
+}
+
+main {
+  transition: background-color 0.18s ease-out, color 0.18s ease-out;
+}
+
+/* Okuma alanı - makale içeriği için ideal genişlik */
+.prose-reading {
+  max-width: var(--prose-max-width);
+  line-height: 1.75;
+}
+
+/* Erişilebilirlik: klavye odak göstergesi */
+a:focus-visible,
+button:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--background), 0 0 0 5px var(--primary);
+  border-radius: 2px;
+}
+
+.dark a:focus-visible,
+.dark button:focus-visible,
+.dark [tabindex="0"]:focus-visible {
+  box-shadow: 0 0 0 3px var(--background), 0 0 0 5px var(--primary);
+}
+
+/* ========================================
+   View Transitions API - Optimized for Best UX
+   ======================================== */
+
+/* View Transitions API - DISABLED in favor of Framer Motion (template.tsx)
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.25s;
+  animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: fade-out-scale;
+}
+
+::view-transition-new(root) {
+  animation-name: fade-in-scale;
+}
+*/
+
+
+/* ========================================
+   Micro-Animations - Improved User Interactions
+   ======================================== */
+
+/* Smooth transitions for all interactive elements */
+a,
+button,
+input,
+textarea,
+select {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Link hover effects */
+a:hover {
+  opacity: 0.8;
+}
+
+a:active {
+  transform: scale(0.98);
+}
+
+/* Button interactions */
+button {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Input focus - uses theme ring */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+  border-color: var(--primary);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--primary);
+}
+
+/* Card hover effects - for any element with role="article" or .card class */
+[role="article"],
+.card,
+article {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[role="article"]:hover,
+.card:hover,
+article:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+[role="article"],
+.card,
+article {
+  box-shadow: var(--card-shadow);
+}
+
+/* Smooth image loading */
+img {
+  transition: opacity 0.3s ease-in-out;
+}
+
+img:not([src]) {
+  opacity: 0;
+}
+
+/* Loading skeleton pulse animation */
+@keyframes skeleton-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton,
+[data-loading="true"] {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Ripple effect for click feedback */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Fade in animation for content */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fade-in-up 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================
+   Dark mode - Okuma ve arayüz
+   ======================================== */
+
+.dark .yazi-icerik {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-links: var(--primary);
+  --tw-prose-quotes: var(--muted);
+}
+
+.dark .yazi-icerik blockquote {
+  border-color: var(--primary);
+  color: var(--muted);
+}
+
+.dark .yazi-icerik a {
+  color: var(--primary);
+}
+
+/* Responsive Tables in Articles */
+.yazi-icerik table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Seçim rengi - dark mode */
+.dark ::selection {
+  background: rgba(244, 114, 182, 0.25);
+  color: var(--foreground);
+}
+
+::selection {
+  background: rgba(139, 21, 56, 0.15);
+  color: var(--foreground);
+}
+
+/* Scrollbar - dark mode */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--muted-bg);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Toast animations */
+.toast {
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+  /* Disable View Transitions for reduced motion users */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Disable all animations for reduced motion users */
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
