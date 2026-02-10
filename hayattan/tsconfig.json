@@ -39,6 +39,7 @@
   "exclude": [
     "node_modules",
     "debug-*.ts",
-    "**/debug-*.ts"
+    "**/debug-*.ts",
+    "scripts/**/*"
   ]
 }
