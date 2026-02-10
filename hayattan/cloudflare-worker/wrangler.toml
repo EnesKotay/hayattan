@@ -1,0 +1,19 @@
+name = "hayattan-upload-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# R2 bucket binding
+[[r2_buckets]]
+binding = "HAYATTAN_MEDIA"
+bucket_name = "hayattan-media"
+
+# Environment variables
+[vars]
+ALLOWED_ORIGINS = "https://hayattan.net,https://www.hayattan.net,http://localhost:3000"
+MAX_FILE_SIZE = "104857600" # 100MB
+AUTH_SECRET = "hayattan-net-super-secret-auth-key-2024"
+
+# Custom domain routing (optional)
+[routes]
+pattern = "hayattan.net/api/upload/*"
+zone_name = "hayattan.net"
