@@ -76,7 +76,7 @@ export function MediaInsertModal({
 
     try {
       let url: string;
-      const DIRECT_UPLOAD_LIMIT = 4 * 1024 * 1024; // 4MB
+      const DIRECT_UPLOAD_LIMIT = 2 * 1024 * 1024; // 2MB - Vercel body limit güvenliği
 
       if (file.size <= DIRECT_UPLOAD_LIMIT) {
         // Küçük dosyalar: doğrudan upload
