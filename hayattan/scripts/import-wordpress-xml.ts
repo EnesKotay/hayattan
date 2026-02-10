@@ -73,7 +73,7 @@ async function importWordPressXML() {
     
     // XML'i parse et
     console.log('🔍 XML parse ediliyor...');
-    const result = await parseXML(xmlContent) as any;
+    const result = await parseXML(xmlContent);
     const channel = result.rss.channel[0];
     
     console.log(`✅ XML başarıyla parse edildi`);
@@ -221,7 +221,7 @@ async function importWordPressXML() {
                   publishedAt: postDate ? new Date(postDate) : new Date(),
                   authorId: author.id,
                   kategoriler: {
-                    set: categoryIds.map((id: any) => ({ id }))
+                    set: categoryIds.map(id => ({ id }))
                   }
                 },
                 create: {
@@ -234,7 +234,7 @@ async function importWordPressXML() {
                   featuredImage: null,
                   showInSlider: false,
                   kategoriler: {
-                    connect: categoryIds.map((id: any) => ({ id }))
+                    connect: categoryIds.map(id => ({ id }))
                   }
                 }
               });
@@ -307,7 +307,7 @@ async function importWordPressXML() {
       }
     });
     
-    authorStats.forEach((author: any, index: number) => {
+    authorStats.forEach((author, index) => {
       console.log(`   ${index + 1}. ${author.name}: ${author._count.yazilar} yazı`);
     });
     

@@ -18,7 +18,7 @@ async function rawSqlCheck() {
     let createTableFound = false;
     let insertCount = 0;
     
-    lines.forEach((line: any, index: number) => {
+    lines.forEach((line, index) => {
       if (line.includes('wp_posts')) {
         wpPostsLines.push(`Satır ${index + 1}: ${line.substring(0, 100)}...`);
         
@@ -37,7 +37,7 @@ async function rawSqlCheck() {
     console.log(`✅ INSERT INTO sayısı: ${insertCount}`);
     
     console.log('\n📋 İlk 10 wp_posts satırı:');
-    wpPostsLines.slice(0, 10).forEach((line: any) => {
+    wpPostsLines.slice(0, 10).forEach(line => {
       console.log(`   ${line}`);
     });
     
@@ -61,7 +61,7 @@ async function rawSqlCheck() {
       /INSERT.*wp_posts/g,
     ];
     
-    patterns.forEach((pattern: any, index: number) => {
+    patterns.forEach((pattern, index) => {
       const matches = sqlContent.match(pattern);
       console.log(`   Pattern ${index + 1}: ${matches?.length || 0} sonuç`);
     });

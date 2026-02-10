@@ -23,7 +23,7 @@ async function fixAuthorMapping() {
     const xmlContent = readFileSync(xmlPath, 'utf-8');
     
     console.log('🔍 XML parse ediliyor...');
-    const result = await parseXML(xmlContent) as any;
+    const result = await parseXML(xmlContent);
     const channel = result.rss.channel[0];
     
     // Önce tüm mevcut yazıları sil
@@ -184,7 +184,7 @@ async function fixAuthorMapping() {
     console.log('\n📊 DOĞRU YAZAR DAĞILIMI:');
     Array.from(authorStats.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([authorName, count]: [string, any]) => {
+      .forEach(([authorName, count]) => {
         console.log(`   ${authorName}: ${count} yazı`);
       });
     

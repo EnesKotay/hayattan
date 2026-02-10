@@ -36,7 +36,7 @@ async function checkBrokenImages() {
     
     const urlPatterns = new Map();
     
-    yazilarWithImages.slice(0, 5).forEach((yazi: any, index: number) => {
+    yazilarWithImages.slice(0, 5).forEach((yazi, index) => {
       console.log(`\n${index + 1}. ${yazi.title}`);
       console.log(`   URL: ${yazi.featuredImage}`);
       

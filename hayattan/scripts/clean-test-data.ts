@@ -151,7 +151,7 @@ async function cleanTestData() {
       select: { name: true, slug: true }
     });
     console.log('\n📂 Kategoriler:');
-    categories.forEach((cat: any, index: number) => {
+    categories.forEach((cat, index) => {
       console.log(`   ${index + 1}. ${cat.name} (${cat.slug})`);
     });
     
@@ -159,7 +159,7 @@ async function cleanTestData() {
       select: { name: true, email: true, role: true }
     });
     console.log('\n👤 Yazarlar:');
-    authors.forEach((author: any, index: number) => {
+    authors.forEach((author, index) => {
       console.log(`   ${index + 1}. ${author.name} (${author.email}) - ${author.role}`);
     });
     
@@ -167,7 +167,7 @@ async function cleanTestData() {
       select: { title: true, slug: true, author: { select: { name: true } } }
     });
     console.log('\n📝 Yazılar:');
-    posts.forEach((post: any, index: number) => {
+    posts.forEach((post, index) => {
       console.log(`   ${index + 1}. ${post.title} - ${post.author.name}`);
     });
     

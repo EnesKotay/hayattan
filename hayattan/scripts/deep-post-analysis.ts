@@ -22,7 +22,7 @@ async function deepPostAnalysis() {
       
       if (alternativeMatches) {
         console.log('\n📋 İlk birkaç INSERT örneği:');
-        alternativeMatches.slice(0, 3).forEach((match: any, index: number) => {
+        alternativeMatches.slice(0, 3).forEach((match, index) => {
           console.log(`\n--- INSERT ${index + 1} ---`);
           console.log(match.substring(0, 300) + '...');
         });
@@ -92,7 +92,7 @@ async function deepPostAnalysis() {
               rowCount++;
               
               // Field'ları temizle
-              const cleanFields = fields.map((f: any) => f.replace(/^'|'$/g, ''));
+              const cleanFields = fields.map(f => f.replace(/^'|'$/g, ''));
               
               const post_id = cleanFields[0];
               const post_title = cleanFields[5];
@@ -130,19 +130,19 @@ async function deepPostAnalysis() {
     console.log('\n📋 POST STATUS DAĞILIMI:');
     Array.from(statusCounts.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([status, count]: [string, any]) => {
+      .forEach(([status, count]) => {
         console.log(`   ${status}: ${count} adet`);
       });
     
     console.log('\n📋 POST TYPE DAĞILIMI:');
     Array.from(typeCounts.entries())
       .sort((a, b) => b[1] - a[1])
-      .forEach(([type, count]: [string, any]) => {
+      .forEach(([type, count]) => {
         console.log(`   ${type}: ${count} adet`);
       });
     
     console.log('\n📝 ÖRNEK POSTLAR:');
-    samplePosts.forEach((post: any, index: number) => {
+    samplePosts.forEach((post, index) => {
       console.log(`   ${index + 1}. [${post.status}] ${post.title} (${post.type})`);
     });
     

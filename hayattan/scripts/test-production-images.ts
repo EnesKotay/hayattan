@@ -24,7 +24,7 @@ async function testProductionImages() {
     
     if (imageMatches.length > 0) {
       console.log('\n🖼️ ÖRNEK IMG TAG\'LERİ:');
-      imageMatches.slice(0, 3).forEach((img: any, index: number) => {
+      imageMatches.slice(0, 3).forEach((img, index) => {
         console.log(`${index + 1}. ${img}`);
       });
     }
@@ -35,7 +35,7 @@ async function testProductionImages() {
     
     if (nextImageMatches.length > 0) {
       console.log('\n⚙️ ÖRNEK NEXT.JS IMAGE URL\'LERİ:');
-      nextImageMatches.slice(0, 3).forEach((url: any, index: number) => {
+      nextImageMatches.slice(0, 3).forEach((url, index) => {
         const fullUrl = `${productionUrl}/${url}`;
         console.log(`${index + 1}. ${fullUrl}`);
       });
@@ -47,7 +47,7 @@ async function testProductionImages() {
     
     if (hayattanMatches.length > 0) {
       console.log('\n📸 ÖRNEK HAYATTAN.NET URL\'LERİ:');
-      hayattanMatches.slice(0, 3).forEach((url: any, index: number) => {
+      hayattanMatches.slice(0, 3).forEach((url, index) => {
         console.log(`${index + 1}. ${url}`);
       });
     }

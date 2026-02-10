@@ -37,7 +37,7 @@ async function importFeaturedImages() {
     const xmlContent = readFileSync(xmlPath, 'utf-8');
     
     console.log('🔍 XML parse ediliyor...');
-    const result = await parseXML(xmlContent) as any;
+    const result = await parseXML(xmlContent);
     const channel = result.rss.channel[0];
     const items = channel.item || [];
     
@@ -173,7 +173,7 @@ async function importFeaturedImages() {
       take: 5
     });
     
-    samplePosts.forEach((post: any, index: number) => {
+    samplePosts.forEach((post, index) => {
       console.log(`   ${index + 1}. "${post.title.substring(0, 40)}..." → ${post.featuredImage}`);
     });
     

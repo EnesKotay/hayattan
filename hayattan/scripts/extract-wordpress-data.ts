@@ -20,7 +20,7 @@ async function extractWordPressData() {
       // İlk birkaç INSERT'i analiz et
       console.log('\n📋 wp_posts örnek veriler:');
       
-      postsMatches.slice(0, 3).forEach((insert: any, index: number) => {
+      postsMatches.slice(0, 3).forEach((insert, index) => {
         console.log(`\n--- INSERT ${index + 1} ---`);
         console.log(insert.substring(0, 500) + '...');
       });
@@ -44,7 +44,7 @@ async function extractWordPressData() {
     
     if (usersMatches) {
       console.log('\n📋 wp_users örnek veriler:');
-      usersMatches.slice(0, 2).forEach((insert: any, index: number) => {
+      usersMatches.slice(0, 2).forEach((insert, index) => {
         console.log(`\n--- USER ${index + 1} ---`);
         console.log(insert.substring(0, 300) + '...');
       });
@@ -59,7 +59,7 @@ async function extractWordPressData() {
     
     if (termsMatches) {
       console.log('\n📋 wp_terms örnek veriler:');
-      termsMatches.slice(0, 2).forEach((insert: any, index: number) => {
+      termsMatches.slice(0, 2).forEach((insert, index) => {
         console.log(`\n--- TERM ${index + 1} ---`);
         console.log(insert.substring(0, 200) + '...');
       });
@@ -70,8 +70,8 @@ async function extractWordPressData() {
     const createTableRegex = /CREATE TABLE[^`]*`([^`]+)`/gi;
     const tableMatches = [...sqlContent.matchAll(createTableRegex)];
     
-    const tables = tableMatches.map((match: any) => match[1]).filter(Boolean);
-    tables.forEach((table: any, index: number) => {
+    const tables = tableMatches.map(match => match[1]).filter(Boolean);
+    tables.forEach((table, index) => {
       console.log(`   ${index + 1}. ${table}`);
     });
     
@@ -98,7 +98,7 @@ async function extractWordPressData() {
       
       if (insertMatches) {
         extractedData += `-- ${tableName} verileri (${insertMatches.length} kayıt)\n`;
-        insertMatches.forEach((insert: any) => {
+        insertMatches.forEach(insert => {
           extractedData += insert + '\n';
         });
         extractedData += '\n';

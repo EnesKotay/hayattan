@@ -198,8 +198,8 @@ async function finalWordPressImport() {
       
       // Kategorileri filtrele (taxonomy = 'category')
       const categories = taxonomyData
-        .filter((tax: any) => tax[2] === 'category')
-        .map((tax: any) => {
+        .filter(tax => tax[2] === 'category')
+        .map(tax => {
           const term = termsData.find(t => t[0] === tax[0]);
           return term ? {
             id: tax[0],
@@ -242,7 +242,7 @@ async function finalWordPressImport() {
       console.log(`   Bulunan gönderi: ${postsData.length}`);
       
       // Sadece yayınlanmış yazıları filtrele
-      const publishedPosts = postsData.filter((post: any) => 
+      const publishedPosts = postsData.filter(post => 
         post[7] === 'publish' && post[20] === 'post' // post_status, post_type
       );
       

@@ -13,10 +13,10 @@ async function prepareWordPressForNeon() {
     
     // WordPress tablolarını tespit et
     const tableMatches = sqlContent.match(/CREATE TABLE `([^`]+)`/g);
-    const tables = tableMatches ? tableMatches.map((match: any) => match.match(/`([^`]+)`/)?.[1]).filter(Boolean) : [];
+    const tables = tableMatches ? tableMatches.map(match => match.match(/`([^`]+)`/)?.[1]).filter(Boolean) : [];
     
     console.log('📋 Bulunan tablolar:');
-    tables.forEach((table: any, index: number) => {
+    tables.forEach((table, index) => {
       console.log(`   ${index + 1}. ${table}`);
     });
     
@@ -35,11 +35,11 @@ async function prepareWordPressForNeon() {
     ];
     
     console.log('\n🎯 İçe aktarılacak önemli tablolar:');
-    const foundImportantTables = tables.filter((table: any) => 
+    const foundImportantTables = tables.filter(table => 
       importantTables.some(important => table?.includes(important.replace('wp_', '')))
     );
     
-    foundImportantTables.forEach((table: any, index: number) => {
+    foundImportantTables.forEach((table, index) => {
       console.log(`   ${index + 1}. ${table}`);
     });
     
@@ -62,7 +62,7 @@ async function prepareWordPressForNeon() {
       const insertRegex = new RegExp(`INSERT INTO \`${table}\`[^;]*;`, 'gs');
       const insertMatches = sqlContent.match(insertRegex);
       if (insertMatches) {
-        insertMatches.forEach((insert: any) => {
+        insertMatches.forEach(insert => {
           filteredSQL += insert + '\n';
         });
         console.log(`   ✅ ${insertMatches.length} INSERT statement eklendi`);
