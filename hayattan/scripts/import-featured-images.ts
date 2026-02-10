@@ -37,7 +37,7 @@ async function importFeaturedImages() {
     const xmlContent = readFileSync(xmlPath, 'utf-8');
     
     console.log('🔍 XML parse ediliyor...');
-    const result = await parseXML(xmlContent);
+    const result = await parseXML(xmlContent) as any;
     const channel = result.rss.channel[0];
     const items = channel.item || [];
     
