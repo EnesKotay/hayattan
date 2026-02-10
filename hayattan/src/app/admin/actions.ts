@@ -389,6 +389,7 @@ const STATIC_MENU_ENTRIES: Record<string, { label: string; href: string }> = {
   misafir_yazarlar: { label: "Misafir Yazıları", href: "/misafir-yazarlar" },
   yazilar: { label: "Yazılar", href: "/yazilar" },
   kategoriler: { label: "Kategoriler", href: "/kategoriler" },
+  fotografhane: { label: "Fotoğrafhane", href: "/fotografhane" },
   iletisim: { label: "İletişim", href: "/iletisim" },
   hakkimizda: { label: "Hakkımızda", href: "/hakkimizda" },
   arsiv: { label: "Arşiv", href: "/arsiv" },
