@@ -23,7 +23,7 @@ model Yazar {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
-  email     String?
+  email     String?  @unique
   password  String?
   photo     String?
   biyografi String?
