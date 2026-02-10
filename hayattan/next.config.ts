@@ -36,7 +36,7 @@ const nextConfig: NextConfig = {
             "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
             "font-src 'self' fonts.gstatic.com data:",
             "img-src 'self' data: https: http:",
-            "connect-src 'self' *.google-analytics.com *.analytics.google.com *.googletagmanager.com *.r2.cloudflarestorage.com *.r2.dev",
+            "connect-src 'self' *.google-analytics.com *.analytics.google.com *.googletagmanager.com",
             "frame-src 'self' *.google.com *.doubleclick.net https://www.youtube.com https://www.youtube-nocookie.com",
             "object-src 'none'",
             "base-uri 'self'",
