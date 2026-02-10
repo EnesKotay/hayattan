@@ -1,31 +1,33 @@
 /**
- * Cloudflare R2'ye dosyayı server-side yükleyen yardımcı fonksiyon.
- * SSL sorunlarını önlemek için server üzerinden upload yapar.
+ * Uploadthing ile dosya yükleme - SSL sorunları yok!
+ * Geçici çözüm olarak Uploadthing kullanıyoruz.
  */
 export async function uploadToR2(file: File) {
-    // FormData oluştur
-    const formData = new FormData();
-    formData.append("file", file);
+    // Uploadthing client kullan
+    const { uploadFiles } = await import("uploadthing/client");
+    
+    try {
+        const response = await uploadFiles("articleImage", {
+            files: [file]
+        });
 
-    // Server-side upload endpoint'ine gönder
-    const response = await fetch("/api/r2/upload", {
-        method: "POST",
-        body: formData,
-    });
+        if (!response || response.length === 0) {
+            throw new Error("Upload başarısız - response boş");
+        }
 
-    const data = await response.json();
+        const uploadedFile = response[0];
+        
+        if (uploadedFile.error) {
+            throw new Error(uploadedFile.error.message);
+        }
 
-    if (!response.ok) {
-        throw new Error(data?.error || "Dosya yükleme hatası.");
+        // Uploadthing URL formatı
+        return {
+            url: uploadedFile.url,
+            key: uploadedFile.key
+        };
+        
+    } catch (error: any) {
+        throw new Error("Uploadthing hatası: " + error.message);
     }
-
-    if (!data.success) {
-        throw new Error(data?.error || "Upload başarısız.");
-    }
-
-    // Başarılı response
-    return {
-        url: data.url,
-        key: data.key
-    };
 }
