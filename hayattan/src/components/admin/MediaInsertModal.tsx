@@ -75,65 +75,42 @@ export function MediaInsertModal({
     setError(null);
 
     try {
-      let url: string;
-      const DIRECT_UPLOAD_LIMIT = 2 * 1024 * 1024; // 2MB - Vercel body limit güvenliği
+      // 1. Sunucudan presigned URL al (sadece küçük JSON, dosya gönderilmiyor)
+      const presignRes = await fetch("/api/r2/presign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: file.type,
+          size: file.size,
+        }),
+      });
 
-      if (file.size <= DIRECT_UPLOAD_LIMIT) {
-        // Küçük dosyalar: doğrudan upload
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const response = await fetch("/api/r2/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || "Yükleme başarısız");
-        }
-
-        const data = await response.json();
-        url = data.url;
-      } else {
-        // Büyük dosyalar (video/audio): presigned URL ile doğrudan R2'ye yükle
-        // 1. Presigned URL al
-        const presignRes = await fetch("/api/r2/presign", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            filename: file.name,
-            contentType: file.type,
-            size: file.size,
-          }),
-        });
-
-        if (!presignRes.ok) {
-          const errData = await presignRes.json().catch(() => ({}));
-          throw new Error(errData.error || "Presign hatası");
-        }
-
-        const { uploadUrl, publicUrl } = await presignRes.json();
-
-        // 2. Dosyayı doğrudan R2'ye yükle (Vercel'den geçmez!)
-        const uploadRes = await fetch(uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type },
-          body: file,
-        });
-
-        if (!uploadRes.ok) {
-          throw new Error("Dosya R2'ye yüklenemedi");
-        }
-
-        url = publicUrl;
+      if (!presignRes.ok) {
+        const errData = await presignRes.json().catch(() => ({}));
+        throw new Error(errData.error || "Yükleme hazırlanamadı");
       }
+
+      const { uploadUrl, publicUrl } = await presignRes.json();
+
+      // 2. Dosyayı doğrudan R2'ye yükle (Vercel'den hiç geçmez!)
+      const uploadRes = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("Dosya yüklenemedi. CORS ayarını kontrol edin.");
+      }
+
+      const url = publicUrl;
 
       if (!url) {
         throw new Error("Yükleme başarılı ancak URL alınamadı.");
       }
 
-      // Determine type based on mime type or extension
+      // Determine type based on mime type
       const mime = file.type;
       let type = "video";
       if (mime.startsWith("image/")) type = "image";
@@ -146,7 +123,7 @@ export function MediaInsertModal({
       });
 
     } catch (e: any) {
-      console.error(e);
+      console.error("Upload error:", e);
       setError(e.message || "Dosya yüklenirken bir hata oluştu.");
     } finally {
       setUploading(false);
