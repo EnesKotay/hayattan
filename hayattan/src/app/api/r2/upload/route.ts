@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         // Parse form data
         const formData = await req.formData();
         const file = formData.get("file") as File;
-        
+
         if (!file) {
             return NextResponse.json({ error: "Dosya bulunamadı" }, { status: 400 });
         }
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         // Validate file type
         const allowedTypes = [
             "image/jpeg",
-            "image/png", 
+            "image/png",
             "image/webp",
             "image/avif",
             "image/gif",
@@ -64,14 +64,14 @@ export async function POST(req: Request) {
 
         await r2.send(uploadCommand);
 
-        // Generate public URL
-        const publicUrl = process.env.R2_PUBLIC_BASE_URL
-            ? `${process.env.R2_PUBLIC_BASE_URL}/${key}`
-            : null;
+        // Generate URL - prefer R2_PUBLIC_BASE_URL if available, otherwise use proxy
+        const baseUrl = process.env.R2_PUBLIC_BASE_URL;
+        const publicUrl = baseUrl
+            ? `${baseUrl}/${key}`
+            : `/api/r2/file/${key}`;
 
-        if (!publicUrl) {
-            return NextResponse.json({ error: "R2_PUBLIC_BASE_URL ayarlanmamış" }, { status: 500 });
-        }
+        // Always also return the proxy URL as fallback
+        const proxyUrl = `/api/r2/file/${key}`;
 
         return NextResponse.json({
             success: true,
@@ -83,8 +83,8 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         console.error("R2 upload error:", error);
-        return NextResponse.json({ 
-            error: "Upload hatası: " + error.message 
+        return NextResponse.json({
+            error: "Upload hatası: " + error.message
         }, { status: 500 });
     }
 }
