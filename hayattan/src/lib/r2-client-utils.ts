@@ -1,6 +1,6 @@
 /**
- * Geçici çözüm: FormData ile server-side upload
- * Uploadthing API karmaşık olduğu için basit server endpoint kullanıyoruz
+ * Uploadthing ile dosya yükleme - SSL sorunları yok!
+ * R2 SSL sorunları nedeniyle Uploadthing kullanıyoruz.
  */
 export async function uploadToR2(file: File) {
     // FormData ile uploadthing endpoint'ine gönder
