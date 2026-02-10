@@ -82,11 +82,23 @@ export function ImageUpload({
         });
       }, 200);
 
-      // r2-client-utils'den gelen yardımcı fonksiyonu kullan
-      const { uploadFiles } = await import("uploadthing/client");
-      
-      const res = await uploadFiles("articleImage", { files: [file] });
-      const { url } = res[0];
+      // Kendi R2 upload API'mizi kullan
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/r2/upload", {
+        method: "POST",
+        body: formData,
+        signal: abortController.signal,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Yükleme başarısız");
+      }
+
+      const data = await res.json();
+      const url = data.url;
 
       clearInterval(progressInterval);
       setUploadProgress(100);
