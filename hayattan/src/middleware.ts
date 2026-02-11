@@ -17,7 +17,7 @@ async function logRateLimitSafely(identifier: string, limitType: string, ipAddre
   }
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Rate limit for admin login endpoint

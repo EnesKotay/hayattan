@@ -96,27 +96,38 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
     <section className="relative w-full overflow-hidden py-2">
       <div className="container mx-auto px-4">
         <div className="group/card relative overflow-hidden rounded-xl shadow-lg ring-1 ring-black/[0.06] transition-shadow hover:shadow-xl">
-          {/* Slider alanı - daha dengeli oranlar (Mobil 16:9, Desktop 2.4:1) */}
-          <div className="relative aspect-[16/9] w-full md:aspect-[2.4/1]">
+          {/* Slider alanı - daha dengeli oranlar (Mobil 16:9, Desktop 2:1) */}
+          <div className="relative aspect-[16/9] w-full md:aspect-[2/1]">
             {items.map((item, index) => {
               const isExternal = item.link.startsWith("http");
               const slideClass = `absolute inset-0 block transition-opacity duration-700 ease-out ${index === activeIndex ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none"
                 }`;
               const inner = (
                 <>
-                  {/* Arka plan görseli */}
-                  <div className="absolute inset-0 bg-muted-bg">
+                  {/* Arka plan ve Görseller */}
+                  <div className="absolute inset-0 overflow-hidden bg-muted-bg">
                     {item.imageUrl && !imageErrors.has(item.id) ? (
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.title}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover/card:scale-105"
-                        sizes="(max-width: 768px) 100vw, 1200px"
-                        priority={index === 0}
-                        unoptimized={isExternalImageUrl(item.imageUrl)}
-                        onError={() => markImageError(item.id)}
-                      />
+                      <>
+                        {/* 1. Katman: Bulanık Arka Plan (Dolgu) */}
+                        <Image
+                          src={item.imageUrl}
+                          alt=""
+                          fill
+                          className="scale-110 object-cover opacity-50 blur-xl filter"
+                          aria-hidden="true"
+                        />
+                        {/* 2. Katman: Net Ön Plan Görseli (Sığdırılmış) */}
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.title}
+                          fill
+                          className="object-contain transition-transform duration-700 group-hover/card:scale-[1.02]"
+                          sizes="(max-width: 768px) 100vw, 1200px"
+                          priority={index === 0}
+                          unoptimized={isExternalImageUrl(item.imageUrl)}
+                          onError={() => markImageError(item.id)}
+                        />
+                      </>
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-light to-primary/10 text-primary/40">
                         <span className="font-serif text-4xl">Y</span>
@@ -127,7 +138,7 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                       className="absolute inset-0"
                       style={{
                         background:
-                          "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 40%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.5) 100%)",
+                          "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 50%, rgba(0,0,0,0.2) 100%)",
                       }}
                     />
                   </div>
@@ -148,7 +159,7 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                     {/* Orta: Sarı şerit */}
                     {item.excerpt && (
                       <div className="absolute left-3 right-3 top-1/2 -translate-y-1/2 md:left-4 md:right-4">
-                        <p className="line-clamp-1 max-w-md rounded-r border-l-2 border-amber-400 bg-amber-400/95 px-3 py-1 text-[10px] font-semibold text-foreground md:px-3 md:py-1.5 md:text-xs">
+                        <p className="line-clamp-2 max-w-2xl rounded-r border-l-4 border-amber-400 bg-amber-400/90 px-3 py-2 text-xs font-medium leading-relaxed text-foreground shadow-sm backdrop-blur-sm md:px-4 md:py-3 md:text-sm">
                           {item.excerpt}
                         </p>
                       </div>
