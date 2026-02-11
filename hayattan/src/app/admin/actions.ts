@@ -2,17 +2,23 @@
 
 import { compare, hash } from "bcryptjs";
 import { randomUUID } from "crypto";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+
+// ... existing imports ...
+
+// ... existing code ...
+
+
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { type AdSlotContent, AD_SLOT_KEYS, adSlotKey, parseAdSlotValue, serializeAdSlotContent } from "@/lib/ad-slots";
+import { sanitizeHtml, sanitizeAdHtml, sanitizeText, sanitizeUrl } from "@/lib/sanitize";
+import { titleCase } from "@/lib/text-case";
 
 // Prisma client tipi bazen oluşturulan modelleri (haber, user, siteSetting) tanımıyor; runtime doğru. Tip hatalarını kaldırmak için:
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
-import { type AdSlotContent, AD_SLOT_KEYS, adSlotKey, parseAdSlotValue, serializeAdSlotContent } from "@/lib/ad-slots";
-import { sanitizeHtml, sanitizeAdHtml, sanitizeText, sanitizeUrl } from "@/lib/sanitize";
-import { titleCase } from "@/lib/text-case";
 
 function slugify(text: string): string {
   return text
@@ -32,6 +38,220 @@ async function requireAuth() {
   if (!session?.user?.role || !["ADMIN", "AUTHOR"].includes(session.user.role)) {
     throw new Error("Yetkisiz erişim");
   }
+}
+
+// ==========================================
+// CACHED DATA FETCHING
+// ==========================================
+
+export const getMenuItems = unstable_cache(
+  async () => {
+    try {
+      // 1. Kayıtlı sırayı al
+      const orderJson = await db.siteSetting.findUnique({
+        where: { key: "menu_order" },
+      });
+      const order = orderJson?.value ? (JSON.parse(orderJson.value) as string[]) : [];
+
+      // 2. Tüm yayınlanmış sayfaları al (ID ve Slug eşleşmesi için)
+      const pages = await db.page.findMany({
+        where: { showInMenu: true, publishedAt: { lte: new Date() } },
+        select: { id: true, title: true, slug: true },
+      });
+      const pagesById = new Map<string, { id: string; title: string; slug: string }>(
+        (pages as any[]).map((p) => [p.id, p])
+      );
+
+      // 3. Sıraya göre listeyi oluştur
+      const result: { href: string; label: string }[] = [];
+      const seen = new Set<string>();
+
+      // Önce kayıtlı sırayı işle
+      for (const id of order) {
+        if (seen.has(id)) continue;
+        seen.add(id);
+
+        if (id.startsWith("static:")) {
+          const key = id.slice(7);
+          // Statik menü elemanları (Ana Sayfa vb.)
+          const entry = STATIC_MENU_ENTRIES[key];
+          if (entry) result.push(entry);
+        } else if (id.startsWith("page:")) {
+          const pageId = id.slice(5);
+          const p = pagesById.get(pageId);
+          if (p) result.push({ href: `/sayfa/${p.slug}`, label: p.title });
+        }
+      }
+
+      // Kayıtlı olmayan ama "menüde göster" denilen yeni sayfaları sona ekle
+      for (const [pageId, p] of pagesById) {
+        if (!seen.has(`page:${pageId}`)) {
+          result.push({ href: `/sayfa/${p.slug}`, label: p.title });
+        }
+      }
+
+      // Varsayılan (Eğer hiç sıra yoksa)
+      if (result.length === 0) {
+        return Object.values(STATIC_MENU_ENTRIES);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Menu fetch error:", error);
+      return Object.values(STATIC_MENU_ENTRIES);
+    }
+  },
+  ["menu-items"], // Cache Key
+  {
+    tags: ["menu-items"], // Revalidation Tag
+    revalidate: 3600, // 1 saat (ne olur ne olmaz)
+  }
+);
+
+export const getAdSlots = unstable_cache(
+  async () => {
+    try {
+      const slots = await db.siteSetting.findMany({
+        where: { key: { in: AD_SLOT_KEYS.map((k) => adSlotKey(k)) } },
+      });
+
+      const result: Record<string, AdSlotContent | null> = {};
+
+      // Tüm slotları null olarak başlat
+      for (const key of AD_SLOT_KEYS) {
+        result[key] = null;
+      }
+
+      // DB'den gelenleri doldur
+      for (const slot of slots) {
+        // "ad_slot_header" -> "header"
+        const cleanKey = slot.key.replace("ad_slot_", "");
+        if (AD_SLOT_KEYS.includes(cleanKey)) {
+          result[cleanKey] = parseAdSlotValue(slot.value);
+        }
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Ad slots fetch error:", error);
+      return {};
+    }
+  },
+  ["ad-slots"],
+  {
+    tags: ["ad-slots"],
+    revalidate: 3600,
+  }
+);
+
+// ... existing code ...
+
+export async function setMenuOrder(order: string[]) {
+  await requireAuth();
+  await db.siteSetting.upsert({
+    where: { key: "menu_order" },
+    update: { value: JSON.stringify(order) },
+    create: { key: "menu_order", value: JSON.stringify(order) },
+  });
+  revalidateTag("menu-items", { expire: 0 }); // Cache'i temizle
+  revalidatePath("/");
+}
+
+// ... existing code ...
+
+
+
+export async function createPage(formData: FormData) {
+  await requireAuth();
+  const title = titleCase(sanitizeText((formData.get("title") as string)?.trim() ?? ""));
+  const slug = (formData.get("slug") as string)?.trim() || slugify(title) || "sayfa";
+  const content = (formData.get("content") as string)?.trim() || "<p></p>";
+  const featuredImageRaw = (formData.get("featuredImage") as string)?.trim() || null;
+  const featuredImage = featuredImageRaw ? (sanitizeUrl(featuredImageRaw) ?? (featuredImageRaw.startsWith("/") ? featuredImageRaw : null)) : null;
+  const showInMenu = formData.get("showInMenu") === "on";
+  const menuOrder = parseInt(String(formData.get("menuOrder") ?? "0"), 10) || 0;
+  const publishedAtRaw = (formData.get("publishedAt") as string)?.trim();
+  const publishedAt = publishedAtRaw === "on" || publishedAtRaw === "1" ? new Date() : null;
+
+  const id = randomUUID();
+  await db.$executeRaw`
+    INSERT INTO "Page" (id, title, slug, content, "featuredImage", "showInMenu", "menuOrder", "publishedAt", "createdAt", "updatedAt")
+    VALUES (${id}, ${title}, ${slug}, ${content}, ${featuredImage}, ${showInMenu}, ${menuOrder}, ${publishedAt}, now(), now())
+  `;
+  revalidateTag("menu-items", { expire: 0 });
+  revalidatePath("/");
+  revalidatePath("/sayfa");
+  revalidatePath("/admin/sayfalar");
+  redirect("/admin/sayfalar?success=1");
+}
+
+export async function updatePage(id: string, formData: FormData) {
+  await requireAuth();
+  const title = titleCase(sanitizeText((formData.get("title") as string)?.trim() ?? ""));
+  const slug = (formData.get("slug") as string)?.trim() ?? "";
+  const content = (formData.get("content") as string)?.trim() || "<p></p>";
+  const featuredImageRaw = (formData.get("featuredImage") as string)?.trim() || null;
+  const featuredImage = featuredImageRaw ? (sanitizeUrl(featuredImageRaw) ?? (featuredImageRaw.startsWith("/") ? featuredImageRaw : null)) : null;
+  const showInMenu = formData.get("showInMenu") === "on";
+  const menuOrder = parseInt(String(formData.get("menuOrder") ?? "0"), 10) || 0;
+  const publishedAtRaw = (formData.get("publishedAt") as string)?.trim();
+  const publishedAt = publishedAtRaw === "on" || publishedAtRaw === "1" ? new Date() : null;
+
+  await db.$executeRaw`
+    UPDATE "Page"
+    SET title = ${title}, slug = ${slug}, content = ${content}, "featuredImage" = ${featuredImage},
+        "showInMenu" = ${showInMenu}, "menuOrder" = ${menuOrder}, "publishedAt" = ${publishedAt}, "updatedAt" = now()
+    WHERE id = ${id}
+  `;
+  revalidateTag("menu-items", { expire: 0 });
+  revalidatePath("/");
+  revalidatePath("/sayfa");
+  revalidatePath("/admin/sayfalar");
+  redirect("/admin/sayfalar?success=1");
+}
+
+export async function deletePage(id: string) {
+  await requireAuth();
+  await db.$executeRaw`DELETE FROM "Page" WHERE id = ${id}`;
+  revalidateTag("menu-items", { expire: 0 });
+  revalidatePath("/");
+  revalidatePath("/sayfa");
+  revalidatePath("/admin/sayfalar");
+  redirect("/admin/sayfalar?deleted=1");
+}
+
+export async function saveAllAdSlots(formData: FormData) {
+  await requireAuth();
+  for (const slotId of AD_SLOT_KEYS) {
+    const rawHtml = ((formData.get(`slot_${slotId}_html`) as string) ?? "").trim();
+    const html = rawHtml ? sanitizeAdHtml(rawHtml) : "";
+    const text = sanitizeText(((formData.get(`slot_${slotId}_text`) as string) ?? "").trim());
+    const rawImage = ((formData.get(`slot_${slotId}_image`) as string) ?? "").trim();
+    const image = rawImage ? (sanitizeUrl(rawImage) ?? (rawImage.startsWith("/") ? rawImage : "")) : "";
+    const width = sanitizeText(((formData.get(`slot_${slotId}_width`) as string) ?? "").trim());
+    const height = sanitizeText(((formData.get(`slot_${slotId}_height`) as string) ?? "").trim());
+    const isActive = formData.get(`slot_${slotId}_active`) === "on";
+    const rawAlign = ((formData.get(`slot_${slotId}_align`) as string) ?? "").trim().toLowerCase();
+    const align = rawAlign === "left" || rawAlign === "right" ? rawAlign : "center";
+
+    let content: AdSlotContent | null = null;
+    if (html) content = { type: "html", content: html, width, height, isActive, align } satisfies AdSlotContent;
+    else if (image) content = { type: "image", content: image, width, height, isActive, align } satisfies AdSlotContent;
+    else if (text) content = { type: "text", content: text, width, height, isActive, align } satisfies AdSlotContent;
+    const value = serializeAdSlotContent(content);
+    const key = adSlotKey(slotId);
+    await db.siteSetting.upsert({
+      where: { key },
+      create: { key, value },
+      update: { value },
+    });
+  }
+  revalidateTag("ad-slots", { expire: 0 });
+  revalidatePath("/");
+  revalidatePath("/yazilar");
+  revalidatePath("/yazilar/[slug]", "page");
+  revalidatePath("/admin/reklam");
+  redirect("/admin/reklam?success=1");
 }
 
 // YAZI
@@ -427,18 +647,7 @@ export async function getMenuOrder(): Promise<string[]> {
   return defaultOrder;
 }
 
-export async function setMenuOrder(order: string[]) {
-  await requireAuth();
-  const value = JSON.stringify(order);
-  await db.siteSetting.upsert({
-    where: { key: MENU_ORDER_KEY },
-    create: { key: MENU_ORDER_KEY, value },
-    update: { value },
-  });
-  revalidatePath("/");
-  revalidatePath("/admin/sayfalar");
-  redirect("/admin/sayfalar/menu-sirasi?success=1");
-}
+
 
 /** Admin için menü öğelerini sırayla döndürür (label ile). */
 export async function getMenuEntriesForAdmin(): Promise<MenuEntryForAdmin[]> {
@@ -474,52 +683,10 @@ export async function getMenuEntriesForAdmin(): Promise<MenuEntryForAdmin[]> {
 }
 
 // ÖZEL SAYFA – Admin panelinden eklenen sayfalar (menüde gösterilebilir)
-export async function getPagesForMenu(): Promise<{ href: string; label: string }[]> {
-  try {
-    const pages = await db.$queryRaw<{ slug: string; title: string }[]>`
-      SELECT slug, title FROM "Page"
-      WHERE "showInMenu" = true AND "publishedAt" IS NOT NULL
-      ORDER BY "menuOrder" ASC, title ASC
-    `;
-    return pages.map((p: { slug: string; title: string }) => ({ href: `/sayfa/${p.slug}`, label: p.title }));
-  } catch {
-    return [];
-  }
-}
+
 
 /** Site menüsü: kaydedilen sıraya göre linkler */
-export async function getMenuItems(): Promise<{ href: string; label: string }[]> {
-  const order = await getMenuOrder();
-  const pagesById = new Map<string, { slug: string; title: string }>();
-  try {
-    const rows = await db.$queryRaw<{ id: string; slug: string; title: string }[]>`
-      SELECT id, slug, title FROM "Page"
-      WHERE "showInMenu" = true AND "publishedAt" IS NOT NULL
-    `;
-    rows.forEach((r: { id: string; slug: string; title: string }) => pagesById.set(r.id, { slug: r.slug, title: r.title }));
-  } catch {
-    // ignore
-  }
-  const result: { href: string; label: string }[] = [];
-  const seen = new Set<string>();
-  for (const id of order) {
-    if (seen.has(id)) continue;
-    seen.add(id);
-    if (id.startsWith("static:")) {
-      const key = id.slice(7);
-      const entry = STATIC_MENU_ENTRIES[key];
-      if (entry) result.push(entry);
-    } else if (id.startsWith("page:")) {
-      const pageId = id.slice(5);
-      const p = pagesById.get(pageId);
-      if (p) result.push({ href: `/sayfa/${p.slug}`, label: p.title });
-    }
-  }
-  for (const [pageId, p] of pagesById) {
-    if (!seen.has(`page:${pageId}`)) result.push({ href: `/sayfa/${p.slug}`, label: p.title });
-  }
-  return result;
-}
+
 
 export async function getPageBySlug(slug: string) {
   const rows = await db.$queryRaw<
@@ -529,61 +696,30 @@ export async function getPageBySlug(slug: string) {
   return rows[0] ?? null;
 }
 
-export async function createPage(formData: FormData) {
-  await requireAuth();
-  const title = titleCase(sanitizeText((formData.get("title") as string)?.trim() ?? ""));
-  const slug = (formData.get("slug") as string)?.trim() || slugify(title) || "sayfa";
-  const content = (formData.get("content") as string)?.trim() || "<p></p>";
-  const featuredImageRaw = (formData.get("featuredImage") as string)?.trim() || null;
-  const featuredImage = featuredImageRaw ? (sanitizeUrl(featuredImageRaw) ?? (featuredImageRaw.startsWith("/") ? featuredImageRaw : null)) : null;
-  const showInMenu = formData.get("showInMenu") === "on";
-  const menuOrder = parseInt(String(formData.get("menuOrder") ?? "0"), 10) || 0;
-  const publishedAtRaw = (formData.get("publishedAt") as string)?.trim();
-  const publishedAt = publishedAtRaw === "on" || publishedAtRaw === "1" ? new Date() : null;
 
-  const id = randomUUID();
-  await db.$executeRaw`
-    INSERT INTO "Page" (id, title, slug, content, "featuredImage", "showInMenu", "menuOrder", "publishedAt", "createdAt", "updatedAt")
-    VALUES (${id}, ${title}, ${slug}, ${content}, ${featuredImage}, ${showInMenu}, ${menuOrder}, ${publishedAt}, now(), now())
-  `;
-  revalidatePath("/");
-  revalidatePath("/sayfa");
-  revalidatePath("/admin/sayfalar");
-  redirect("/admin/sayfalar?success=1");
-}
 
-export async function updatePage(id: string, formData: FormData) {
-  await requireAuth();
-  const title = titleCase(sanitizeText((formData.get("title") as string)?.trim() ?? ""));
-  const slug = (formData.get("slug") as string)?.trim() ?? "";
-  const content = (formData.get("content") as string)?.trim() || "<p></p>";
-  const featuredImageRaw = (formData.get("featuredImage") as string)?.trim() || null;
-  const featuredImage = featuredImageRaw ? (sanitizeUrl(featuredImageRaw) ?? (featuredImageRaw.startsWith("/") ? featuredImageRaw : null)) : null;
-  const showInMenu = formData.get("showInMenu") === "on";
-  const menuOrder = parseInt(String(formData.get("menuOrder") ?? "0"), 10) || 0;
-  const publishedAtRaw = (formData.get("publishedAt") as string)?.trim();
-  const publishedAt = publishedAtRaw === "on" || publishedAtRaw === "1" ? new Date() : null;
 
-  await db.$executeRaw`
-    UPDATE "Page"
-    SET title = ${title}, slug = ${slug}, content = ${content}, "featuredImage" = ${featuredImage},
-        "showInMenu" = ${showInMenu}, "menuOrder" = ${menuOrder}, "publishedAt" = ${publishedAt}, "updatedAt" = now()
-    WHERE id = ${id}
-  `;
-  revalidatePath("/");
-  revalidatePath("/sayfa");
-  revalidatePath("/admin/sayfalar");
-  redirect("/admin/sayfalar?success=1");
-}
 
-export async function deletePage(id: string) {
-  await requireAuth();
-  await db.$executeRaw`DELETE FROM "Page" WHERE id = ${id}`;
-  revalidatePath("/");
-  revalidatePath("/sayfa");
-  revalidatePath("/admin/sayfalar");
-  redirect("/admin/sayfalar?deleted=1");
-}
+
+
+// HABER – Ana sayfa slider'da gösterilen haberler
+
+
+
+
+
+
+// PROFİL – Giriş yapan kullanıcının şifresini değiştirir
+
+
+// REKLAM AYARLARI (SiteSetting) – HTML, metin veya görsel URL (öncelik: HTML > görsel > metin)
+/** Tüm reklam slot içeriklerini getirir (public - sitede göstermek için) */
+
+
+/** Tek slot içeriğini getirir */
+
+
+
 
 // HABER – Ana sayfa slider'da gösterilen haberler
 export async function createHaber(formData: FormData) {
@@ -696,70 +832,6 @@ export async function updatePassword(formData: FormData) {
 
   revalidatePath("/admin/profil");
   redirect("/admin/profil?success=1");
-}
-
-// REKLAM AYARLARI (SiteSetting) – HTML, metin veya görsel URL (öncelik: HTML > görsel > metin)
-/** Tüm reklam slot içeriklerini getirir (public - sitede göstermek için) */
-export async function getAdSlots(): Promise<Record<string, AdSlotContent | null>> {
-  const map: Record<string, AdSlotContent | null> = {};
-  for (const id of AD_SLOT_KEYS) {
-    map[id] = null;
-  }
-  if (!db.siteSetting) {
-    return map;
-  }
-  const keys = AD_SLOT_KEYS.map((id) => adSlotKey(id));
-  const rows = await db.siteSetting.findMany({
-    where: { key: { in: keys } },
-  });
-  for (const id of AD_SLOT_KEYS) {
-    const key = adSlotKey(id);
-    const row = rows.find((r: { key: string }) => r.key === key);
-    map[id] = parseAdSlotValue(row?.value ?? null);
-  }
-  return map;
-}
-
-/** Tek slot içeriğini getirir */
-export async function getAdSlot(slotId: string): Promise<AdSlotContent | null> {
-  const row = await db.siteSetting.findUnique({
-    where: { key: adSlotKey(slotId) },
-  });
-  return parseAdSlotValue(row?.value ?? null);
-}
-
-/** Tüm reklam slotlarını FormData ile kaydeder (HTML, metin, görsel URL – öncelik: HTML > görsel > metin) */
-export async function saveAllAdSlots(formData: FormData) {
-  await requireAuth();
-  for (const slotId of AD_SLOT_KEYS) {
-    const rawHtml = ((formData.get(`slot_${slotId}_html`) as string) ?? "").trim();
-    const html = rawHtml ? sanitizeAdHtml(rawHtml) : "";
-    const text = sanitizeText(((formData.get(`slot_${slotId}_text`) as string) ?? "").trim());
-    const rawImage = ((formData.get(`slot_${slotId}_image`) as string) ?? "").trim();
-    const image = rawImage ? (sanitizeUrl(rawImage) ?? (rawImage.startsWith("/") ? rawImage : "")) : "";
-    const width = sanitizeText(((formData.get(`slot_${slotId}_width`) as string) ?? "").trim());
-    const height = sanitizeText(((formData.get(`slot_${slotId}_height`) as string) ?? "").trim());
-    const isActive = formData.get(`slot_${slotId}_active`) === "on";
-    const rawAlign = ((formData.get(`slot_${slotId}_align`) as string) ?? "").trim().toLowerCase();
-    const align = rawAlign === "left" || rawAlign === "right" ? rawAlign : "center";
-
-    let content: AdSlotContent | null = null;
-    if (html) content = { type: "html", content: html, width, height, isActive, align } satisfies AdSlotContent;
-    else if (image) content = { type: "image", content: image, width, height, isActive, align } satisfies AdSlotContent;
-    else if (text) content = { type: "text", content: text, width, height, isActive, align } satisfies AdSlotContent;
-    const value = serializeAdSlotContent(content);
-    const key = adSlotKey(slotId);
-    await db.siteSetting.upsert({
-      where: { key },
-      create: { key, value },
-      update: { value },
-    });
-  }
-  revalidatePath("/");
-  revalidatePath("/yazilar");
-  revalidatePath("/yazilar/[slug]", "page");
-  revalidatePath("/admin/reklam");
-  redirect("/admin/reklam?success=1");
 }
 
 
