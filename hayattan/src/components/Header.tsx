@@ -10,8 +10,9 @@ import { getMenuItems } from "@/app/admin/actions";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { NavDropdown } from "./NavDropdown";
+import { MoreHorizontal, Mail, Info, Archive, History, Camera, UserPlus, BookOpen } from "lucide-react";
 
-type NavItem = { href: string; label: string };
+type NavItem = { href: string; label: string; icon?: any };
 
 const defaultNavItems: NavItem[] = [
   { href: "/", label: "Ana Sayfa" },
@@ -19,12 +20,12 @@ const defaultNavItems: NavItem[] = [
   { href: "/yazilar", label: "Yazılar" },
   { href: "/kategoriler", label: "Kategoriler" },
   { href: "/bakis-dergisi", label: "Bakış Dergisi" },
-  { href: "/iletisim", label: "İletişim" },
-  { href: "/hakkimizda", label: "Hakkımızda" },
-  { href: "/arsiv", label: "Arşiv" },
-  { href: "/eski-yazilar", label: "Eski Yazılar" },
-  { href: "/fotografhane", label: "Fotoğrafhane" },
-  { href: "/misafir-yazarlar", label: "Misafir Yazıları" },
+  { href: "/iletisim", label: "İletişim", icon: Mail },
+  { href: "/hakkimizda", label: "Hakkımızda", icon: Info },
+  { href: "/arsiv", label: "Arşiv", icon: Archive },
+  { href: "/eski_yazilar", label: "Eski Yazılar", icon: History },
+  { href: "/fotografhane", label: "Fotoğrafhane", icon: Camera },
+  { href: "/misafir-yazarlar", label: "Misafir Yazıları", icon: UserPlus },
 ];
 
 export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
@@ -96,7 +97,10 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
             ))}
 
             {dropdownItems.length > 0 && (
-              <NavDropdown label="DAHA FAZLA" items={dropdownItems} />
+              <NavDropdown
+                label={<MoreHorizontal className="w-5 h-5" />}
+                items={dropdownItems}
+              />
             )}
           </div>
         </nav>
