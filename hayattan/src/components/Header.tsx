@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
+
 import { MobileMenu } from "./MobileMenu";
 import { SearchWithSuggestions } from "./Search/SearchWithSuggestions";
 import { ThemeSelector } from "./ThemeSelector";
 import { Logo } from "./Logo";
 import { getMenuItems } from "@/app/admin/actions";
 import { useEffect, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
+import { NavDropdown } from "./NavDropdown";
 
 type NavItem = { href: string; label: string };
 
@@ -16,11 +18,13 @@ const defaultNavItems: NavItem[] = [
   { href: "/yazarlar", label: "Yazarlar" },
   { href: "/yazilar", label: "Yazılar" },
   { href: "/kategoriler", label: "Kategoriler" },
+  { href: "/bakis-dergisi", label: "Bakış Dergisi" },
   { href: "/iletisim", label: "İletişim" },
   { href: "/hakkimizda", label: "Hakkımızda" },
   { href: "/arsiv", label: "Arşiv" },
   { href: "/eski-yazilar", label: "Eski Yazılar" },
-  { href: "/bakis-dergisi", label: "Bakış Dergisi" },
+  { href: "/fotografhane", label: "Fotoğrafhane" },
+  { href: "/misafir-yazarlar", label: "Misafir Yazıları" },
 ];
 
 export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
@@ -30,7 +34,9 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
 
   useEffect(() => {
     if (!propNavItems) {
-      getMenuItems().then(items => setNavItems(items)).catch(() => { });
+      getMenuItems().then(items => {
+        if (items && items.length > 0) setNavItems(items);
+      }).catch(() => { });
     }
   }, [propNavItems]);
 
@@ -42,62 +48,69 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // First 5 items are main, rest are in dropdown
+  const mainNavItems = navItems.slice(0, 5);
+  const dropdownItems = navItems.slice(5);
+
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-500 ease-in-out ${isScrolled ? "glass border-b border-primary/10 shadow-lg py-2" : "bg-background border-b border-border py-4"
+      className={`sticky top-0 z-50 w-full transition-all duration-500 ease-in-out ${isScrolled
+        ? "backdrop-blur-md bg-background/80 border-b border-primary/10 shadow-[0_8px_32px_rgba(0,0,0,0.05)] py-2"
+        : "bg-background border-b border-border/50 py-4"
         }`}
     >
       <div className="container relative mx-auto flex items-center justify-between px-4">
         <motion.div
-          animate={{ scale: isScrolled ? 0.8 : 0.9 }}
-          transition={{ duration: 0.4 }}
+          animate={{ scale: isScrolled ? 0.85 : 1 }}
+          transition={{ duration: 0.4, ease: "circOut" }}
           className="flex-shrink-0"
         >
-          <Logo size="md" showTagline={false} centered={false} iconScale={0.8} />
+          <Logo size="md" showTagline={false} centered={false} iconScale={isScrolled ? 0.8 : 0.9} />
         </motion.div>
 
         <nav
-          className="hidden lg:flex lg:items-center lg:gap-0.5 xl:gap-1 relative"
+          className="hidden lg:flex lg:items-center lg:gap-1 xl:gap-2 relative ml-8"
           aria-label="Ana navigasyon"
           onMouseLeave={() => setHoveredItem(null)}
         >
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onMouseEnter={() => setHoveredItem(item.href)}
-              className="group relative px-3 py-2 text-xs xl:text-sm font-bold uppercase tracking-[0.1em] text-foreground/80 transition-colors hover:text-primary whitespace-nowrap z-10"
-            >
-              <span className="relative z-10">{item.label}</span>
-              {hoveredItem === item.href && (
-                <motion.div
-                  layoutId="nav-hover"
-                  className="absolute inset-x-0 inset-y-1 z-0 rounded-full bg-primary/5 shadow-sm"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 30
-                  }}
-                />
-              )}
-            </Link>
-          ))}
+          <div className="flex items-center">
+            {mainNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onMouseEnter={() => setHoveredItem(item.href)}
+                className="group relative px-3 py-2 text-xs xl:text-sm font-bold uppercase tracking-[0.1em] text-foreground/80 transition-colors hover:text-primary whitespace-nowrap z-10"
+              >
+                <span className="relative z-10">{item.label}</span>
+                {hoveredItem === item.href && (
+                  <motion.div
+                    layoutId="nav-hover"
+                    className="absolute inset-x-0 inset-y-1 z-0 rounded-full bg-primary/5"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </Link>
+            ))}
+
+            {dropdownItems.length > 0 && (
+              <NavDropdown label="DAHA FAZLA" items={dropdownItems} />
+            )}
+          </div>
         </nav>
 
-        {/* DateTime is now part of the right utilities for better spacing */}
-
-        <div className="hidden md:flex md:items-center md:gap-4 xl:gap-8 justify-end">
-          <div className="flex-1 min-w-[140px] xl:min-w-[180px]">
+        <div className="hidden md:flex md:items-center md:gap-4 xl:gap-6 justify-end flex-1 max-w-md ml-auto">
+          <div className="w-full max-w-[200px] xl:max-w-[240px] opacity-90 hover:opacity-100 transition-opacity">
             <SearchWithSuggestions />
           </div>
-          <div className="h-4 w-[1px] bg-border/60" />
+          <div className="h-6 w-px bg-border/40" />
           <ThemeSelector />
         </div>
 
-        <div className="lg:hidden">
+        <div className="lg:hidden flex items-center gap-3">
+          <ThemeSelector />
           <MobileMenu navItems={navItems} />
         </div>
       </div>

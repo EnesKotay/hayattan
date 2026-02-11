@@ -60,7 +60,14 @@ export default async function AdminYazilarPage({
       },
     }),
     prisma.yazi.count({ where }),
-    prisma.yazar.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }], select: { id: true, name: true } }),
+    prisma.yazar.findMany({
+      orderBy: [
+        { sortOrder: "asc" },
+        { yazilar: { _count: "desc" } },
+        { name: "asc" }
+      ] as any,
+      select: { id: true, name: true }
+    }),
     prisma.yazi.count({ where: { publishedAt: { not: null } } }),
     prisma.yazi.count({ where: { publishedAt: null } }),
     prisma.yazi.aggregate({ where: { publishedAt: { not: null } }, _sum: { viewCount: true } }),

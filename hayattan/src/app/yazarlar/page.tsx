@@ -38,7 +38,7 @@ export default async function YazarlarPage({
         { sortOrder: "asc" },
         { yazilar: { _count: "desc" } },
         { name: "asc" }
-      ],
+      ] as any,
       select: {
         id: true,
         name: true,
@@ -56,7 +56,7 @@ export default async function YazarlarPage({
         { sortOrder: "asc" },
         { yazilar: { _count: "desc" } },
         { name: "asc" }
-      ],
+      ] as any,
       select: {
         id: true,
         name: true,

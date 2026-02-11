@@ -20,6 +20,23 @@ import { titleCase } from "@/lib/text-case";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
 
+const STATIC_MENU_ENTRIES: Record<string, { label: string; href: string }> = {
+  ana_sayfa: { label: "Ana Sayfa", href: "/" },
+  yazarlar: { label: "Yazarlar", href: "/yazarlar" },
+  misafir_yazarlar: { label: "Misafir Yazıları", href: "/misafir-yazarlar" },
+  yazilar: { label: "Yazılar", href: "/yazilar" },
+  kategoriler: { label: "Kategoriler", href: "/kategoriler" },
+  fotografhane: { label: "Fotoğrafhane", href: "/fotografhane" },
+  iletisim: { label: "İletişim", href: "/iletisim" },
+  hakkimizda: { label: "Hakkımızda", href: "/hakkimizda" },
+  arsiv: { label: "Arşiv", href: "/arsiv" },
+  eski_yazilar: { label: "Eski Yazılar", href: "/eski-yazilar" },
+  bakis_dergisi: { label: "Bakış Dergisi", href: "/bakis-dergisi" },
+};
+
+const STATIC_MENU_KEYS = Object.keys(STATIC_MENU_ENTRIES);
+const MENU_ORDER_KEY = "menu_order";
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -604,23 +621,6 @@ export async function deleteKategori(id: string) {
 }
 
 // Menü sırası – SiteSetting "menu_order" = JSON string[] (öğe id'leri: "static:ana_sayfa" vb. veya "page:uuid")
-const MENU_ORDER_KEY = "menu_order";
-
-const STATIC_MENU_ENTRIES: Record<string, { label: string; href: string }> = {
-  ana_sayfa: { label: "Ana Sayfa", href: "/" },
-  yazarlar: { label: "Yazarlar", href: "/yazarlar" },
-  misafir_yazarlar: { label: "Misafir Yazıları", href: "/misafir-yazarlar" },
-  yazilar: { label: "Yazılar", href: "/yazilar" },
-  kategoriler: { label: "Kategoriler", href: "/kategoriler" },
-  fotografhane: { label: "Fotoğrafhane", href: "/fotografhane" },
-  iletisim: { label: "İletişim", href: "/iletisim" },
-  hakkimizda: { label: "Hakkımızda", href: "/hakkimizda" },
-  arsiv: { label: "Arşiv", href: "/arsiv" },
-  eski_yazilar: { label: "Eski Yazılar", href: "/eski-yazilar" },
-  bakis_dergisi: { label: "Bakış Dergisi", href: "/bakis-dergisi" },
-};
-
-const STATIC_MENU_KEYS = Object.keys(STATIC_MENU_ENTRIES);
 
 /** Menüde gösterilecek öğe: id (static:key veya page:uuid) ve görünen adı */
 export type MenuEntryForAdmin = { id: string; label: string; type: "static" | "page" };
@@ -687,8 +687,6 @@ export async function getMenuEntriesForAdmin(): Promise<MenuEntryForAdmin[]> {
 
 // ÖZEL SAYFA – Admin panelinden eklenen sayfalar (menüde gösterilebilir)
 
-
-/** Site menüsü: kaydedilen sıraya göre linkler */
 
 
 export async function getPageBySlug(slug: string) {
