@@ -154,17 +154,17 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                         {splitTitle(item.title).part1}
                       </span>
 
-                      {/* Başlık */}
-                      <h2 className="font-serif text-3xl font-bold leading-[1.1] text-white drop-shadow-2xl md:text-5xl lg:text-6xl">
+                      {/* Başlık - Larger and airier */}
+                      <h2 className="font-serif text-4xl font-extrabold leading-[1.05] text-white drop-shadow-2xl md:text-6xl lg:text-8xl tracking-tight">
                         {splitTitle(item.title).part2}
                       </h2>
 
-                      {/* Açıklama ve Yazar */}
-                      <div className="flex flex-col gap-6 pt-4 md:flex-row md:items-center">
+                      {/* Açıklama ve Yazar - Airy Layout */}
+                      <div className="flex flex-col gap-8 pt-6 md:flex-row md:items-center">
                         {/* Açıklama */}
                         {item.excerpt && (
-                          <div className="relative border-l-2 border-primary/60 pl-6 backdrop-blur-sm">
-                            <p className="line-clamp-2 text-sm font-medium text-white/90 md:text-lg md:leading-relaxed italic font-serif">
+                          <div className="relative border-l-2 border-primary/40 pl-8 backdrop-blur-[2px]">
+                            <p className="line-clamp-2 text-base font-medium text-white/90 md:text-xl md:leading-relaxed italic font-serif opacity-90">
                               "{item.excerpt}"
                             </p>
                           </div>

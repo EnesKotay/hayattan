@@ -133,14 +133,14 @@ export function YazarlarBolumu({
                   </div>
                 </div>
 
-                {/* İsim ve Bilgi */}
-                <div className="relative z-10 w-full px-4">
-                  <h3 className="font-serif text-2xl font-bold text-foreground transition-colors group-hover:text-primary">
+                {/* İsim ve Bilgi - Better Typography */}
+                <div className="relative z-10 w-full px-2 space-y-4">
+                  <h3 className="font-serif text-2xl font-extrabold text-foreground transition-all duration-500 group-hover:text-primary tracking-tight">
                     {yazar.name}
                   </h3>
-                  <div className="my-4 mx-auto h-0.5 w-12 bg-border transition-all duration-500 group-hover:w-24 group-hover:bg-primary/30" />
-                  <span className="inline-block rounded-full bg-muted-bg px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-muted transition-colors group-hover:bg-primary-light group-hover:text-primary">
-                    YAZAR
+                  <div className="mx-auto h-[1px] w-12 bg-primary/10 transition-all duration-700 group-hover:w-20 group-hover:bg-primary/30" />
+                  <span className="inline-block rounded-full bg-muted-bg/50 px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-muted transition-all duration-500 group-hover:bg-primary-light group-hover:text-primary">
+                    {yazar.unvan || "YAZAR"}
                   </span>
                 </div>
               </Link>

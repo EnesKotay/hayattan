@@ -15,14 +15,13 @@
   --surface: #ffffff;
   --ring: rgba(139, 21, 56, 0.15);
 
-  /* Premium Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-premium: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+  /* Premium Shadows - Refined */
+  --shadow-premium: 0 10px 40px -10px rgba(0, 0, 0, 0.08), 0 5px 20px -15px rgba(0, 0, 0, 0.05);
+  --shadow-premium-xl: 0 25px 60px -15px rgba(0, 0, 0, 0.12), 0 10px 30px -20px rgba(0, 0, 0, 0.08);
 
-  --card-shadow: var(--shadow-sm);
-  --card-shadow-hover: var(--shadow-premium);
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-wide: 0.04em;
+  --radius-premium: 24px;
   --prose-max-width: 68ch;
   --content-max-width: 1280px;
 }
@@ -78,16 +77,16 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Glassmorphism Classes */
+/* Glassmorphism Classes - Refined */
 .glass {
-  background: rgba(var(--background), 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(var(--background), 0.65);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(var(--primary), 0.04);
 }
 
 .dark .glass {
-  background: rgba(9, 9, 11, 0.75);
+  background: rgba(9, 9, 11, 0.65);
 }
 
 /* Typography Optimizations */
@@ -131,22 +130,22 @@ button:active:not(:disabled) {
   transform: scale(0.97);
 }
 
-/* Premium Card Style */
+/* Premium Card Style - Airier & Softer */
 [role="article"],
 .card,
 article {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 1rem;
+  border-radius: var(--radius-premium);
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 [role="article"]:hover,
 .card:hover,
 article:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-premium-xl);
   border-color: rgba(var(--primary), 0.1);
 }
 
