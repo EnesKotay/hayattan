@@ -100,7 +100,7 @@ export function YazilarFiltre({
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           {/* Kategori dropdown */}
-          <div className="flex min-w-0 items-center gap-2 sm:w-auto">
+          <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
             <label htmlFor="yazilar-kategori" className="shrink-0 text-xs font-medium uppercase tracking-wider text-muted sm:text-[11px]">
               Kategori
             </label>
@@ -122,7 +122,7 @@ export function YazilarFiltre({
           </div>
 
           {/* Yazar dropdown */}
-          <div className="flex min-w-0 items-center gap-2 sm:w-auto">
+          <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
             <label htmlFor="yazilar-yazar" className="shrink-0 text-xs font-medium uppercase tracking-wider text-muted sm:text-[11px]">
               Yazar
             </label>
@@ -148,7 +148,7 @@ export function YazilarFiltre({
             <span className="shrink-0 text-xs font-medium uppercase tracking-wider text-muted sm:text-[11px]">
               Sıra
             </span>
-            <div className="flex rounded-lg border border-border/60 bg-muted-bg/50 p-0.5">
+            <div className="flex flex-wrap gap-1 rounded-lg border border-border/60 bg-muted-bg/50 p-0.5">
               {SIRALAMA_OPTIONS.map((opt) => (
                 <Link
                   key={opt.value}
@@ -159,11 +159,10 @@ export function YazilarFiltre({
                     sayfa: "1",
                     ...(arama?.trim() && { ara: arama.trim() }),
                   })}
-                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                    siralama === opt.value
+                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${siralama === opt.value
                       ? "bg-primary text-white shadow-sm"
                       : "text-muted-foreground hover:bg-background hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {opt.label}
                 </Link>

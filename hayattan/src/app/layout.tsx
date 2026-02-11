@@ -16,6 +16,12 @@ import { ProgressBar } from "@/components/ProgressBar";
 import "./globals.css";
 import "@/styles/admin.css";
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 const sourceSans = Source_Sans_3({
   variable: "--font-source-sans",
   subsets: ["latin", "latin-ext"],

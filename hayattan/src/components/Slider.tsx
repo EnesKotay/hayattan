@@ -3,7 +3,7 @@
 import { isExternalImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /** Ana sayfa haber slider'ında gösterilecek öğe (Haber veya Yazi'den map edilir) */
 export type SliderItem = {
@@ -35,6 +35,32 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
   const [activeIndex, setActiveIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchEndX.current = null;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchStartX.current === null || touchEndX.current === null) return;
+    const diff = touchStartX.current - touchEndX.current;
+    const minSwipe = 50;
+    if (Math.abs(diff) > minSwipe) {
+      if (diff > 0) {
+        setActiveIndex((prev) => (prev + 1) % items.length);
+      } else {
+        setActiveIndex((prev) => (prev - 1 + items.length) % items.length);
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+  }, [items.length]);
   const markImageError = useCallback((id: string) => {
     setImageErrors((prev) => new Set(prev).add(id));
   }, []);
@@ -94,9 +120,14 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
 
   return (
     <section className="relative w-full overflow-hidden py-2">
-      <div className="container mx-auto px-4">
-        <div className="group/card relative overflow-hidden rounded-xl shadow-lg ring-1 ring-black/[0.06] transition-shadow hover:shadow-xl">
-          <div className="relative aspect-[16/9] w-full md:aspect-[16/9]">
+      <div className="container mx-auto px-2 sm:px-4">
+        <div
+          className="group/card relative overflow-hidden rounded-xl shadow-lg ring-1 ring-black/[0.06] transition-shadow hover:shadow-xl"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div className="relative aspect-[4/3] w-full sm:aspect-[16/10] md:aspect-[16/9]">
             {items.map((item, index) => {
               const isExternal = item.link.startsWith("http");
               const slideClass = `absolute inset-0 block transition-opacity duration-700 ease-out ${index === activeIndex ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none"
@@ -111,7 +142,7 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                           src={item.imageUrl}
                           alt=""
                           fill
-                          className="scale-110 object-cover opacity-50 blur-2xl filter"
+                          className="hidden scale-110 object-cover opacity-50 blur-2xl filter sm:block"
                           aria-hidden="true"
                         />
                         <Image
@@ -141,24 +172,24 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                   </div>
 
                   {/* İçerik Katmanı - Modern & Minimalist */}
-                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-6 md:p-10">
-                    <div className="max-w-4xl space-y-3">
+                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-4 sm:p-6 md:p-10">
+                    <div className="max-w-4xl space-y-2 sm:space-y-3">
 
                       {/* Üst Kategori Badge */}
-                      <span className="inline-block rounded bg-primary/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm md:text-xs">
+                      <span className="inline-block rounded bg-primary/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm sm:px-3 sm:py-1 sm:text-[10px] md:text-xs">
                         {splitTitle(item.title).part1}
                       </span>
 
                       {/* Başlık */}
-                      <h2 className="font-serif text-2xl font-bold leading-tight text-white drop-shadow-md md:text-4xl lg:text-5xl">
+                      <h2 className="font-serif text-lg font-bold leading-tight text-white drop-shadow-md sm:text-2xl md:text-4xl lg:text-5xl">
                         {splitTitle(item.title).part2}
                       </h2>
 
                       {/* Açıklama ve Yazar Alt Alta */}
-                      <div className="flex flex-col gap-3 pt-2 md:flex-row md:items-center md:gap-6">
+                      <div className="flex flex-col gap-2 pt-1 sm:gap-3 sm:pt-2 md:flex-row md:items-center md:gap-6">
                         {/* Açıklama */}
                         {item.excerpt && (
-                          <div className="relative border-l-4 border-amber-400 pl-4">
+                          <div className="relative hidden border-l-4 border-amber-400 pl-4 sm:block">
                             <p className="line-clamp-2 text-sm font-medium text-gray-200 md:text-base md:leading-relaxed">
                               {item.excerpt}
                             </p>
