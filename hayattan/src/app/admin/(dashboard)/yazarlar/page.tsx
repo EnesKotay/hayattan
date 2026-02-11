@@ -14,7 +14,11 @@ export default async function AdminYazarlarPage({
   const q = (params.q ?? "").trim();
   const tumu = await prisma.yazar.findMany({
     where: q ? { OR: [{ name: { contains: q, mode: "insensitive" } }, { slug: { contains: q, mode: "insensitive" } }] } : undefined,
-    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    orderBy: [
+      { sortOrder: "asc" },
+      { yazilar: { _count: "desc" } },
+      { name: "asc" }
+    ],
     include: { _count: { select: { yazilar: true } } },
   });
   // Şirketten ayrılmış (eski) yazarlar bu listede görünmez; sadece Eski Yazılar sayfasında listelenir

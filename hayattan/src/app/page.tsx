@@ -52,6 +52,7 @@ async function getYazarlar(): Promise<YazarRow[]> {
     },
     orderBy: [
       { sortOrder: "asc" },
+      { yazilar: { _count: "desc" } },
       { name: "asc" }
     ],
     select: {

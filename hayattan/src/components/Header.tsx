@@ -5,7 +5,6 @@ import { MobileMenu } from "./MobileMenu";
 import { SearchWithSuggestions } from "./Search/SearchWithSuggestions";
 import { ThemeSelector } from "./ThemeSelector";
 import { Logo } from "./Logo";
-import { DateTimeDisplay } from "./DateTimeDisplay";
 import { getMenuItems } from "@/app/admin/actions";
 import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -67,7 +66,7 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
               key={item.href}
               href={item.href}
               onMouseEnter={() => setHoveredItem(item.href)}
-              className="group relative px-2.5 py-1.5 text-[10px] xl:text-[11px] font-bold uppercase tracking-[0.15em] text-foreground/70 transition-colors hover:text-primary whitespace-nowrap z-10"
+              className="group relative px-3 py-2 text-xs xl:text-sm font-bold uppercase tracking-[0.1em] text-foreground/80 transition-colors hover:text-primary whitespace-nowrap z-10"
             >
               <span className="relative z-10">{item.label}</span>
               {hoveredItem === item.href && (
@@ -90,11 +89,8 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
 
         {/* DateTime is now part of the right utilities for better spacing */}
 
-        <div className="hidden md:flex md:items-center md:gap-3 xl:gap-5 justify-end">
-          <div className="hidden xl:block">
-            <DateTimeDisplay minimal />
-          </div>
-          <div className="flex-1 max-w-[120px] xl:max-w-[160px]">
+        <div className="hidden md:flex md:items-center md:gap-4 xl:gap-8 justify-end">
+          <div className="flex-1 min-w-[140px] xl:min-w-[180px]">
             <SearchWithSuggestions />
           </div>
           <div className="h-4 w-[1px] bg-border/60" />
