@@ -27,6 +27,7 @@ const defaultNavItems: NavItem[] = [
 export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
   const [navItems, setNavItems] = useState<NavItem[]>(propNavItems || defaultNavItems);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   useEffect(() => {
     if (!propNavItems) {
@@ -56,26 +57,39 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
           <Logo size="md" showTagline={false} centered={false} />
         </motion.div>
 
-        <nav className="hidden lg:flex lg:items-center lg:gap-5 xl:gap-8" aria-label="Ana navigasyon">
+        <nav
+          className="hidden lg:flex lg:items-center lg:gap-1 xl:gap-2 relative"
+          aria-label="Ana navigasyon"
+          onMouseLeave={() => setHoveredItem(null)}
+        >
           {navItems.map((item) => (
-            <motion.div
+            <Link
               key={item.href}
-              whileHover={{ y: -2 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              href={item.href}
+              onMouseEnter={() => setHoveredItem(item.href)}
+              className="group relative px-4 py-2 text-xs xl:text-sm font-extrabold uppercase tracking-[0.12em] text-foreground/70 transition-colors hover:text-primary whitespace-nowrap z-10"
             >
-              <Link
-                href={item.href}
-                className="group relative px-2 py-1 text-xs xl:text-sm font-bold tracking-tight text-foreground/70 transition-colors hover:text-primary whitespace-nowrap"
-              >
-                {item.label}
-                <motion.span
-                  className="absolute -bottom-1 left-0 h-0.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"
-                  initial={{ width: 0 }}
-                  whileHover={{ width: "100%" }}
-                  transition={{ duration: 0.3 }}
+              <span className="relative z-10">{item.label}</span>
+              {hoveredItem === item.href && (
+                <motion.div
+                  layoutId="nav-hover"
+                  className="absolute inset-0 z-0 rounded-full bg-primary/5 shadow-[0_0_20px_rgba(var(--primary-rgb),0.03)]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30
+                  }}
                 />
-              </Link>
-            </motion.div>
+              )}
+              {/* Subtle underline for active context - can be expanded later */}
+              <motion.span
+                className="absolute -bottom-1 left-4 right-4 h-0.5 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                layoutId={`underline-${item.href}`}
+              />
+            </Link>
           ))}
         </nav>
 
