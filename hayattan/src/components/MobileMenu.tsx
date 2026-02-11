@@ -101,8 +101,8 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
               initial={{ x: "100%", opacity: 0.5 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0.5 }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed right-0 top-0 z-50 h-[100dvh] w-full max-w-[320px] glass bg-background/90 border-l border-white/10 p-6 flex flex-col shadow-[-20px_0_50px_rgba(0,0,0,0.2)]"
+              transition={{ type: "spring", damping: 35, stiffness: 350 }}
+              className="fixed right-0 top-0 z-50 h-[100dvh] w-full max-w-[300px] bg-background/95 backdrop-blur-2xl border-l border-primary/5 p-6 flex flex-col shadow-[-10px_0_40px_rgba(0,0,0,0.1)]"
               aria-label="Mobil navigasyon"
             >
               <div className="mt-16 flex flex-col flex-1 gap-8 overflow-y-auto scrollbar-hide py-4">

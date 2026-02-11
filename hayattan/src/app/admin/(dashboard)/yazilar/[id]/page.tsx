@@ -21,7 +21,13 @@ export default async function YaziDuzenlePage({
   if (!yazi) notFound();
 
   const [yazarlar, kategoriler] = await Promise.all([
-    prisma.yazar.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
+    prisma.yazar.findMany({
+      orderBy: [
+        { sortOrder: "asc" },
+        { yazilar: { _count: "desc" } },
+        { name: "asc" }
+      ] as any
+    }),
     prisma.kategori.findMany({ orderBy: { name: "asc" } }),
   ]);
 

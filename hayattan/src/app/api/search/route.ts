@@ -47,6 +47,11 @@ export async function GET(request: NextRequest) {
             where: {
                 name: { contains: searchTerm, mode: "insensitive" },
             },
+            orderBy: [
+                { sortOrder: "asc" },
+                { yazilar: { _count: "desc" } },
+                { name: "asc" }
+            ] as any,
             select: {
                 id: true,
                 name: true,

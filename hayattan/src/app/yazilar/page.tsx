@@ -102,14 +102,17 @@ export default async function YazilarPage({
     }),
     prisma.yazar.findMany({
       where: { yazilar: { some: { publishedAt: { not: null } } } },
-      orderBy: { name: "asc" },
+      orderBy: [
+        { sortOrder: "asc" },
+        { yazilar: { _count: "desc" } },
+        { name: "asc" }
+      ] as any,
       select: { name: true, slug: true },
     }),
     getAdSlots(),
   ]);
 
   const totalPages = Math.ceil(totalCount / YAZILAR_PER_PAGE);
-
   function paginationUrl(p: number) {
     const params = new URLSearchParams();
     if (p > 1) params.set("sayfa", String(p));

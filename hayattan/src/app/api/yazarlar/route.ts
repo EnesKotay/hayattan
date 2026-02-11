@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       { sortOrder: "asc" },
       { yazilar: { _count: "desc" } },
       { name: "asc" }
-    ],
+    ] as any,
     include: { _count: { select: { yazilar: true } } },
   });
 
