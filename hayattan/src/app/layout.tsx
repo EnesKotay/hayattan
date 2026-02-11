@@ -38,6 +38,7 @@ export const metadata: Metadata = {
     template: "%s | Hayattan.Net",
   },
   description: "Hayattan.Net - Hayatın Engelsiz Tarafı",
+  keywords: ["kültür", "sanat", "edebiyat", "deneme", "engelsiz yaşam", "blog", "dergi", "yazar", "şair", "fotoğraf"],
   openGraph: {
     type: "website",
     locale: "tr_TR",
