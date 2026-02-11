@@ -1,4 +1,4 @@
-import { isExternalImageUrl } from "@/lib/image";
+import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { StaggerContainer, StaggerItem } from "@/components/Animations/Reveal";
@@ -108,13 +108,12 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
               <div className="relative aspect-[16/9] overflow-hidden bg-muted-bg">
                 {featured.featuredImage ? (
                   <Image
-                    src={featured.featuredImage}
+                    src={normalizeImageUrl(featured.featuredImage)!}
                     alt={featured.title}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                     sizes="(max-width: 1024px) 100vw, 66vw"
                     priority
-                    unoptimized={isExternalImageUrl(featured.featuredImage)}
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/40">
@@ -145,12 +144,11 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
                     <Link href={`/yazilar/${yazi.slug}`} className="relative h-24 w-28 shrink-0 overflow-hidden bg-muted-bg md:h-28 md:w-36">
                       {yazi.featuredImage ? (
                         <Image
-                          src={yazi.featuredImage}
+                          src={normalizeImageUrl(yazi.featuredImage)!}
                           alt={yazi.title}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
                           sizes="150px"
-                          unoptimized={isExternalImageUrl(yazi.featuredImage)}
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/40">
