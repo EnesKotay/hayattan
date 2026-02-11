@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 export function ProgressBar() {
+    return (
+        <Suspense fallback={null}>
+            <ProgressBarContent />
+        </Suspense>
+    );
+}
+
+function ProgressBarContent() {
     const [progress, setProgress] = useState(0);
     const [isVisible, setIsVisible] = useState(false);
     const pathname = usePathname();
