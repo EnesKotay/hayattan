@@ -37,10 +37,10 @@ const defaultNavItems: NavItem[] = [
 ];
 
 const socialLinks = [
-  { href: "https://facebook.com", icon: <Facebook className="w-5 h-5" />, label: "Facebook" },
-  { href: "https://twitter.com", icon: <Twitter className="w-5 h-5" />, label: "Twitter" },
-  { href: "https://instagram.com", icon: <Instagram className="w-5 h-5" />, label: "Instagram" },
-  { href: "https://youtube.com", icon: <Youtube className="w-5 h-5" />, label: "YouTube" },
+  { href: "https://www.facebook.com/Hayattan.Net2020", icon: <Facebook className="w-5 h-5" />, label: "Facebook" },
+  { href: "https://twitter.com/HayattanNet", icon: <Twitter className="w-5 h-5" />, label: "Twitter" },
+  { href: "https://www.instagram.com/hayattannet/", icon: <Instagram className="w-5 h-5" />, label: "Instagram" },
+  { href: "https://www.youtube.com/channel/UCO44ksBz7R6TYV7fCA6u0Gw", icon: <Youtube className="w-5 h-5" />, label: "YouTube" },
 ];
 
 export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] }) {
@@ -166,12 +166,15 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
                   </div>
 
                   <div className="flex flex-col gap-4 pb-4">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted">Sosyal Medya</span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted">Sosyal Medya</span>
                     <div className="flex gap-4">
                       {socialLinks.map((social, i) => (
                         <motion.a
                           key={social.label}
                           href={social.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setIsOpen(false)}
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ delay: 0.6 + i * 0.1, type: "spring" }}
