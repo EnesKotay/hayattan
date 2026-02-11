@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { SearchWithSuggestions } from "./Search/SearchWithSuggestions";
 import { ThemeSelector } from "./ThemeSelector";
-import { DateTimeDisplay } from "./DateTimeDisplay";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home,
@@ -108,15 +107,6 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
             >
               <div className="mt-16 flex flex-col flex-1 gap-8 overflow-y-auto scrollbar-hide py-4">
 
-                {/* Tarih & Saat (Mobil) */}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 }}
-                  className="mb-2 px-2"
-                >
-                  <DateTimeDisplay />
-                </motion.div>
 
                 {/* Arama Bölümü */}
                 <motion.div
