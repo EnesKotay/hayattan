@@ -1,6 +1,6 @@
 "use client";
 
-import { isExternalImageUrl } from "@/lib/image";
+import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -108,20 +108,19 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                     {item.imageUrl && !imageErrors.has(item.id) ? (
                       <>
                         <Image
-                          src={item.imageUrl}
+                          src={normalizeImageUrl(item.imageUrl)!}
                           alt=""
                           fill
                           className="scale-110 object-cover opacity-50 blur-2xl filter"
                           aria-hidden="true"
                         />
                         <Image
-                          src={item.imageUrl}
+                          src={normalizeImageUrl(item.imageUrl)!}
                           alt={item.title}
                           fill
                           className="object-contain transition-transform duration-700 group-hover/card:scale-[1.01]"
                           sizes="(max-width: 768px) 100vw, 1200px"
                           priority={index === 0}
-                          unoptimized={isExternalImageUrl(item.imageUrl)}
                           onError={() => markImageError(item.id)}
                         />
                       </>

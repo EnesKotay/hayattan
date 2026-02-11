@@ -1,6 +1,6 @@
 "use client";
 
-import { isExternalImageUrl, isValidImageSrc } from "@/lib/image";
+import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
@@ -111,12 +111,11 @@ export function YazarlarBolumu({
                 <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-background shadow-md transition-all group-hover:scale-105 group-hover:border-primary/20 group-hover:shadow-lg">
                   {yazar.photo && isValidImageSrc(yazar.photo) ? (
                     <Image
-                      src={yazar.photo}
+                      src={normalizeImageUrl(yazar.photo)!}
                       alt={yazar.name}
                       fill
                       className="object-cover"
                       sizes="128px"
-                      unoptimized={isExternalImageUrl(yazar.photo)}
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-primary-light text-3xl font-bold text-primary">

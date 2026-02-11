@@ -1,4 +1,4 @@
-import { isExternalImageUrl, isValidImageSrc } from "@/lib/image";
+import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -150,7 +150,7 @@ export default async function YaziDetayPage({ params }: Props) {
             >
               {yazi.author.photo && isValidImageSrc(yazi.author.photo) ? (
                 <Image
-                  src={yazi.author.photo}
+                  src={normalizeImageUrl(yazi.author.photo)!}
                   alt={yazi.author.name}
                   width={32}
                   height={32}
@@ -196,7 +196,7 @@ export default async function YaziDetayPage({ params }: Props) {
       <div className="relative mb-8 aspect-video overflow-hidden rounded-lg bg-muted-bg">
         {yazi.featuredImage ? (
           <Image
-            src={yazi.featuredImage}
+            src={normalizeImageUrl(yazi.featuredImage)!}
             alt={yazi.imageAlt || yazi.title}
             fill
             className="object-cover"
@@ -242,7 +242,7 @@ export default async function YaziDetayPage({ params }: Props) {
                   <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded bg-muted-bg">
                     {iy.featuredImage ? (
                       <Image
-                        src={iy.featuredImage}
+                        src={normalizeImageUrl(iy.featuredImage)!}
                         alt={iy.title}
                         fill
                         className="object-cover transition-transform group-hover:scale-105"
