@@ -6,6 +6,7 @@ import { FormField, FormSection } from "@/components/admin/FormField";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { saveHakkimizdaContent, type HakkimizdaContent } from "@/app/admin/actions";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useToast } from "@/components/admin/ToastProvider";
 
 type HakkimizdaFormProps = {
     defaultValues: HakkimizdaContent;
@@ -15,9 +16,28 @@ export function HakkimizdaForm({ defaultValues }: HakkimizdaFormProps) {
     const [mainContent, setMainContent] = useState(defaultValues.mainContent);
     const [detailsContent, setDetailsContent] = useState(defaultValues.detailsContent);
     const [rulesContent, setRulesContent] = useState(defaultValues.rulesContent);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { success, error: showError } = useToast();
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        const formData = new FormData(e.currentTarget);
+        formData.set("mainContent", mainContent);
+        formData.set("detailsContent", detailsContent);
+        formData.set("rulesContent", rulesContent);
+        try {
+            await saveHakkimizdaContent(formData);
+            success("Hakkımızda Sayfası Güncellendi", "İçerik başarıyla kaydedildi.");
+        } catch (err) {
+            showError("Hata Oluştu", err instanceof Error ? err.message : "Kaydedilirken bir hata oluştu.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
-        <form action={saveHakkimizdaContent} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
             {/* Hidden inputs for rich text content */}
             <input type="hidden" name="mainContent" value={mainContent} />
             <input type="hidden" name="detailsContent" value={detailsContent} />
@@ -108,9 +128,10 @@ export function HakkimizdaForm({ defaultValues }: HakkimizdaFormProps) {
             <div className="flex flex-wrap gap-3">
                 <button
                     type="submit"
-                    className="rounded-lg bg-primary px-6 py-2.5 font-medium text-white transition-colors hover:bg-primary-hover"
+                    disabled={isSubmitting}
+                    className="rounded-lg bg-primary px-6 py-2.5 font-medium text-white transition-colors hover:bg-primary-hover disabled:opacity-50"
                 >
-                    Kaydet
+                    {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
                 </button>
                 <Link
                     href="/admin"

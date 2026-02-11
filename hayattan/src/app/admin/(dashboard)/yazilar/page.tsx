@@ -60,7 +60,7 @@ export default async function AdminYazilarPage({
       },
     }),
     prisma.yazi.count({ where }),
-    prisma.yazar.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.yazar.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }], select: { id: true, name: true } }),
     prisma.yazi.count({ where: { publishedAt: { not: null } } }),
     prisma.yazi.count({ where: { publishedAt: null } }),
     prisma.yazi.aggregate({ where: { publishedAt: { not: null } }, _sum: { viewCount: true } }),
@@ -251,8 +251,8 @@ export default async function AdminYazilarPage({
                     <td className="px-4 py-4">
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${yazi.publishedAt
-                            ? "bg-green-100 text-green-800"
-                            : "bg-amber-100 text-amber-800"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-amber-100 text-amber-800"
                           }`}
                       >
                         {yazi.publishedAt ? (
@@ -344,8 +344,8 @@ export default async function AdminYazilarPage({
                       key={p}
                       href={paginationUrl(p, paginationParams)}
                       className={`min-w-[2.25rem] rounded-lg px-3 py-2 text-center text-sm font-medium transition-colors ${p === sayfa
-                          ? "bg-primary text-white shadow-sm"
-                          : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                        ? "bg-primary text-white shadow-sm"
+                        : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
                         }`}
                     >
                       {p}

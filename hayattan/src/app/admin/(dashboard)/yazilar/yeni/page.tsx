@@ -4,7 +4,7 @@ import { YaziForm } from "@/components/admin/YaziForm";
 
 export default async function YeniYaziPage() {
   const [yazarlar, kategoriler] = await Promise.all([
-    prisma.yazar.findMany({ orderBy: { name: "asc" } }),
+    prisma.yazar.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
     prisma.kategori.findMany({ orderBy: { name: "asc" } }),
   ]);
 

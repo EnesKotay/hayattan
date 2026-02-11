@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { SubmitButton } from "./SubmitButton";
 import { ImageUpload } from "./ImageUpload";
+import { useToast } from "./ToastProvider";
+import { useState } from "react";
 
 type HaberFormProps = {
     action: (payload: FormData) => void;
@@ -25,13 +27,25 @@ export function HaberForm({
     defaultValues,
     isEdit = false,
 }: HaberFormProps) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [state, formAction] = useActionState(async (_state: void, formData: FormData) => {
-        action(formData);
-    }, undefined);
+    const { success, error: showError } = useToast();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        const formData = new FormData(e.currentTarget);
+        try {
+            await action(formData);
+            success("Haber başarıyla kaydedildi.", "Değişiklikler sisteme işlendi.");
+        } catch (err) {
+            showError("Hata Oluştu", err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
-        <form action={formAction} className="grid gap-8 lg:grid-cols-3">
+        <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-3">
             <div className="space-y-6 lg:col-span-2">
                 {/* TEMEL BİLGİLER KARTI */}
                 <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -170,9 +184,13 @@ export function HaberForm({
 
                 {/* AKSİYON BUTONLARI */}
                 <div className="flex flex-col gap-3">
-                    <SubmitButton>
-                        {isEdit ? "Değişiklikleri Kaydet" : "Haberi Oluştur"}
-                    </SubmitButton>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-50"
+                    >
+                        {isSubmitting ? "Kaydediliyor..." : (isEdit ? "Değişiklikleri Kaydet" : "Haberi Oluştur")}
+                    </button>
                     <Link
                         href="/admin/haberler"
                         className="inline-flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900"
