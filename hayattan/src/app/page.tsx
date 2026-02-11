@@ -59,7 +59,13 @@ async function getYazarlar(): Promise<YazarRow[]> {
       photo: true,
     },
   });
-  return rows;
+
+  // Ömer Faruk Kotay'ı en başa taşı
+  return rows.sort((a, b) => {
+    if (a.name === "Ömer Faruk Kotay") return -1;
+    if (b.name === "Ömer Faruk Kotay") return 1;
+    return a.name.localeCompare(b.name, "tr");
+  });
 }
 
 

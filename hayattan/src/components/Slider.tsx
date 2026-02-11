@@ -155,7 +155,7 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                       </span>
 
                       {/* Başlık - Larger and airier */}
-                      <h2 className="font-serif text-4xl font-extrabold leading-[1.05] text-white drop-shadow-2xl md:text-6xl lg:text-8xl tracking-tight">
+                      <h2 className="font-serif text-3xl font-extrabold leading-[1.05] text-white drop-shadow-2xl md:text-5xl lg:text-7xl tracking-tight">
                         {splitTitle(item.title).part2}
                       </h2>
 

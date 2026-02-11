@@ -105,15 +105,6 @@ model SiteSetting {
   value String
 }
 
-model PasswordResetToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  email     String
-  expires   DateTime
-  createdAt DateTime @default(now())
-
-  @@index([email])
-}
 
 model SecurityLog {
   id        String   @id @default(cuid())

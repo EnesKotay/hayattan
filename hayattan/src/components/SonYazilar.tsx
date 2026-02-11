@@ -124,7 +124,7 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40 transition-opacity duration-700 group-hover:opacity-60" />
               </div>
               <div className="p-8 md:p-10 relative">
-                <h3 className="font-serif text-3xl font-bold leading-tight text-foreground transition-all duration-500 group-hover:text-primary md:text-4xl lg:text-5xl tracking-tight group-hover:translate-x-1">
+                <h3 className="font-serif text-2xl font-bold leading-tight text-foreground transition-all duration-500 group-hover:text-primary md:text-3xl lg:text-4xl tracking-tight group-hover:translate-x-1">
                   {featured.title}
                 </h3>
                 {featured.excerpt && (
@@ -167,7 +167,7 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
                         ))}
                       </div>
                       <Link href={`/yazilar/${yazi.slug}`}>
-                        <h4 className="font-serif line-clamp-2 text-lg font-bold text-foreground transition-all duration-500 group-hover:text-primary md:text-xl tracking-tight group-hover:translate-x-1">
+                        <h4 className="font-serif line-clamp-2 text-base font-bold text-foreground transition-all duration-500 group-hover:text-primary md:text-lg tracking-tight group-hover:translate-x-1">
                           {yazi.title}
                         </h4>
                       </Link>
