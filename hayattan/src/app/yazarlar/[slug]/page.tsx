@@ -85,7 +85,6 @@ export default async function YazarDetayPage({ params, searchParams }: Props) {
               fill
               className="object-cover"
               sizes="160px"
-              unoptimized={isExternalImageUrl(yazar.photo)}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary">
@@ -141,7 +140,6 @@ export default async function YazarDetayPage({ params, searchParams }: Props) {
                         fill
                         className="object-cover transition-transform group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        unoptimized={isExternalImageUrl(yazi.featuredImage)}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/50">
