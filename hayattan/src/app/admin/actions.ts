@@ -462,6 +462,7 @@ export async function createYazar(formData: FormData) {
   const biyografi = (formData.get("biyografi") as string)?.trim() || null;
   const misafir = formData.get("misafir") === "on";
   const ayrilmis = formData.get("ayrilmis") === "on";
+  const sortOrder = parseInt(formData.get("sortOrder") as string) || 0;
 
   if (!name) {
     revalidatePath("/admin/yazarlar");
@@ -477,6 +478,7 @@ export async function createYazar(formData: FormData) {
       biyografi: biyografi || null,
       misafir,
       ayrilmis,
+      sortOrder,
     },
   });
   revalidatePath("/");
@@ -497,6 +499,7 @@ export async function updateYazar(id: string, formData: FormData) {
   const biyografi = (formData.get("biyografi") as string)?.trim() || null;
   const misafir = formData.get("misafir") === "on";
   const ayrilmis = formData.get("ayrilmis") === "on";
+  const sortOrder = parseInt(formData.get("sortOrder") as string) || 0;
 
   if (!name || !slug) {
     revalidatePath("/admin/yazarlar/" + id);
@@ -515,7 +518,7 @@ export async function updateYazar(id: string, formData: FormData) {
     await db.$executeRaw`
       UPDATE "Yazar"
       SET name = ${name}, slug = ${slug}, email = ${email}, photo = ${photo}, biyografi = ${biyografi},
-          misafir = ${misafir}, ayrilmis = ${ayrilmis}, "updatedAt" = now()
+          misafir = ${misafir}, ayrilmis = ${ayrilmis}, "sortOrder" = ${sortOrder}, "updatedAt" = now()
       WHERE id = ${id}
     `;
   } catch (err) {
