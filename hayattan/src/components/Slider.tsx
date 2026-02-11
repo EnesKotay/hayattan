@@ -96,7 +96,7 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
     <section className="relative w-full overflow-hidden py-2">
       <div className="container mx-auto px-4">
         <div className="group/card relative overflow-hidden rounded-xl shadow-lg ring-1 ring-black/[0.06] transition-shadow hover:shadow-xl">
-          <div className="relative aspect-[16/9] w-full md:aspect-[2/1]">
+          <div className="relative aspect-[16/9] w-full md:aspect-[16/9]">
             {items.map((item, index) => {
               const isExternal = item.link.startsWith("http");
               const slideClass = `absolute inset-0 block transition-opacity duration-700 ease-out ${index === activeIndex ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none"
