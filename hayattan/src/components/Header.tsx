@@ -50,15 +50,15 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
     >
       <div className="container relative mx-auto flex items-center justify-between px-4">
         <motion.div
-          animate={{ scale: isScrolled ? 0.9 : 1 }}
+          animate={{ scale: isScrolled ? 0.8 : 0.9 }}
           transition={{ duration: 0.4 }}
           className="flex-shrink-0"
         >
-          <Logo size="md" showTagline={false} centered={false} />
+          <Logo size="md" showTagline={false} centered={false} iconScale={0.8} />
         </motion.div>
 
         <nav
-          className="hidden lg:flex lg:items-center lg:gap-1 xl:gap-2 relative"
+          className="hidden lg:flex lg:items-center lg:gap-0.5 xl:gap-1 relative"
           aria-label="Ana navigasyon"
           onMouseLeave={() => setHoveredItem(null)}
         >
@@ -67,13 +67,13 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
               key={item.href}
               href={item.href}
               onMouseEnter={() => setHoveredItem(item.href)}
-              className="group relative px-4 py-2 text-xs xl:text-sm font-extrabold uppercase tracking-[0.12em] text-foreground/70 transition-colors hover:text-primary whitespace-nowrap z-10"
+              className="group relative px-2.5 py-1.5 text-[10px] xl:text-[11px] font-bold uppercase tracking-[0.15em] text-foreground/70 transition-colors hover:text-primary whitespace-nowrap z-10"
             >
               <span className="relative z-10">{item.label}</span>
               {hoveredItem === item.href && (
                 <motion.div
                   layoutId="nav-hover"
-                  className="absolute inset-0 z-0 rounded-full bg-primary/5 shadow-[0_0_20px_rgba(var(--primary-rgb),0.03)]"
+                  className="absolute inset-x-0 inset-y-1 z-0 rounded-full bg-primary/5 shadow-sm"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -84,24 +84,20 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
                   }}
                 />
               )}
-              {/* Subtle underline for active context - can be expanded later */}
-              <motion.span
-                className="absolute -bottom-1 left-4 right-4 h-0.5 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                layoutId={`underline-${item.href}`}
-              />
             </Link>
           ))}
         </nav>
 
-        <div className="hidden xl:flex flex-1 justify-center px-4">
-          <DateTimeDisplay />
-        </div>
+        {/* DateTime is now part of the right utilities for better spacing */}
 
-        <div className="hidden md:flex md:items-center md:gap-3 lg:w-48 xl:w-72 justify-end">
-          <div className="flex-1 max-w-[140px] xl:max-w-[180px]">
+        <div className="hidden md:flex md:items-center md:gap-3 xl:gap-5 justify-end">
+          <div className="hidden xl:block">
+            <DateTimeDisplay minimal />
+          </div>
+          <div className="flex-1 max-w-[120px] xl:max-w-[160px]">
             <SearchWithSuggestions />
           </div>
-          <div className="h-4 w-[1px] bg-border/60 mx-1" />
+          <div className="h-4 w-[1px] bg-border/60" />
           <ThemeSelector />
         </div>
 
