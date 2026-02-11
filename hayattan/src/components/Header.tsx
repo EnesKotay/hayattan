@@ -56,7 +56,7 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
           <Logo size="md" showTagline={false} centered={false} />
         </motion.div>
 
-        <nav className="hidden lg:flex lg:items-center lg:gap-10" aria-label="Ana navigasyon">
+        <nav className="hidden lg:flex lg:items-center lg:gap-5 xl:gap-8" aria-label="Ana navigasyon">
           {navItems.map((item) => (
             <motion.div
               key={item.href}
@@ -65,7 +65,7 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
             >
               <Link
                 href={item.href}
-                className="group relative px-2 py-1 text-sm font-semibold tracking-tight text-foreground/70 transition-colors hover:text-primary"
+                className="group relative px-2 py-1 text-xs xl:text-sm font-bold tracking-tight text-foreground/70 transition-colors hover:text-primary whitespace-nowrap"
               >
                 {item.label}
                 <motion.span
@@ -79,12 +79,12 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
           ))}
         </nav>
 
-        <div className="hidden lg:flex flex-1 justify-center px-8">
+        <div className="hidden xl:flex flex-1 justify-center px-4">
           <DateTimeDisplay />
         </div>
 
-        <div className="hidden md:flex md:items-center md:gap-4 md:w-80 justify-end">
-          <div className="flex-1 max-w-[180px]">
+        <div className="hidden md:flex md:items-center md:gap-3 lg:w-48 xl:w-72 justify-end">
+          <div className="flex-1 max-w-[140px] xl:max-w-[180px]">
             <SearchWithSuggestions />
           </div>
           <div className="h-4 w-[1px] bg-border/60 mx-1" />
