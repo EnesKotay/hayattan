@@ -32,6 +32,7 @@ model Yazar {
   updatedAt DateTime @updatedAt
   misafir   Boolean  @default(false)
   ayrilmis  Boolean  @default(false)
+  sortOrder Int      @default(0)
   yazilar   Yazi[]
 }
 

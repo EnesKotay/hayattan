@@ -83,6 +83,14 @@ export default async function YazarDuzenlePage({
               className="w-full rounded-lg border border-[#ddd] px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </FormField>
+          <FormField label="Sıralama" help="Yazarın listedeki sırası (küçük sayı üste çıkar).">
+            <input
+              name="sortOrder"
+              type="number"
+              defaultValue={yazar.sortOrder}
+              className="w-full rounded-lg border border-[#ddd] px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </FormField>
         </FormSection>
 
         <FormSection title="Profil">
