@@ -141,8 +141,8 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
             <StaggerContainer className="flex flex-col gap-4 lg:gap-6">
               {sideYazilar.map((yazi) => (
                 <StaggerItem key={yazi.id}>
-                  <article className="group flex gap-3 overflow-hidden rounded-lg border border-border bg-background transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20 sm:gap-4">
-                    <Link href={`/yazilar/${yazi.slug}`} className="relative h-24 w-24 shrink-0 overflow-hidden bg-muted-bg sm:h-24 sm:w-28 md:h-28 md:w-36">
+                  <article className="group flex gap-4 overflow-hidden rounded-lg border border-border bg-background transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20">
+                    <Link href={`/yazilar/${yazi.slug}`} className="relative h-24 w-28 shrink-0 overflow-hidden bg-muted-bg md:h-28 md:w-36">
                       {yazi.featuredImage ? (
                         <Image
                           src={yazi.featuredImage}

@@ -217,12 +217,12 @@ export default async function YaziDetayPage({ params }: Props) {
       </div>
 
       {/* Reklam - Görsel altı, içerik üstü */}
-      <div className="mb-8 overflow-hidden">
+      <div className="mb-8">
         <AdSlot slotId="yazi-top" size="leaderboard" content={adSlots["yazi-top"]} />
       </div>
 
       <div
-        className="yazi-icerik prose-reading space-y-4 overflow-hidden text-foreground [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-bold [&_p]:leading-relaxed [&_a]:text-primary [&_a]:underline [&_a:hover]:no-underline [&_ul]:list-inside [&_ul]:list-disc [&_ol]:list-inside [&_ol]:list-decimal [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted"
+        className="yazi-icerik prose-reading space-y-4 text-foreground [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-bold [&_p]:leading-relaxed [&_a]:text-primary [&_a]:underline [&_a:hover]:no-underline [&_ul]:list-inside [&_ul]:list-disc [&_ol]:list-inside [&_ol]:list-decimal [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted"
         dangerouslySetInnerHTML={{ __html: yazi.content }}
       />
 
