@@ -1,17 +1,20 @@
+import { SkeletonGrid } from "@/components/Skeletons/SkeletonArticle";
+
 export default function Loading() {
     return (
-        <div className="flex h-[calc(100vh-4rem)] w-full items-center justify-center bg-background">
-            <div className="flex flex-col items-center gap-4">
-                <div className="relative h-16 w-16">
-                    <div className="absolute inset-0 animate-ping rounded-full bg-primary/20 opacity-75"></div>
-                    <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-background ring-4 ring-primary/30">
-                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                    </div>
-                </div>
-                <p className="animate-pulse font-serif text-lg font-medium text-muted-foreground">
-                    Yükleniyor...
-                </p>
+        <div className="container mx-auto px-4 py-12 space-y-12">
+            <div className="max-w-2xl space-y-4">
+                <div className="skeleton h-12 w-3/4 rounded-lg" />
+                <div className="skeleton h-6 w-full rounded-md" />
             </div>
+
+            <div className="flex gap-4 mb-8">
+                <div className="skeleton h-10 w-24 rounded-full" />
+                <div className="skeleton h-10 w-32 rounded-full" />
+                <div className="skeleton h-10 w-28 rounded-full" />
+            </div>
+
+            <SkeletonGrid count={6} />
         </div>
     );
 }

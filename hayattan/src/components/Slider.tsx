@@ -4,6 +4,7 @@ import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 /** Ana sayfa haber slider'ında gösterilecek öğe (Haber veya Yazi'den map edilir) */
 export type SliderItem = {
@@ -139,35 +140,45 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                     />
                   </div>
 
-                  {/* İçerik Katmanı - Modern & Minimalist */}
-                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-6 md:p-10">
-                    <div className="max-w-4xl space-y-3">
-
+                  {/* İçerik Katmanı - Cinematic & Premium */}
+                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-6 md:p-12 lg:p-16">
+                    <motion.div
+                      key={activeIndex}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+                      className="max-w-4xl space-y-4"
+                    >
                       {/* Üst Kategori Badge */}
-                      <span className="inline-block rounded bg-primary/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm md:text-xs">
+                      <span className="inline-block rounded-full bg-primary px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-lg md:text-xs">
                         {splitTitle(item.title).part1}
                       </span>
 
                       {/* Başlık */}
-                      <h2 className="font-serif text-2xl font-bold leading-tight text-white drop-shadow-md md:text-4xl lg:text-5xl">
+                      <h2 className="font-serif text-3xl font-bold leading-[1.1] text-white drop-shadow-2xl md:text-5xl lg:text-6xl">
                         {splitTitle(item.title).part2}
                       </h2>
 
-                      {/* Açıklama ve Yazar Alt Alta */}
-                      <div className="flex flex-col gap-3 pt-2 md:flex-row md:items-center md:gap-6">
+                      {/* Açıklama ve Yazar */}
+                      <div className="flex flex-col gap-6 pt-4 md:flex-row md:items-center">
                         {/* Açıklama */}
                         {item.excerpt && (
-                          <div className="relative border-l-4 border-amber-400 pl-4">
-                            <p className="line-clamp-2 text-sm font-medium text-gray-200 md:text-base md:leading-relaxed">
-                              {item.excerpt}
+                          <div className="relative border-l-2 border-primary/60 pl-6 backdrop-blur-sm">
+                            <p className="line-clamp-2 text-sm font-medium text-white/90 md:text-lg md:leading-relaxed italic font-serif">
+                              "{item.excerpt}"
                             </p>
                           </div>
                         )}
 
-                        {/* Yazar Bilgisi (Ayıraçlı) */}
-                        <div className="flex items-center gap-3 text-white/80 md:border-l md:border-white/20 md:pl-6">
+                        {/* Yazar Bilgisi */}
+                        <div className="flex items-center gap-4 text-white/80 md:border-l md:border-white/20 md:pl-8">
+                          <div className="h-10 w-10 rounded-full bg-white/10 p-0.5 backdrop-blur-md">
+                            <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/20 font-bold text-white text-xs">
+                              {item.authorName.charAt(0)}
+                            </div>
+                          </div>
                           <div className="flex flex-col text-xs md:text-sm">
-                            <span className="font-bold text-white">{item.authorName}</span>
+                            <span className="font-bold text-white tracking-wide">{item.authorName}</span>
                             {item.publishedAt && (
                               <span className="text-white/60">
                                 {new Date(item.publishedAt).toLocaleDateString("tr-TR", {
@@ -180,8 +191,7 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                           </div>
                         </div>
                       </div>
-
-                    </div>
+                    </motion.div>
                   </div>
                 </>
               );
