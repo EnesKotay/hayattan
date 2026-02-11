@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Calendar } from "lucide-react";
 
-export function DateTimeDisplay() {
+export function DateTimeDisplay({ minimal = false }: { minimal?: boolean }) {
     const [date, setDate] = useState<Date | null>(null);
 
     useEffect(() => {
@@ -19,9 +19,30 @@ export function DateTimeDisplay() {
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const seconds = date.getSeconds().toString().padStart(2, '0');
 
-    const day = date.toLocaleDateString("tr-TR", { weekday: "long" });
+    const day = date.toLocaleDateString("tr-TR", { weekday: "short" });
     const dayNum = date.getDate();
-    const month = date.toLocaleDateString("tr-TR", { month: "long" });
+    const month = date.toLocaleDateString("tr-TR", { month: "short" });
+
+    if (minimal) {
+        return (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center gap-3 py-1 px-3 rounded-full bg-primary/5 border border-primary/10"
+            >
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/60 uppercase tracking-widest">
+                    <span>{dayNum} {month}</span>
+                    <span className="opacity-40">{day}</span>
+                </div>
+                <div className="h-2.5 w-[1px] bg-primary/20" />
+                <div className="font-mono text-[12px] font-bold text-primary flex items-center">
+                    <span>{hours}</span>
+                    <span className="mx-0.5 animate-pulse">:</span>
+                    <span>{minutes}</span>
+                </div>
+            </motion.div>
+        );
+    }
 
     return (
         <motion.div
@@ -33,7 +54,7 @@ export function DateTimeDisplay() {
             <div className="flex items-center gap-2 text-[11px] font-bold text-foreground/80 tracking-tight">
                 <Calendar className="w-3.5 h-3.5 text-primary" />
                 <span className="uppercase whitespace-nowrap">
-                    {dayNum} {month}, {day}
+                    {dayNum} {date.toLocaleDateString("tr-TR", { month: "long" })}, {date.toLocaleDateString("tr-TR", { weekday: "long" })}
                 </span>
             </div>
 
