@@ -33,7 +33,7 @@ export default async function YazarlarPage({
 
   const [yazarlar, misafirYazarlar] = await Promise.all([
     prisma.yazar.findMany({
-      where: { misafir: false, ayrilmis: false },
+      where: { misafir: false },
       orderBy: [
         { sortOrder: "asc" },
         { yazilar: { _count: "desc" } },

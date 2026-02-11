@@ -48,7 +48,6 @@ async function getYazarlar(): Promise<YazarRow[]> {
   const rows = await prisma.yazar.findMany({
     where: {
       misafir: false,
-      ayrilmis: false,
     },
     orderBy: [
       { sortOrder: "asc" },
