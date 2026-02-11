@@ -12,6 +12,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/Toast/ToastProvider";
 import { ToastContainer } from "@/components/Toast/Toast";
 import { CommandMenu } from "@/components/CommandMenu";
+import { ProgressBar } from "@/components/ProgressBar";
 import "./globals.css";
 import "@/styles/admin.css";
 
@@ -74,6 +75,7 @@ export default async function RootLayout({
             <SessionProvider>
               <CommandMenu />
               <SkipLink />
+              <ProgressBar />
               <Header navItems={navItems} />
               <ReadingProgress />
               <main id="main-content" className="min-h-full flex-1 bg-background">
