@@ -96,7 +96,6 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
     <section className="relative w-full overflow-hidden py-2">
       <div className="container mx-auto px-4">
         <div className="group/card relative overflow-hidden rounded-xl shadow-lg ring-1 ring-black/[0.06] transition-shadow hover:shadow-xl">
-          {/* Slider alanı - daha dengeli oranlar (Mobil 16:9, Desktop 2:1) */}
           <div className="relative aspect-[16/9] w-full md:aspect-[2/1]">
             {items.map((item, index) => {
               const isExternal = item.link.startsWith("http");
@@ -108,20 +107,18 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                   <div className="absolute inset-0 overflow-hidden bg-muted-bg">
                     {item.imageUrl && !imageErrors.has(item.id) ? (
                       <>
-                        {/* 1. Katman: Bulanık Arka Plan (Dolgu) */}
                         <Image
                           src={item.imageUrl}
                           alt=""
                           fill
-                          className="scale-110 object-cover opacity-50 blur-xl filter"
+                          className="scale-110 object-cover opacity-50 blur-2xl filter"
                           aria-hidden="true"
                         />
-                        {/* 2. Katman: Net Ön Plan Görseli (Sığdırılmış) */}
                         <Image
                           src={item.imageUrl}
                           alt={item.title}
                           fill
-                          className="object-contain transition-transform duration-700 group-hover/card:scale-[1.02]"
+                          className="object-contain transition-transform duration-700 group-hover/card:scale-[1.01]"
                           sizes="(max-width: 768px) 100vw, 1200px"
                           priority={index === 0}
                           unoptimized={isExternalImageUrl(item.imageUrl)}
@@ -133,52 +130,58 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                         <span className="font-serif text-4xl">Y</span>
                       </div>
                     )}
-                    {/* Çok katmanlı gradient - daha zengin derinlik */}
+                    {/* Modern Gradient Overlay */}
                     <div
                       className="absolute inset-0"
                       style={{
                         background:
-                          "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 50%, rgba(0,0,0,0.2) 100%)",
+                          "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 30%, transparent 100%)",
                       }}
                     />
                   </div>
 
-                  {/* Geçmeli metin katmanları */}
-                  <div className="absolute inset-0 flex flex-col justify-between p-3 md:p-4">
-                    {/* Üst: Kırmızı banner + Başlık */}
-                    <div>
-                      <span className="inline-flex items-center gap-1 rounded bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white md:px-2.5 md:py-1 md:text-xs">
-                        <span className="h-0.5 w-0.5 rounded-full bg-white/80" />
+                  {/* İçerik Katmanı - Modern & Minimalist */}
+                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-6 md:p-10">
+                    <div className="max-w-4xl space-y-3">
+
+                      {/* Üst Kategori Badge */}
+                      <span className="inline-block rounded bg-primary/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm md:text-xs">
                         {splitTitle(item.title).part1}
                       </span>
-                      <h2 className="mt-1 font-serif text-base font-bold leading-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.5)] md:text-lg lg:text-xl">
+
+                      {/* Başlık */}
+                      <h2 className="font-serif text-2xl font-bold leading-tight text-white drop-shadow-md md:text-4xl lg:text-5xl">
                         {splitTitle(item.title).part2}
                       </h2>
-                    </div>
 
-                    {/* Orta: Sarı şerit */}
-                    {item.excerpt && (
-                      <div className="absolute left-3 right-3 top-1/2 -translate-y-1/2 md:left-4 md:right-4">
-                        <p className="line-clamp-2 max-w-2xl rounded-r border-l-4 border-amber-400 bg-amber-400/90 px-3 py-2 text-xs font-medium leading-relaxed text-foreground shadow-sm backdrop-blur-sm md:px-4 md:py-3 md:text-sm">
-                          {item.excerpt}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Alt: Yazar bilgisi */}
-                    <div className="flex items-end justify-between gap-2">
-                      <div className="rounded border border-white/20 bg-black/40 px-2.5 py-1.5 backdrop-blur-sm md:px-3 md:py-2">
-                        <p className="text-[10px] font-bold text-white md:text-xs">{item.authorName}</p>
-                        {item.publishedAt && (
-                          <p className="text-[9px] text-white/80 md:text-[10px]">
-                            {new Date(item.publishedAt).toLocaleDateString("tr-TR", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </p>
+                      {/* Açıklama ve Yazar Alt Alta */}
+                      <div className="flex flex-col gap-3 pt-2 md:flex-row md:items-center md:gap-6">
+                        {/* Açıklama */}
+                        {item.excerpt && (
+                          <div className="relative border-l-4 border-amber-400 pl-4">
+                            <p className="line-clamp-2 text-sm font-medium text-gray-200 md:text-base md:leading-relaxed">
+                              {item.excerpt}
+                            </p>
+                          </div>
                         )}
+
+                        {/* Yazar Bilgisi (Ayıraçlı) */}
+                        <div className="flex items-center gap-3 text-white/80 md:border-l md:border-white/20 md:pl-6">
+                          <div className="flex flex-col text-xs md:text-sm">
+                            <span className="font-bold text-white">{item.authorName}</span>
+                            {item.publishedAt && (
+                              <span className="text-white/60">
+                                {new Date(item.publishedAt).toLocaleDateString("tr-TR", {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
+
                     </div>
                   </div>
                 </>
