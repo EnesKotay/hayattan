@@ -98,20 +98,20 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
         {/* Öne çıkan + yan sütun layout */}
         <div className={`grid gap-6 ${hasSidebar ? "lg:grid-cols-3" : ""}`}>
           {/* Öne çıkan yazı - büyük kart */}
-          <article className={`group relative card ${hasSidebar ? "lg:col-span-2" : ""}`}>
-            <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-2">
+          <article className={`group relative card overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:shadow-premium-xl hover:-translate-y-2 hover:border-primary/20 bg-background ${hasSidebar ? "lg:col-span-2" : ""}`}>
+            <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-2 transition-transform duration-500 group-hover:translate-x-1">
               {featured.kategoriler.slice(0, 2).map((k) => (
                 <KategoriBadge key={k.slug} name={k.name} slug={k.slug} />
               ))}
             </div>
             <Link href={`/yazilar/${featured.slug}`} className="block h-full">
-              <div className="image-container relative aspect-[16/9] bg-muted-bg">
+              <div className="image-container relative aspect-[16/9] w-full bg-muted-bg overflow-hidden">
                 {featured.featuredImage ? (
                   <Image
                     src={normalizeImageUrl(featured.featuredImage)!}
                     alt={featured.title}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-110"
                     sizes="(max-width: 1024px) 100vw, 66vw"
                     priority
                   />
@@ -120,17 +120,19 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
                     <span className="font-serif text-6xl">Y</span>
                   </div>
                 )}
+                {/* Premium Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
               </div>
-              <div className="p-6 md:p-8">
-                <h3 className="font-serif text-2xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary md:text-3xl lg:text-4xl">
+              <div className="p-6 md:p-8 relative">
+                <h3 className="font-serif text-2xl font-bold leading-tight text-foreground transition-all duration-300 group-hover:text-primary md:text-3xl lg:text-4xl group-hover:translate-x-1">
                   {featured.title}
                 </h3>
                 {featured.excerpt && (
-                  <p className="mt-4 line-clamp-3 text-sm md:text-base text-muted/90 leading-relaxed font-sans">
+                  <p className="mt-4 line-clamp-3 text-sm md:text-base text-muted/90 leading-relaxed font-sans transition-all duration-300 group-hover:text-muted group-hover:translate-x-1">
                     {featured.excerpt}
                   </p>
                 )}
-                <div className="mt-6 pt-6 border-t border-border/60">
+                <div className="mt-6 pt-6 border-t border-border/60 transition-colors group-hover:border-primary/20">
                   <YaziMeta author={featured.author} publishedAt={featured.publishedAt} />
                 </div>
               </div>
@@ -142,14 +144,14 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
             <StaggerContainer className="flex flex-col gap-6">
               {sideYazilar.map((yazi) => (
                 <StaggerItem key={yazi.id}>
-                  <article className="group card flex gap-4 h-full border-none shadow-none hover:shadow-none bg-transparent">
-                    <Link href={`/yazilar/${yazi.slug}`} className="image-container relative h-24 w-28 shrink-0 rounded-xl bg-muted-bg md:h-32 md:w-40">
+                  <article className="group flex gap-4 h-full border-none shadow-none hover:shadow-none bg-transparent transition-all duration-300">
+                    <Link href={`/yazilar/${yazi.slug}`} className="image-container relative h-24 w-28 shrink-0 rounded-xl bg-muted-bg md:h-32 md:w-40 overflow-hidden">
                       {yazi.featuredImage ? (
                         <Image
                           src={normalizeImageUrl(yazi.featuredImage)!}
                           alt={yazi.title}
                           fill
-                          className="object-cover"
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                           sizes="200px"
                         />
                       ) : (
@@ -158,18 +160,18 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
                         </div>
                       )}
                     </Link>
-                    <div className="min-w-0 flex-1 flex flex-col justify-center py-1">
-                      <div className="mb-2 flex flex-wrap gap-1">
+                    <div className="min-w-0 flex-1 flex flex-col justify-center py-1 group/text">
+                      <div className="mb-2 flex flex-wrap gap-1 transition-transform duration-300 group-hover:translate-x-1">
                         {yazi.kategoriler.slice(0, 1).map((k) => (
                           <KategoriBadge key={k.slug} name={k.name} slug={k.slug} />
                         ))}
                       </div>
                       <Link href={`/yazilar/${yazi.slug}`}>
-                        <h4 className="font-serif line-clamp-2 text-base font-bold text-foreground transition-colors group-hover:text-primary md:text-lg">
+                        <h4 className="font-serif line-clamp-2 text-base font-bold text-foreground transition-all duration-300 group-hover:text-primary md:text-lg group-hover:translate-x-1">
                           {yazi.title}
                         </h4>
                       </Link>
-                      <div className="mt-2 text-xs">
+                      <div className="mt-2 text-xs transition-transform duration-300 group-hover:translate-x-1">
                         <YaziMeta author={yazi.author} publishedAt={yazi.publishedAt} />
                       </div>
                     </div>
