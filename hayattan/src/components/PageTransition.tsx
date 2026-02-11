@@ -1,7 +1,8 @@
 "use client";
 
+
 import { usePathname } from "next/navigation";
-import { useEffect, ReactNode } from "react";
+import { useEffect, ReactNode, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface PageTransitionProps {
@@ -9,6 +10,14 @@ interface PageTransitionProps {
 }
 
 export function PageTransition({ children }: PageTransitionProps) {
+  return (
+    <Suspense fallback={<>{children}</>}>
+      <PageTransitionContent>{children}</PageTransitionContent>
+    </Suspense>
+  );
+}
+
+function PageTransitionContent({ children }: PageTransitionProps) {
   const pathname = usePathname();
 
   useEffect(() => {

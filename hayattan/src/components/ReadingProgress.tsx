@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
 export function ReadingProgress() {
+  return (
+    <Suspense fallback={null}>
+      <ReadingProgressContent />
+    </Suspense>
+  );
+}
+
+function ReadingProgressContent() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {

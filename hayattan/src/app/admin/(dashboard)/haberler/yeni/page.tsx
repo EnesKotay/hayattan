@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { createHaber } from "@/app/admin/actions";
 import { HaberForm } from "@/components/admin/HaberForm";
+import Loading from "../../loading";
 
 export default function YeniHaberPage() {
     return (
@@ -13,7 +15,9 @@ export default function YeniHaberPage() {
                 </p>
             </div>
 
-            <HaberForm action={createHaber} />
+            <Suspense fallback={<Loading />}>
+                <HaberForm action={createHaber} />
+            </Suspense>
         </div>
     );
 }
