@@ -140,7 +140,7 @@ export function YazarlarBolumu({
                   </h3>
                   <div className="mx-auto h-[1px] w-12 bg-primary/10 transition-all duration-700 group-hover:w-20 group-hover:bg-primary/30" />
                   <span className="inline-block rounded-full bg-muted-bg/50 px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-muted transition-all duration-500 group-hover:bg-primary-light group-hover:text-primary">
-                    {yazar.unvan || "YAZAR"}
+                    {(yazar as any).unvan || "YAZAR"}
                   </span>
                 </div>
               </Link>
