@@ -9,8 +9,7 @@ import { Logo } from "./Logo";
 import { getMenuItems } from "@/app/admin/actions";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { NavDropdown } from "./NavDropdown";
-import { MoreHorizontal, Mail, Info, Archive, History, Camera, UserPlus, BookOpen } from "lucide-react";
+import { Mail, Info, Archive, History, Camera, UserPlus, BookOpen } from "lucide-react";
 
 type NavItem = { href: string; label: string; icon?: any };
 
@@ -49,9 +48,6 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // First 5 items are main, rest are in dropdown
-  const mainNavItems = navItems.slice(0, 5);
-  const dropdownItems = navItems.slice(5);
 
   return (
     <header
@@ -75,12 +71,12 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
           onMouseLeave={() => setHoveredItem(null)}
         >
           <div className="flex items-center">
-            {mainNavItems.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onMouseEnter={() => setHoveredItem(item.href)}
-                className="group relative px-3 py-2 text-xs xl:text-sm font-bold uppercase tracking-[0.1em] text-foreground/80 transition-colors hover:text-primary whitespace-nowrap z-10"
+                className="group relative px-2 py-2 text-[11px] xl:text-[13px] font-bold uppercase tracking-[0.05em] text-foreground/80 transition-colors hover:text-primary whitespace-nowrap z-10"
               >
                 <span className="relative z-10">{item.label}</span>
                 {hoveredItem === item.href && (
@@ -95,13 +91,6 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
                 )}
               </Link>
             ))}
-
-            {dropdownItems.length > 0 && (
-              <NavDropdown
-                label={<MoreHorizontal className="w-5 h-5" />}
-                items={dropdownItems}
-              />
-            )}
           </div>
         </nav>
 
