@@ -95,9 +95,10 @@ export function AdSlot({ slotId, size = "leaderboard", content, className = "", 
   }
 
   // Özel boyut varsa style olarak ekle, yoksa class'tan gelenleri kullan
-  const customStyle: React.CSSProperties = { maxWidth: "100%" };
+  const customStyle: React.CSSProperties = {};
   if (content?.width) customStyle.width = convertToPx(content.width);
   if (content?.height) customStyle.height = convertToPx(content.height);
+  if (content?.width || content?.height) customStyle.maxWidth = "none";
 
   // Content varsa göster
   return (

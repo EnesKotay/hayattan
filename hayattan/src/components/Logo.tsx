@@ -8,15 +8,18 @@ type LogoProps = {
 };
 
 const sizeClasses = {
-  sm: "text-xl",
-  md: "text-3xl md:text-4xl",
-  lg: "text-4xl md:text-5xl lg:text-6xl",
+  sm: "text-lg md:text-xl",
+  md: "text-xl md:text-3xl lg:text-4xl", // Mobile: text-xl, Desktop: text-3xl+
+  lg: "text-2xl md:text-5xl lg:text-6xl",
+};
+
+const imageSizeClasses = {
+  sm: "h-8 w-8 md:h-10 md:w-10",
+  md: "h-10 w-10 md:h-14 md:w-14", // Mobile: 40px, Desktop: 56px
+  lg: "h-12 w-12 md:h-20 md:w-20",
 };
 
 export function Logo({ size = "lg", showTagline = true, centered = true }: LogoProps) {
-  // Size multiplier for the icon (Daha da büyütüldü)
-  const iconSize = size === "lg" ? 80 : size === "md" ? 56 : 42;
-
   return (
     <div
       className={`flex flex-col items-center gap-2 ${centered ? "mx-auto text-center" : ""
@@ -24,14 +27,14 @@ export function Logo({ size = "lg", showTagline = true, centered = true }: LogoP
     >
       <Link
         href="/"
-        className="flex items-center gap-3 transition-opacity hover:opacity-90"
+        className="flex items-center gap-2 md:gap-3 transition-opacity hover:opacity-90"
       >
-        <div className="relative overflow-hidden rounded-full shadow-md">
+        <div className={`relative overflow-hidden rounded-full shadow-md ${imageSizeClasses[size]}`}>
           <Image
             src="/amblem.jpg"
             alt="Hayattan.Net Amblem"
-            width={iconSize}
-            height={iconSize}
+            fill
+            sizes="(max-width: 768px) 48px, 80px"
             className="object-cover"
           />
         </div>
@@ -42,7 +45,7 @@ export function Logo({ size = "lg", showTagline = true, centered = true }: LogoP
         </span>
       </Link>
       {showTagline && (
-        <p className="text-sm text-muted">Hayatın Engelsiz Tarafı</p>
+        <p className="text-xs md:text-sm text-muted">Hayatın Engelsiz Tarafı</p>
       )}
     </div>
   );
