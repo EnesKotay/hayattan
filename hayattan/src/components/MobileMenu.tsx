@@ -174,7 +174,6 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
                           href={social.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={() => setIsOpen(false)}
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ delay: 0.6 + i * 0.1, type: "spring" }}
