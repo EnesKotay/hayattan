@@ -4,6 +4,7 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { ToastProvider } from "@/components/admin/ToastProvider";
 import { ToastContainer } from "@/components/admin/Toast";
+import { AdminWelcome } from "@/components/admin/AdminWelcome";
 
 export default async function AdminLayout({
   children,
@@ -32,6 +33,7 @@ export default async function AdminLayout({
         <main className="container mx-auto max-w-5xl px-4 py-8">
           {children}
         </main>
+        <AdminWelcome />
         <ToastContainer />
       </div>
     </ToastProvider>

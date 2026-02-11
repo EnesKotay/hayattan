@@ -97,7 +97,7 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
     <section className="relative w-full overflow-hidden py-2">
       <div className="container mx-auto px-4">
         <div className="group/card relative overflow-hidden rounded-xl shadow-lg ring-1 ring-black/[0.06] transition-shadow hover:shadow-xl">
-          <div className="relative aspect-[16/9] w-full md:aspect-[16/9]">
+          <div className="relative aspect-[16/10] w-full md:aspect-[2.4/1]">
             {items.map((item, index) => {
               const isExternal = item.link.startsWith("http");
               const slideClass = `absolute inset-0 block transition-opacity duration-700 ease-out ${index === activeIndex ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none"
@@ -141,7 +141,7 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                   </div>
 
                   {/* İçerik Katmanı - Cinematic & Premium */}
-                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-6 md:p-12 lg:p-16">
+                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-6 md:p-10 lg:p-12">
                     <motion.div
                       key={activeIndex}
                       initial={{ opacity: 0, y: 20 }}
@@ -155,7 +155,7 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                       </span>
 
                       {/* Başlık - Larger and airier */}
-                      <h2 className="font-serif text-3xl font-extrabold leading-[1.05] text-white drop-shadow-2xl md:text-5xl lg:text-7xl tracking-tight">
+                      <h2 className="font-serif text-2xl font-extrabold leading-[1.05] text-white drop-shadow-2xl md:text-5xl lg:text-6xl tracking-tight">
                         {splitTitle(item.title).part2}
                       </h2>
 

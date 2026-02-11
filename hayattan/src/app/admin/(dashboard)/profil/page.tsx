@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { updatePassword } from "../../actions";
 import { FormField, FormSection } from "@/components/admin/FormField";
+import { AdminFeedback } from "@/components/admin/AdminFeedback";
 
 const ERROR_MESSAGES: Record<string, string> = {
   eksik: "Tüm alanları doldurun.",
@@ -31,16 +32,7 @@ export default async function ProfilPage({
         </p>
       </div>
 
-      {params.success && (
-        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-          Şifreniz güncellendi.
-        </div>
-      )}
-      {errorMessage && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          {errorMessage}
-        </div>
-      )}
+      <AdminFeedback initialSuccess={params.success} initialError={params.error} />
 
       <form action={updatePassword} className="space-y-6">
         <FormSection title="Şifre değiştir">
