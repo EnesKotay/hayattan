@@ -82,7 +82,7 @@ export function NavDropdown({ label, items, active = false }: NavDropdownProps) 
                         </div>
                     </motion.div>
                 )}
-            </AnPresence>
+            </AnimatePresence>
         </div>
     );
 }
