@@ -196,6 +196,16 @@ article {
   box-shadow: var(--card-shadow);
 }
 
+/* Touch cihazlarda hover animasyonlarını devre dışı bırak */
+@media (hover: none) {
+  [role="article"]:hover,
+  .card:hover,
+  article:hover {
+    transform: none;
+    box-shadow: var(--card-shadow);
+  }
+}
+
 /* Smooth image loading */
 img {
   transition: opacity 0.3s ease-in-out;
@@ -203,6 +213,45 @@ img {
 
 img:not([src]) {
   opacity: 0;
+}
+
+/* ========================================
+   Scrollbar gizleme (yatay scroll alanları)
+   ======================================== */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ========================================
+   Makale içeriği - Responsive medya
+   ======================================== */
+.yazi-icerik {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.yazi-icerik img,
+.yazi-icerik video,
+.yazi-icerik audio {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.yazi-icerik iframe {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+}
+
+.yazi-icerik pre {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* Loading skeleton pulse animation */

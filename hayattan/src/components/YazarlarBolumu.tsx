@@ -94,14 +94,14 @@ export function YazarlarBolumu({
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="scrollbar-hide -mx-4 flex gap-6 overflow-x-auto px-4 pb-8 md:mx-0 md:px-0"
+          className="scrollbar-hide -mx-4 flex gap-4 overflow-x-auto px-4 pb-8 md:mx-0 md:gap-6 md:px-0"
           style={{ scrollSnapType: "x mandatory" }}
         >
           {yazarlar.map((yazar) => (
             <Link
               key={yazar.id}
               href={`/yazarlar/${yazar.slug}`}
-              className="group relative flex h-[340px] w-[280px] flex-none snap-start flex-col items-center justify-center rounded-2xl border border-border bg-background p-6 text-center shadow-sm transition-all hover:-translate-y-2 hover:border-primary/20 hover:shadow-xl"
+              className="group relative flex h-[300px] w-[220px] flex-none snap-start flex-col items-center justify-center rounded-2xl border border-border bg-background p-4 text-center shadow-sm transition-all hover:-translate-y-2 hover:border-primary/20 hover:shadow-xl md:h-[340px] md:w-[280px] md:p-6"
             >
               {/* Dekoratif Arkaplan */}
               <div className="absolute top-0 h-24 w-full rounded-t-2xl bg-gradient-to-br from-muted-bg to-transparent opacity-50 transition-opacity group-hover:from-primary/5" />
