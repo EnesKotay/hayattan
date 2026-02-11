@@ -97,21 +97,21 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
 
         {/* Öne çıkan + yan sütun layout */}
         <div className={`grid gap-6 ${hasSidebar ? "lg:grid-cols-3" : ""}`}>
-          {/* Öne çıkan yazı - büyük kart (rozetler link dışında, iç içe <a> önlenir) */}
-          <article className={`group relative ${hasSidebar ? "lg:col-span-2" : ""}`}>
+          {/* Öne çıkan yazı - büyük kart */}
+          <article className={`group relative card ${hasSidebar ? "lg:col-span-2" : ""}`}>
             <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-2">
               {featured.kategoriler.slice(0, 2).map((k) => (
                 <KategoriBadge key={k.slug} name={k.name} slug={k.slug} />
               ))}
             </div>
-            <Link href={`/yazilar/${featured.slug}`} className="block overflow-hidden rounded-lg border border-border bg-background shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/30">
-              <div className="relative aspect-[16/9] overflow-hidden bg-muted-bg">
+            <Link href={`/yazilar/${featured.slug}`} className="block h-full">
+              <div className="image-container relative aspect-[16/9] bg-muted-bg">
                 {featured.featuredImage ? (
                   <Image
                     src={normalizeImageUrl(featured.featuredImage)!}
                     alt={featured.title}
                     fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 66vw"
                     priority
                   />
@@ -121,34 +121,36 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
                   </div>
                 )}
               </div>
-              <div className="p-5 md:p-6">
-                <h3 className="font-serif text-xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary md:text-2xl lg:text-3xl">
+              <div className="p-6 md:p-8">
+                <h3 className="font-serif text-2xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary md:text-3xl lg:text-4xl">
                   {featured.title}
                 </h3>
                 {featured.excerpt && (
-                  <p className="mt-3 line-clamp-2 text-muted">{featured.excerpt}</p>
+                  <p className="mt-4 line-clamp-3 text-sm md:text-base text-muted/90 leading-relaxed font-sans">
+                    {featured.excerpt}
+                  </p>
                 )}
+                <div className="mt-6 pt-6 border-t border-border/60">
+                  <YaziMeta author={featured.author} publishedAt={featured.publishedAt} />
+                </div>
               </div>
             </Link>
-            <div className="px-5 pb-5 md:px-6 md:pb-6 pt-0 -mt-2">
-              <YaziMeta author={featured.author} publishedAt={featured.publishedAt} />
-            </div>
           </article>
 
           {/* Yan sütun - küçük kartlar */}
           {hasSidebar && (
-            <StaggerContainer className="flex flex-col gap-4 lg:gap-6">
+            <StaggerContainer className="flex flex-col gap-6">
               {sideYazilar.map((yazi) => (
                 <StaggerItem key={yazi.id}>
-                  <article className="group flex gap-4 overflow-hidden rounded-lg border border-border bg-background transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20">
-                    <Link href={`/yazilar/${yazi.slug}`} className="relative h-24 w-28 shrink-0 overflow-hidden bg-muted-bg md:h-28 md:w-36">
+                  <article className="group card flex gap-4 h-full border-none shadow-none hover:shadow-none bg-transparent">
+                    <Link href={`/yazilar/${yazi.slug}`} className="image-container relative h-24 w-28 shrink-0 rounded-xl bg-muted-bg md:h-32 md:w-40">
                       {yazi.featuredImage ? (
                         <Image
                           src={normalizeImageUrl(yazi.featuredImage)!}
                           alt={yazi.title}
                           fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          sizes="150px"
+                          className="object-cover"
+                          sizes="200px"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/40">
@@ -156,18 +158,20 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
                         </div>
                       )}
                     </Link>
-                    <div className="min-w-0 flex-1 py-3 pr-4">
-                      <div className="mb-1 flex flex-wrap gap-1">
+                    <div className="min-w-0 flex-1 flex flex-col justify-center py-1">
+                      <div className="mb-2 flex flex-wrap gap-1">
                         {yazi.kategoriler.slice(0, 1).map((k) => (
                           <KategoriBadge key={k.slug} name={k.name} slug={k.slug} />
                         ))}
                       </div>
                       <Link href={`/yazilar/${yazi.slug}`}>
-                        <h4 className="font-serif line-clamp-2 text-sm font-bold text-foreground transition-colors group-hover:text-primary md:text-base">
+                        <h4 className="font-serif line-clamp-2 text-base font-bold text-foreground transition-colors group-hover:text-primary md:text-lg">
                           {yazi.title}
                         </h4>
                       </Link>
-                      <YaziMeta author={yazi.author} publishedAt={yazi.publishedAt} />
+                      <div className="mt-2 text-xs">
+                        <YaziMeta author={yazi.author} publishedAt={yazi.publishedAt} />
+                      </div>
                     </div>
                   </article>
                 </StaggerItem>

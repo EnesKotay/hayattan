@@ -18,11 +18,11 @@ export default function Error({
 
   return (
     <div className="container mx-auto flex min-h-[60vh] flex-col items-center justify-center px-4 py-16">
-      <h1 className="font-serif text-2xl font-bold text-foreground">
-        Bir hata oluştu
+      <h1 className="font-serif text-3xl font-bold text-foreground">
+        Bir şeyler yolunda gitmedi
       </h1>
-      <p className="mt-4 text-center text-muted">
-        İşleminiz şu an gerçekleştirilemedi. Lütfen tekrar deneyin veya ana sayfaya dönün.
+      <p className="mt-4 max-w-md text-center text-muted">
+        Maalesef bu sayfayı şu an yükleyemedik. İnternet bağlantınızı kontrol edip sayfayı yenilemeyi deneyebilirsiniz.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-4">
         <button

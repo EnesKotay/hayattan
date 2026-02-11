@@ -64,7 +64,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const navItems = await getMenuItems();
   return (
     <html lang="tr" suppressHydrationWarning>
       <body
@@ -76,7 +75,7 @@ export default async function RootLayout({
               <CommandMenu />
               <SkipLink />
               <ProgressBar />
-              <Header navItems={navItems} />
+              <Header />
               <ReadingProgress />
               <main id="main-content" className="min-h-full flex-1 bg-background">
                 <PageTransition>{children}</PageTransition>
