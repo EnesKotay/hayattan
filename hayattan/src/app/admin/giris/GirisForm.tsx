@@ -3,13 +3,11 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 
 export default function GirisForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/admin";
-  const resetSuccess = searchParams.get("resetSuccess");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -53,11 +51,6 @@ export default function GirisForm() {
               {error}
             </div>
           )}
-          {resetSuccess && (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-              Şifreniz başarıyla sıfırlandı. Yeni şifrenizle giriş yapabilirsiniz.
-            </div>
-          )}
 
           <div>
             <label
@@ -93,14 +86,6 @@ export default function GirisForm() {
               placeholder="••••••••"
               className="mt-1.5 w-full rounded-lg border border-[#ddd] px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
-            <div className="mt-2 text-right">
-              <Link
-                href="/admin/giris/sifremi-unuttum"
-                className="text-xs font-medium text-primary hover:underline"
-              >
-                Şifremi unuttum
-              </Link>
-            </div>
           </div>
 
           <button
