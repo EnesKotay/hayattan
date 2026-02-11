@@ -234,6 +234,26 @@ article:hover {
 }
 
 
+
+/* --- Smooth Scrolling & Performance --- */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+::selection {
+  background-color: var(--primary);
+  color: white;
+  text-shadow: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   /* Disable View Transitions for reduced motion users */

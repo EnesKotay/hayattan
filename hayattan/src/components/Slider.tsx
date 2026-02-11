@@ -216,41 +216,45 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
           {/* Önceki / Sonraki okları */}
           {items.length > 1 && (
             <>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1, x: -5 }}
+                whileTap={{ scale: 0.9 }}
                 type="button"
                 onClick={goPrev}
-                className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white/90 backdrop-blur-sm transition-all hover:bg-primary hover:text-white md:left-3 md:p-2"
+                className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/30 w-12 h-12 flex items-center justify-center text-white/90 backdrop-blur-md border border-white/10 transition-colors hover:bg-primary hover:text-white"
                 aria-label="Önceki slide"
               >
-                <svg className="h-4 w-4 md:h-5 md:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                 </svg>
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1, x: 5 }}
+                whileTap={{ scale: 0.9 }}
                 type="button"
                 onClick={goNext}
-                className="absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white/90 backdrop-blur-sm transition-all hover:bg-primary hover:text-white md:right-3 md:p-2"
+                className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/30 w-12 h-12 flex items-center justify-center text-white/90 backdrop-blur-md border border-white/10 transition-colors hover:bg-primary hover:text-white"
                 aria-label="Sonraki slide"
               >
-                <svg className="h-4 w-4 md:h-5 md:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                 </svg>
-              </button>
+              </motion.button>
             </>
           )}
 
           {/* Pagination + progress bar */}
           {items.length > 1 && (
-            <div className="absolute bottom-0 left-0 right-0 z-20 p-2 md:p-2.5">
-              <div className="flex flex-col items-center gap-1.5">
-                <div className="h-0.5 w-full max-w-[180px] overflow-hidden rounded-full bg-white/20">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all duration-100"
+            <div className="absolute bottom-0 left-0 right-0 z-20 p-4 md:p-6 bg-gradient-to-t from-black/40 to-transparent">
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-1 w-full max-w-[240px] overflow-hidden rounded-full bg-white/10 backdrop-blur-sm">
+                  <motion.div
+                    className="h-full rounded-full bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)]"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
                 <nav
-                  className="flex items-center gap-1 rounded-full bg-black/50 px-2 py-1.5 backdrop-blur-sm"
+                  className="flex items-center gap-2 rounded-full bg-white/5 p-2 backdrop-blur-md border border-white/10"
                   aria-label="Slider sayfa navigasyonu"
                 >
                   {items.map((_, index) => (
@@ -258,13 +262,14 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                       key={index}
                       type="button"
                       onClick={(e) => goTo(index, e)}
-                      className={`rounded-full transition-all duration-300 ${index === activeIndex
-                        ? "h-1.5 w-5 bg-primary"
-                        : "h-1.5 w-1.5 bg-white/60 hover:bg-white/90"
+                      className={`group relative h-2 transition-all duration-500 ${index === activeIndex ? "w-8" : "w-2 hover:w-4"
                         }`}
                       aria-label={`Slide ${index + 1}`}
                       aria-current={index === activeIndex ? "true" : undefined}
-                    />
+                    >
+                      <span className={`absolute inset-0 rounded-full transition-all duration-300 ${index === activeIndex ? "bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" : "bg-white/40 group-hover:bg-white/60"
+                        }`} />
+                    </button>
                   ))}
                 </nav>
               </div>

@@ -13,6 +13,7 @@ import { ToastProvider } from "@/components/Toast/ToastProvider";
 import { ToastContainer } from "@/components/Toast/Toast";
 import { CommandMenu } from "@/components/CommandMenu";
 import { ProgressBar } from "@/components/ProgressBar";
+import { CustomCursor } from "@/components/Animations/CustomCursor";
 import "./globals.css";
 import "@/styles/admin.css";
 
@@ -75,6 +76,7 @@ export default async function RootLayout({
               <CommandMenu />
               <SkipLink />
               <ProgressBar />
+              <CustomCursor />
               <Header />
               <ReadingProgress />
               <main id="main-content" className="min-h-full flex-1 bg-background">

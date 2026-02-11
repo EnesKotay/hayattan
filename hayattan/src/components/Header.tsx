@@ -5,6 +5,7 @@ import { MobileMenu } from "./MobileMenu";
 import { SearchWithSuggestions } from "./Search/SearchWithSuggestions";
 import { ThemeSelector } from "./ThemeSelector";
 import { Logo } from "./Logo";
+import { DateTimeDisplay } from "./DateTimeDisplay";
 import { getMenuItems } from "@/app/admin/actions";
 import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -37,37 +38,56 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? "glass h-14" : "bg-background h-16 border-b border-border"
+      className={`sticky top-0 z-50 w-full transition-all duration-500 ease-in-out ${isScrolled ? "glass border-b border-primary/10 shadow-lg py-2" : "bg-background border-b border-border py-4"
         }`}
     >
-      <div className="container relative mx-auto flex h-full items-center justify-between px-4">
-        <div className="flex-shrink-0 transition-transform duration-300 transform"
-          style={{ scale: isScrolled ? 0.9 : 1 }}>
+      <div className="container relative mx-auto flex items-center justify-between px-4">
+        <motion.div
+          animate={{ scale: isScrolled ? 0.9 : 1 }}
+          transition={{ duration: 0.4 }}
+          className="flex-shrink-0"
+        >
           <Logo size="md" showTagline={false} centered={false} />
-        </div>
+        </motion.div>
 
-        <nav className="hidden lg:flex lg:items-center lg:gap-8" aria-label="Ana navigasyon">
+        <nav className="hidden lg:flex lg:items-center lg:gap-10" aria-label="Ana navigasyon">
           {navItems.map((item) => (
-            <Link
+            <motion.div
               key={item.href}
-              href={item.href}
-              className="group relative py-2 text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              {item.label}
-              <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-primary transition-all duration-300 group-hover:w-full" />
-            </Link>
+              <Link
+                href={item.href}
+                className="group relative px-2 py-1 text-sm font-semibold tracking-tight text-foreground/70 transition-colors hover:text-primary"
+              >
+                {item.label}
+                <motion.span
+                  className="absolute -bottom-1 left-0 h-0.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"
+                  initial={{ width: 0 }}
+                  whileHover={{ width: "100%" }}
+                  transition={{ duration: 0.3 }}
+                />
+              </Link>
+            </motion.div>
           ))}
         </nav>
 
-        <div className="hidden md:flex md:items-center md:gap-3 md:w-72 justify-end">
-          <SearchWithSuggestions />
-          <div className="h-6 w-[1px] bg-border mx-1" />
+        <div className="hidden lg:flex flex-1 justify-center px-8">
+          <DateTimeDisplay />
+        </div>
+
+        <div className="hidden md:flex md:items-center md:gap-4 md:w-80 justify-end">
+          <div className="flex-1 max-w-[180px]">
+            <SearchWithSuggestions />
+          </div>
+          <div className="h-4 w-[1px] bg-border/60 mx-1" />
           <ThemeSelector />
         </div>
 
