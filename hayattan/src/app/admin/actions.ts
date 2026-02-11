@@ -805,25 +805,25 @@ export async function updatePassword(formData: FormData) {
     redirect(`/admin/profil?error=zayif&msg=${errorMsg}`);
   }
 
-  const user = await db.user.findUnique({
+  const user = await db.yazar.findUnique({
     where: { id: session.user.id },
-    select: { passwordHash: true },
+    select: { password: true },
   });
   if (!user) redirect("/admin/profil?error=bulunamadi");
 
-  const isValid = await compare(currentPassword, user.passwordHash);
+  const isValid = await compare(currentPassword, user.password || "");
   if (!isValid) redirect("/admin/profil?error=yanlis");
 
   // Check if new password is same as old password
-  const isSameAsOld = await compare(newPassword, user.passwordHash);
+  const isSameAsOld = await compare(newPassword, user.password || "");
   if (isSameAsOld) {
     redirect("/admin/profil?error=ayni");
   }
 
-  const passwordHash = await hash(newPassword, 12);
-  await db.user.update({
+  const hashedPassword = await hash(newPassword, 12);
+  await db.yazar.update({
     where: { id: session.user.id },
-    data: { passwordHash },
+    data: { password: hashedPassword },
   });
 
   // Log password change
@@ -833,7 +833,6 @@ export async function updatePassword(formData: FormData) {
   revalidatePath("/admin/profil");
   redirect("/admin/profil?success=1");
 }
-
 
 async function getSetting(key: string): Promise<string> {
   try {
