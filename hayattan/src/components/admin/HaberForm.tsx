@@ -53,13 +53,13 @@ export function HaberForm({
                         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                             📝
                         </span>
-                        <h2 className="font-semibold text-gray-900">Haber Detayları</h2>
+                        <h2 className="font-semibold text-gray-900">Manşet/Haber Detayları</h2>
                     </div>
 
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-gray-700">
-                                Başlık <span className="text-red-500">*</span>
+                                Haber Başlığı <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -74,7 +74,7 @@ export function HaberForm({
 
                         <div>
                             <label htmlFor="excerpt" className="mb-1.5 block text-sm font-medium text-gray-700">
-                                Kısa Açıklama (Özet)
+                                Öne Çıkan Kısa Yazı (Özet)
                             </label>
                             <textarea
                                 id="excerpt"
@@ -103,7 +103,7 @@ export function HaberForm({
                             </div>
                             <div>
                                 <label htmlFor="sortOrder" className="mb-1.5 block text-sm font-medium text-gray-700">
-                                    Sıra Numarası (Küçük önce)
+                                    Görünüm Sırası (1=İlk Sırada)
                                 </label>
                                 <input
                                     type="number"
@@ -139,8 +139,8 @@ export function HaberForm({
                                 defaultValue={defaultValues?.publishedAt ? "now" : ""}
                                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                             >
-                                <option value="now">Yayında (Şimdi)</option>
-                                <option value="">Taslak (Gizli)</option>
+                                <option value="now">Sitede Göster (Aktif)</option>
+                                <option value="">Gizle (Taslak Olarak Kalsın)</option>
                             </select>
                         </div>
                     </div>
@@ -152,22 +152,22 @@ export function HaberForm({
                         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50 text-green-600">
                             🖼️
                         </span>
-                        <h2 className="font-semibold text-gray-900">Medya ve Bağlantı</h2>
+                        <h2 className="font-semibold text-gray-900">Fotoğraf ve Bağlantı</h2>
                     </div>
 
                     <div className="space-y-4">
                         <div>
                             <ImageUpload
                                 name="imageUrl"
-                                label="Görsel URL"
-                                help="Haberin arka plan resmi. Dosya yükleyin veya URL girin."
+                                label="Haber Fotoğrafı"
+                                help="Slider üzerinde görünecek ana fotoğraf."
                                 defaultValue={defaultValues?.imageUrl}
                             />
                         </div>
 
                         <div>
                             <label htmlFor="link" className="mb-1.5 block text-sm font-medium text-gray-700">
-                                Yönlenecek Link
+                                Tıklandığında Gidilecek Sayfa
                             </label>
                             <input
                                 type="text"

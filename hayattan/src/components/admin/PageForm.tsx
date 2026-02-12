@@ -81,7 +81,7 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
       {/* İlerleme */}
       <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-gray-700">Form Tamamlanma</span>
+          <span className="text-sm font-semibold text-gray-700">Formun Doluluk Oranı</span>
           <span className="text-sm font-bold text-gray-900">{progress}%</span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
@@ -93,8 +93,8 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
       </div>
 
       {/* Temel Bilgiler */}
-      <FormSection title="📄 Sayfa Bilgileri">
-        <FormField label="Başlık" required>
+      <FormSection title="📄 Sayfa Detayları">
+        <FormField label="Sayfa Başlığı" required>
           <input
             name="title"
             value={title}
@@ -111,7 +111,7 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
           )}
         </FormField>
 
-        <FormField label="Sayfa Adresi (URL)">
+        <FormField label="Sitedeki Bağlantı (Sayfa Adresi)">
           <input
             name="slug"
             value={slug}
@@ -124,7 +124,7 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
           />
           {slug && (
             <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
-              <p className="text-xs font-medium text-gray-700 mb-1">🔗 URL Önizleme:</p>
+              <p className="text-xs font-medium text-gray-700 mb-1">🔗 Sayfa Bağlantısı Önizleme:</p>
               <p className="text-xs font-mono text-gray-600 break-all">
                 hayattan.net/sayfa/<span className="font-bold text-gray-900">{slug}</span>
               </p>
@@ -132,7 +132,7 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
           )}
         </FormField>
 
-        <FormField label="Kapak Görseli" help="Sayfanın üstünde gösterilecek (isteğe bağlı)">
+        <FormField label="Kapak Fotoğrafı" help="Sayfanın en üstünde gösterilecek ana resim">
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
             <ImageUpload
               name="featuredImage"
@@ -195,7 +195,7 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
             <div>
               <div className="flex items-center gap-2">
                 <Icons.CheckCircle className="h-4 w-4 text-gray-700" />
-                <span className="font-semibold text-gray-900">Yayında</span>
+                <span className="font-semibold text-gray-900">Sitede Göster (Aktif)</span>
               </div>
               <p className="mt-1 text-sm text-gray-600">
                 Ziyaretçiler görebilsin
