@@ -197,12 +197,12 @@ export default async function AdminDashboardPage() {
       <DashboardQuickActions actions={quickActions} />
 
       {/* İstatistik Kartları */}
-      <DashboardStats stats={stats} />
+      {/* <DashboardStats stats={stats} /> */}
 
       {/* Grafikler */}
-      <div className="animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+      {/* <div className="animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
         <DashboardCharts stats={dashboardStats} />
-      </div>
+      </div> */}
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Orta: Yönetim Kartları */}

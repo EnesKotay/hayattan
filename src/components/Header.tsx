@@ -22,7 +22,7 @@ const defaultNavItems: NavItem[] = [
   { href: "/iletisim", label: "İletişim", icon: Mail },
   { href: "/hakkimizda", label: "Hakkımızda", icon: Info },
   { href: "/arsiv", label: "Arşiv", icon: Archive },
-  { href: "/eski_yazilar", label: "Eski Yazılar", icon: History },
+  { href: "/eski-yazilar", label: "Eski Yazılar", icon: History },
   { href: "/fotografhane", label: "Fotoğrafhane", icon: Camera },
   { href: "/misafir-yazarlar", label: "Misafir Yazıları", icon: UserPlus },
 ];
