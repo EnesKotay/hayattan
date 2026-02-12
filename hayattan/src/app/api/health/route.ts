@@ -5,10 +5,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       message: "API is working",
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV,
-      hasDatabase: !!process.env.DATABASE_URL,
-      hasAuth: !!process.env.AUTH_SECRET
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     return NextResponse.json({
