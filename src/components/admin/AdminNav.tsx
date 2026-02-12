@@ -15,6 +15,7 @@ const navItems = [
   { href: "/admin/reklam", label: "Reklam", icon: Icons.Ad, badge: null },
   { href: "/admin/hakkimizda", label: "Hakkımızda", icon: Icons.Info, badge: null },
   { href: "/admin/profil", label: "Profil", icon: Icons.Lock, badge: null },
+  { href: "/admin/istatistik", label: "İstatistikler", icon: Icons.News, badge: null },
   { href: "/admin/guvenlik", label: "Güvenlik", icon: Icons.ShieldCheck, badge: null },
 ];
 
