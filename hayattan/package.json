@@ -24,7 +24,6 @@
     "@aws-sdk/s3-request-presigner": "^3.986.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
-    "@google/generative-ai": "^0.24.1",
     "@prisma/adapter-pg": "^6.0.0",
     "@prisma/client": "^6.0.0",
     "@prisma/extension-accelerate": "^1.0.0",

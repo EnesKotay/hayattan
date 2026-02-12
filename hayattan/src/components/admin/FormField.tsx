@@ -9,19 +9,17 @@ export function FormField({
   help,
   required,
   children,
-  rightElement,
 }: {
   label: string;
   help?: string;
   required?: boolean;
   children: ReactNode;
-  rightElement?: ReactNode;
 }) {
   const [showHelp, setShowHelp] = useState(false);
 
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
           <label className="block text-sm font-medium text-foreground">
             {label}
@@ -54,7 +52,6 @@ export function FormField({
             </div>
           )}
         </div>
-        {rightElement && <div>{rightElement}</div>}
       </div>
       {children}
     </div>
