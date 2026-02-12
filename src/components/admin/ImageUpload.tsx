@@ -396,112 +396,111 @@ export function ImageUpload({
 
         {/* Sürükle-bırak / dosya seç */}
         {(!imageUrl || !imageUrl.trim()) && (
-          <div
-            {...getRootProps()}
+          { ...(getRootProps() as any) }
             className={`cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors ${isDragActive
-              ? "border-primary bg-primary-light"
-              : "border-[#ddd] hover:border-primary hover:bg-[#f9f9f6]"
-              } ${isUploading ? "cursor-not-allowed opacity-50" : ""}`}
+          ? "border-primary bg-primary-light"
+          : "border-[#ddd] hover:border-primary hover:bg-[#f9f9f6]"
+          } ${isUploading ? "cursor-not-allowed opacity-50" : ""}`}
           >
-            <input {...getInputProps()} />
-            <div className="mx-auto flex flex-col items-center">
-              <svg
-                className="mb-3 h-12 w-12 text-muted"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+        <input {...getInputProps()} />
+        <div className="mx-auto flex flex-col items-center">
+          <svg
+            className="mb-3 h-12 w-12 text-muted"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            />
+          </svg>
+          {isUploading ? (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                Yükleniyor... {uploadProgress}%
+              </p>
+              <div className="h-2 w-48 overflow-hidden rounded-full bg-[#e5e5dc]">
+                <div
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
                 />
-              </svg>
-              {isUploading ? (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-foreground">
-                    Yükleniyor... {uploadProgress}%
-                  </p>
-                  <div className="h-2 w-48 overflow-hidden rounded-full bg-[#e5e5dc]">
-                    <div
-                      className="h-full bg-primary transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (abortControllerRef.current) {
-                        abortControllerRef.current.abort();
-                      }
-                    }}
-                    className="mt-2 text-xs text-red-600 hover:text-red-700 underline"
-                  >
-                    İptal
-                  </button>
-                </div>
-              ) : isDragActive ? (
-                <p className="text-sm font-medium text-primary">
-                  Dosyayı buraya bırakın...
-                </p>
-              ) : (
-                <>
-                  <p className="text-sm font-medium text-foreground">
-                    Görseli sürükleyip bırakın veya tıklayarak seçin
-                  </p>
-                  <p className="mt-2 text-xs text-muted">
-                    PNG, JPG, GIF, WebP (maks. 4MB)
-                  </p>
-                </>
-              )}
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (abortControllerRef.current) {
+                    abortControllerRef.current.abort();
+                  }
+                }}
+                className="mt-2 text-xs text-red-600 hover:text-red-700 underline"
+              >
+                İptal
+              </button>
             </div>
-          </div>
-        )}
-
-        {/* URL veya site içi yol */}
-        <div>
-          <label className="mb-1 block text-xs text-muted">
-            Veya adres girin (dosya yüklediyseniz otomatik dolar):
-          </label>
-          <input
-            type="text"
-            placeholder="https://... veya /uploads/foto.jpg"
-            value={inputValue}
-            onChange={handleUrlChange}
-            onBlur={handleUrlBlur}
-            disabled={isUploading}
-            className="w-full rounded-lg border border-[#ddd] px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Görsel adresi veya URL"
-          />
-          <p className="mt-1 text-xs text-muted">
-            Tam link (https://...) veya sitedeki yol (/uploads/...) yazabilirsiniz.
-          </p>
+          ) : isDragActive ? (
+            <p className="text-sm font-medium text-primary">
+              Dosyayı buraya bırakın...
+            </p>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-foreground">
+                Görseli sürükleyip bırakın veya tıklayarak seçin
+              </p>
+              <p className="mt-2 text-xs text-muted">
+                PNG, JPG, GIF, WebP (maks. 4MB)
+              </p>
+            </>
+          )}
         </div>
-
-        {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3">
-            <div className="flex items-start gap-2">
-              <svg
-                className="h-5 w-5 flex-shrink-0 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          </div>
-        )}
       </div>
+        )}
+
+      {/* URL veya site içi yol */}
+      <div>
+        <label className="mb-1 block text-xs text-muted">
+          Veya adres girin (dosya yüklediyseniz otomatik dolar):
+        </label>
+        <input
+          type="text"
+          placeholder="https://... veya /uploads/foto.jpg"
+          value={inputValue}
+          onChange={handleUrlChange}
+          onBlur={handleUrlBlur}
+          disabled={isUploading}
+          className="w-full rounded-lg border border-[#ddd] px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Görsel adresi veya URL"
+        />
+        <p className="mt-1 text-xs text-muted">
+          Tam link (https://...) veya sitedeki yol (/uploads/...) yazabilirsiniz.
+        </p>
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+          <div className="flex items-start gap-2">
+            <svg
+              className="h-5 w-5 flex-shrink-0 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        </div>
+      )}
     </div>
+    </div >
   );
 }
