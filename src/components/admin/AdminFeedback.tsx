@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, Suspense } from "react";
-import { useToast } from "@/components/Toast/ToastProvider";
+import { useToast } from "@/components/admin/ToastProvider";
 
 type AdminFeedbackProps = {
   initialSuccess?: string | null;
@@ -15,7 +15,7 @@ function AdminFeedbackContent({
   initialDeleted = null,
   initialError = null,
 }: AdminFeedbackProps) {
-  const { addToast } = useToast();
+  const { success: showSuccess, warning: showWarning, error: showError } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -30,11 +30,11 @@ function AdminFeedbackContent({
 
     // Toast göster
     if (success === "1") {
-      addToast("Kaydedildi. Değişiklikler sitede görünür.", "success");
+      showSuccess("İşlem Başarılı", "Değişiklikler kaydedildi ve sitede yayına alındı.");
     } else if (deleted === "1") {
-      addToast("Silindi.", "warning");
+      showWarning("Silindi", "Öğe başarıyla silindi.");
     } else if (error) {
-      addToast(`Hata: ${decodeURIComponent(error)}`, "error");
+      showError("Hata Oluştu", decodeURIComponent(error));
     }
 
     // URL'den parametreleri temizle (kullanıcıya temiz URL göstermek için)
@@ -50,7 +50,7 @@ function AdminFeedbackContent({
     }, 500); // 100ms bazen çok hızlı olup toast'un görünmesini engelleyebilir (render cycle), 500ms daha güvenli
 
     return () => clearTimeout(t);
-  }, [success, deleted, error, router, addToast]);
+  }, [success, deleted, error, router, showSuccess, showWarning, showError]);
 
   return null;
 }

@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(AUTHOR)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Yazar {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  email     String?  @unique
+  password  String?
+  photo     String?
+  biyografi String?
+  role      Role     @default(AUTHOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  misafir   Boolean  @default(false)
+  ayrilmis  Boolean  @default(false)
+  sortOrder Int      @default(0)
+  yazilar   Yazi[]
+}
+
+model Kategori {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  yazilar     Yazi[]   @relation("KategoriToYazi")
+}
+
+model Yazi {
+  id              String     @id @default(cuid())
+  title           String
+  slug            String     @unique
+  excerpt         String?
+  content         String
+  featuredImage   String?
+  publishedAt     DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  authorId        String
+  viewCount       Int        @default(0)
+  showInSlider    Boolean    @default(false)
+  imageAlt        String?
+  metaDescription String?
+  metaKeywords    String?
+  ogImage         String?
+  author          Yazar      @relation(fields: [authorId], references: [id])
+  kategoriler     Kategori[] @relation("KategoriToYazi")
+
+  @@index([slug])
+  @@index([publishedAt])
+  @@index([authorId])
+}
+
+model Haber {
+  id          String    @id @default(cuid())
+  title       String
+  excerpt     String?
+  imageUrl    String?
+  link        String?
+  authorName  String?
+  sortOrder   Int       @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Page {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  content       String
+  showInMenu    Boolean   @default(true)
+  menuOrder     Int       @default(0)
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  featuredImage String?
+
+  @@index([slug])
+  @@index([publishedAt])
+}
+
+model SiteSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+
+model SecurityLog {
+  id        String   @id @default(cuid())
+  eventType String
+  userId    String?
+  ipAddress String?
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([userId])
+  @@index([ipAddress])
+}
+
+enum Role {
+  ADMIN
+  AUTHOR
+}
+
+

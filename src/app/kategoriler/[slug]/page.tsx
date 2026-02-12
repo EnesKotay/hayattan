@@ -1,4 +1,4 @@
-import { isExternalImageUrl } from "@/lib/image";
+import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -113,12 +113,11 @@ export default async function KategoriDetayPage({ params, searchParams }: Props)
                   <div className="relative aspect-[16/10] overflow-hidden bg-muted-bg">
                     {yazi.featuredImage ? (
                       <Image
-                        src={yazi.featuredImage}
+                        src={normalizeImageUrl(yazi.featuredImage)!}
                         alt={yazi.title}
                         fill
                         className="object-cover transition-transform group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        unoptimized={isExternalImageUrl(yazi.featuredImage)}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/50">

@@ -10,9 +10,8 @@ const transition = {
 export default function Template({ children }: { children: React.ReactNode }) {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0.1, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
             transition={transition}
             className="min-h-full bg-background transition-colors duration-[180ms] ease-out"
             style={{ background: "var(--background)" }}

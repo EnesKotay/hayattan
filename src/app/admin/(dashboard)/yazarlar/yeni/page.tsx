@@ -31,6 +31,7 @@ export default function YeniYazarPage() {
   const [bio, setBio] = useState("");
   const [isMisafir, setIsMisafir] = useState(false);
   const [isAyrilmis, setIsAyrilmis] = useState(false);
+  const [sortOrder, setSortOrder] = useState(0);
 
   // Otomatik slug
   useEffect(() => {
@@ -108,12 +109,17 @@ export default function YeniYazarPage() {
                 placeholder="ornek@email.com"
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
-              {email && (
-                <div className="mt-1.5 flex items-center gap-1 text-xs text-blue-600">
-                  <Icons.CheckCircle className="h-3 w-3" />
-                  <span>Geçerli e-posta</span>
-                </div>
-              )}
+            </FormField>
+
+            <FormField label="Sıralama" help="Küçük sayı üste çıkar">
+              <input
+                name="sortOrder"
+                type="number"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)}
+                placeholder="0"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
             </FormField>
           </div>
 
@@ -149,8 +155,8 @@ export default function YeniYazarPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Misafir Yazar */}
             <label className={`group flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all ${isMisafir
-                ? 'border-blue-300 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-blue-200 hover:bg-blue-50/50'
+              ? 'border-blue-300 bg-blue-50'
+              : 'border-gray-200 bg-white hover:border-blue-200 hover:bg-blue-50/50'
               }`}>
               <input
                 type="checkbox"
@@ -175,8 +181,8 @@ export default function YeniYazarPage() {
 
             {/* Eski Yazar */}
             <label className={`group flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all ${isAyrilmis
-                ? 'border-gray-400 bg-gray-100'
-                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+              ? 'border-gray-400 bg-gray-100'
+              : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
               }`}>
               <input
                 type="checkbox"

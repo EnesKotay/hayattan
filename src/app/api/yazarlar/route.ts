@@ -24,7 +24,11 @@ export async function GET(request: Request) {
 
   const yazarlar = await prisma.yazar.findMany({
     where: Object.keys(where).length ? where : undefined,
-    orderBy: { name: "asc" },
+    orderBy: [
+      { sortOrder: "asc" },
+      { yazilar: { _count: "desc" } },
+      { name: "asc" }
+    ] as any,
     include: { _count: { select: { yazilar: true } } },
   });
 

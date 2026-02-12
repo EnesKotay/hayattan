@@ -6,6 +6,7 @@ import { FormField, FormSection } from "@/components/admin/FormField";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { Icons } from "@/components/admin/Icons";
+import { useToast } from "@/components/admin/ToastProvider";
 
 type PageFormProps = {
   action: (formData: FormData) => void;
@@ -45,6 +46,8 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
   const [autoSlug, setAutoSlug] = useState(!defaultValues.slug);
   const [showInMenu, setShowInMenu] = useState(defaultValues.showInMenu !== false);
   const [isPublished, setIsPublished] = useState(!!defaultValues.publishedAt);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { success, error: showError } = useToast();
 
   // Otomatik slug
   useEffect(() => {
@@ -57,12 +60,20 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
   const requiredFields = [!!title, content !== "<p></p>"];
   const progress = Math.round((requiredFields.filter(Boolean).length / requiredFields.length) * 100);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
     formData.set("content", content);
     formData.set("slug", slug);
-    action(formData);
+    try {
+      await action(formData);
+      success("Sayfa başarıyla kaydedildi.", "Değişiklikler sisteme işlendi.");
+    } catch (err) {
+      showError("Hata Oluştu", err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -70,7 +81,7 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
       {/* İlerleme */}
       <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-gray-700">Form Tamamlanma</span>
+          <span className="text-sm font-semibold text-gray-700">Formun Doluluk Oranı</span>
           <span className="text-sm font-bold text-gray-900">{progress}%</span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
@@ -82,8 +93,8 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
       </div>
 
       {/* Temel Bilgiler */}
-      <FormSection title="📄 Sayfa Bilgileri">
-        <FormField label="Başlık" required>
+      <FormSection title="📄 Sayfa Detayları">
+        <FormField label="Sayfa Başlığı" required>
           <input
             name="title"
             value={title}
@@ -100,7 +111,7 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
           )}
         </FormField>
 
-        <FormField label="Sayfa Adresi (URL)">
+        <FormField label="Sitedeki Bağlantı (Sayfa Adresi)">
           <input
             name="slug"
             value={slug}
@@ -113,7 +124,7 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
           />
           {slug && (
             <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
-              <p className="text-xs font-medium text-gray-700 mb-1">🔗 URL Önizleme:</p>
+              <p className="text-xs font-medium text-gray-700 mb-1">🔗 Sayfa Bağlantısı Önizleme:</p>
               <p className="text-xs font-mono text-gray-600 break-all">
                 hayattan.net/sayfa/<span className="font-bold text-gray-900">{slug}</span>
               </p>
@@ -121,7 +132,7 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
           )}
         </FormField>
 
-        <FormField label="Kapak Görseli" help="Sayfanın üstünde gösterilecek (isteğe bağlı)">
+        <FormField label="Kapak Fotoğrafı" help="Sayfanın en üstünde gösterilecek ana resim">
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
             <ImageUpload
               name="featuredImage"
@@ -148,8 +159,8 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Menüde Göster */}
           <label className={`group flex cursor-pointer items-start gap-4 rounded-lg border-2 p-4 transition-all ${showInMenu
-              ? 'border-gray-400 bg-gray-50'
-              : 'border-gray-200 bg-white hover:border-gray-300'
+            ? 'border-gray-400 bg-gray-50'
+            : 'border-gray-200 bg-white hover:border-gray-300'
             }`}>
             <input
               type="checkbox"
@@ -171,8 +182,8 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
 
           {/* Yayında */}
           <label className={`group flex cursor-pointer items-start gap-4 rounded-lg border-2 p-4 transition-all ${isPublished
-              ? 'border-gray-400 bg-gray-50'
-              : 'border-gray-200 bg-white hover:border-gray-300'
+            ? 'border-gray-400 bg-gray-50'
+            : 'border-gray-200 bg-white hover:border-gray-300'
             }`}>
             <input
               type="checkbox"
@@ -184,7 +195,7 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
             <div>
               <div className="flex items-center gap-2">
                 <Icons.CheckCircle className="h-4 w-4 text-gray-700" />
-                <span className="font-semibold text-gray-900">Yayında</span>
+                <span className="font-semibold text-gray-900">Sitede Göster (Aktif)</span>
               </div>
               <p className="mt-1 text-sm text-gray-600">
                 Ziyaretçiler görebilsin
@@ -225,10 +236,11 @@ export function PageForm({ action, defaultValues = {}, isEdit = false }: PageFor
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
         <button
           type="submit"
-          className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-8 py-3 text-base font-bold text-white shadow-sm transition-all hover:bg-gray-800"
+          disabled={isSubmitting}
+          className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-8 py-3 text-base font-bold text-white shadow-sm transition-all hover:bg-gray-800 disabled:opacity-50"
         >
           <Icons.CheckCircle className="h-5 w-5" />
-          {isEdit ? "Değişiklikleri Kaydet" : "Sayfayı Oluştur"}
+          {isSubmitting ? "Kaydediliyor..." : (isEdit ? "Değişiklikleri Kaydet" : "Sayfayı Oluştur")}
         </button>
         <Link
           href="/admin/sayfalar"

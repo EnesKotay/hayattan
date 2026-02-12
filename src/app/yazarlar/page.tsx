@@ -34,7 +34,11 @@ export default async function YazarlarPage({
   const [yazarlar, misafirYazarlar] = await Promise.all([
     prisma.yazar.findMany({
       where: { misafir: false, ayrilmis: false },
-      orderBy: { name: "asc" },
+      orderBy: [
+        { sortOrder: "asc" },
+        { yazilar: { _count: "desc" } },
+        { name: "asc" }
+      ] as any,
       select: {
         id: true,
         name: true,
@@ -48,7 +52,11 @@ export default async function YazarlarPage({
     }),
     prisma.yazar.findMany({
       where: { misafir: true },
-      orderBy: { name: "asc" },
+      orderBy: [
+        { sortOrder: "asc" },
+        { yazilar: { _count: "desc" } },
+        { name: "asc" }
+      ] as any,
       select: {
         id: true,
         name: true,

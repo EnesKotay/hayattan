@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { SubmitButton } from "./SubmitButton";
 import { ImageUpload } from "./ImageUpload";
+import { useToast } from "./ToastProvider";
+import { useState } from "react";
 
 type HaberFormProps = {
     action: (payload: FormData) => void;
@@ -25,13 +27,25 @@ export function HaberForm({
     defaultValues,
     isEdit = false,
 }: HaberFormProps) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [state, formAction] = useActionState(async (_state: void, formData: FormData) => {
-        action(formData);
-    }, undefined);
+    const { success, error: showError } = useToast();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        const formData = new FormData(e.currentTarget);
+        try {
+            await action(formData);
+            success("Haber başarıyla kaydedildi.", "Değişiklikler sisteme işlendi.");
+        } catch (err) {
+            showError("Hata Oluştu", err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
-        <form action={formAction} className="grid gap-8 lg:grid-cols-3">
+        <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-3">
             <div className="space-y-6 lg:col-span-2">
                 {/* TEMEL BİLGİLER KARTI */}
                 <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -39,13 +53,13 @@ export function HaberForm({
                         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                             📝
                         </span>
-                        <h2 className="font-semibold text-gray-900">Haber Detayları</h2>
+                        <h2 className="font-semibold text-gray-900">Manşet/Haber Detayları</h2>
                     </div>
 
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-gray-700">
-                                Başlık <span className="text-red-500">*</span>
+                                Haber Başlığı <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -60,7 +74,7 @@ export function HaberForm({
 
                         <div>
                             <label htmlFor="excerpt" className="mb-1.5 block text-sm font-medium text-gray-700">
-                                Kısa Açıklama (Özet)
+                                Öne Çıkan Kısa Yazı (Özet)
                             </label>
                             <textarea
                                 id="excerpt"
@@ -89,7 +103,7 @@ export function HaberForm({
                             </div>
                             <div>
                                 <label htmlFor="sortOrder" className="mb-1.5 block text-sm font-medium text-gray-700">
-                                    Sıra Numarası (Küçük önce)
+                                    Görünüm Sırası (1=İlk Sırada)
                                 </label>
                                 <input
                                     type="number"
@@ -125,8 +139,8 @@ export function HaberForm({
                                 defaultValue={defaultValues?.publishedAt ? "now" : ""}
                                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                             >
-                                <option value="now">Yayında (Şimdi)</option>
-                                <option value="">Taslak (Gizli)</option>
+                                <option value="now">Sitede Göster (Aktif)</option>
+                                <option value="">Gizle (Taslak Olarak Kalsın)</option>
                             </select>
                         </div>
                     </div>
@@ -138,22 +152,22 @@ export function HaberForm({
                         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50 text-green-600">
                             🖼️
                         </span>
-                        <h2 className="font-semibold text-gray-900">Medya ve Bağlantı</h2>
+                        <h2 className="font-semibold text-gray-900">Fotoğraf ve Bağlantı</h2>
                     </div>
 
                     <div className="space-y-4">
                         <div>
                             <ImageUpload
                                 name="imageUrl"
-                                label="Görsel URL"
-                                help="Haberin arka plan resmi. Dosya yükleyin veya URL girin."
+                                label="Haber Fotoğrafı"
+                                help="Slider üzerinde görünecek ana fotoğraf."
                                 defaultValue={defaultValues?.imageUrl}
                             />
                         </div>
 
                         <div>
                             <label htmlFor="link" className="mb-1.5 block text-sm font-medium text-gray-700">
-                                Yönlenecek Link
+                                Tıklandığında Gidilecek Sayfa
                             </label>
                             <input
                                 type="text"
@@ -170,9 +184,13 @@ export function HaberForm({
 
                 {/* AKSİYON BUTONLARI */}
                 <div className="flex flex-col gap-3">
-                    <SubmitButton>
-                        {isEdit ? "Değişiklikleri Kaydet" : "Haberi Oluştur"}
-                    </SubmitButton>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-50"
+                    >
+                        {isSubmitting ? "Kaydediliyor..." : (isEdit ? "Değişiklikleri Kaydet" : "Haberi Oluştur")}
+                    </button>
                     <Link
                         href="/admin/haberler"
                         className="inline-flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900"

@@ -7,6 +7,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { saveAllAdSlots } from "@/app/admin/actions";
 import type { AdSlotContent } from "@/lib/ad-slots";
 import { Icons } from "./Icons";
+import { useToast } from "./ToastProvider";
 
 const SLOT_LABELS: Record<string, string> = {
   "top-banner": "Logo altı",
@@ -53,6 +54,8 @@ export function ReklamForm({ initialAds }: ReklamFormProps) {
   const [activeTab, setActiveTab] = useState("all");
   const [previewDevice, setPreviewDevice] = useState<DeviceType>("desktop");
   const [showPreview, setShowPreview] = useState<Record<string, boolean>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { success, error: showError } = useToast();
 
   const handleChange = (slotId: string, field: string, value: unknown) => {
     setAds((prev) => {
@@ -86,8 +89,22 @@ export function ReklamForm({ initialAds }: ReklamFormProps) {
     return cat && "keys" in cat && cat.keys && cat.keys.includes(id);
   });
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      await saveAllAdSlots(formData);
+      success("Reklamlar Kaydedildi", "Tüm reklam yerleşimleri başarıyla güncellendi.");
+    } catch (err) {
+      showError("Hata Oluştu", err instanceof Error ? err.message : "Reklamlar kaydedilirken bir hata oluştu.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <form action={saveAllAdSlots} className="space-y-6 pb-28 max-w-4xl">
+    <form onSubmit={handleSubmit} className="space-y-6 pb-28 max-w-4xl">
       {/* Filtre */}
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#e8e6e3] bg-white px-4 py-3 shadow-sm">
         {CATEGORIES.map((c) => (
@@ -312,9 +329,10 @@ export function ReklamForm({ initialAds }: ReklamFormProps) {
           </Link>
           <button
             type="submit"
-            className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-hover hover:shadow-primary/30 active:scale-[0.98]"
+            disabled={isSubmitting}
+            className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-hover hover:shadow-primary/30 active:scale-[0.98] disabled:opacity-50"
           >
-            Kaydet
+            {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
           </button>
         </div>
       </div>

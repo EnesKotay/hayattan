@@ -159,11 +159,10 @@ export function YazilarFiltre({
                     sayfa: "1",
                     ...(arama?.trim() && { ara: arama.trim() }),
                   })}
-                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                    siralama === opt.value
+                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${siralama === opt.value
                       ? "bg-primary text-white shadow-sm"
                       : "text-muted-foreground hover:bg-background hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {opt.label}
                 </Link>

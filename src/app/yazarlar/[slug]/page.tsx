@@ -1,4 +1,4 @@
-import { isExternalImageUrl, isValidImageSrc } from "@/lib/image";
+import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -80,12 +80,11 @@ export default async function YazarDetayPage({ params, searchParams }: Props) {
         <div className="relative h-40 w-40 flex-shrink-0 overflow-hidden rounded-full border-2 border-primary-light">
           {yazar.photo && isValidImageSrc(yazar.photo) ? (
             <Image
-              src={yazar.photo}
+              src={normalizeImageUrl(yazar.photo)!}
               alt={yazar.name}
               fill
               className="object-cover"
               sizes="160px"
-              unoptimized={isExternalImageUrl(yazar.photo)}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary">
@@ -136,12 +135,11 @@ export default async function YazarDetayPage({ params, searchParams }: Props) {
                   <div className="relative aspect-[16/10] overflow-hidden bg-muted-bg">
                     {yazi.featuredImage ? (
                       <Image
-                        src={yazi.featuredImage}
+                        src={normalizeImageUrl(yazi.featuredImage)!}
                         alt={yazi.title}
                         fill
                         className="object-cover transition-transform group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        unoptimized={isExternalImageUrl(yazi.featuredImage)}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/50">
