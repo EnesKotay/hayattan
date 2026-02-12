@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ArrowRight } from "lucide-react";
+import { ChevronDownIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 
 type NavItem = { href: string; label: string; icon?: React.ElementType };
 
@@ -72,10 +72,10 @@ export function NavDropdown({ label, items, active = false }: NavDropdownProps) 
                                         onClick={() => setIsOpen(false)}
                                     >
                                         <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted-bg group-hover:bg-white/20 transition-colors">
-                                            {item.icon ? <item.icon className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                                            {item.icon ? <item.icon className="w-4 h-4" /> : <ArrowRightIcon className="w-4 h-4" />}
                                         </span>
                                         <span className="flex-1 tracking-tight">{item.label}</span>
-                                        <ChevronDown className="w-4 h-4 -rotate-90 opacity-0 -translate-x-2 transition-all group-hover:opacity-50 group-hover:translate-x-0" />
+                                        <ChevronDownIcon className="w-4 h-4 -rotate-90 opacity-0 -translate-x-2 transition-all group-hover:opacity-50 group-hover:translate-x-0" />
                                     </Link>
                                 </motion.div>
                             ))}

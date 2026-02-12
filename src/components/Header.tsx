@@ -9,7 +9,19 @@ import { Logo } from "./Logo";
 import { getMenuItems } from "@/app/admin/actions";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Info, Archive, History, Camera, UserPlus, BookOpen } from "lucide-react";
+import {
+  HomeIcon,
+  UsersIcon,
+  DocumentTextIcon,
+  Squares2X2Icon,
+  EnvelopeIcon,
+  InformationCircleIcon,
+  ArchiveBoxIcon,
+  ClockIcon,
+  PhotoIcon,
+  UserPlusIcon,
+  BookOpenIcon
+} from "@heroicons/react/24/outline";
 
 type NavItem = { href: string; label: string; icon?: any };
 
@@ -19,12 +31,12 @@ const defaultNavItems: NavItem[] = [
   { href: "/yazilar", label: "Yazılar" },
   { href: "/kategoriler", label: "Kategoriler" },
   { href: "/bakis-dergisi", label: "Bakış Dergisi" },
-  { href: "/iletisim", label: "İletişim", icon: Mail },
-  { href: "/hakkimizda", label: "Hakkımızda", icon: Info },
-  { href: "/arsiv", label: "Arşiv", icon: Archive },
-  { href: "/eski-yazilar", label: "Eski Yazılar", icon: History },
-  { href: "/fotografhane", label: "Fotoğrafhane", icon: Camera },
-  { href: "/misafir-yazarlar", label: "Misafir Yazıları", icon: UserPlus },
+  { href: "/iletisim", label: "İletişim", icon: EnvelopeIcon },
+  { href: "/hakkimizda", label: "Hakkımızda", icon: InformationCircleIcon },
+  { href: "/arsiv", label: "Arşiv", icon: ArchiveBoxIcon },
+  { href: "/eski-yazilar", label: "Eski Yazılar", icon: ClockIcon },
+  { href: "/fotografhane", label: "Fotoğrafhane", icon: PhotoIcon },
+  { href: "/misafir-yazarlar", label: "Misafir Yazıları", icon: UserPlusIcon },
 ];
 
 export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
@@ -75,6 +87,7 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 onMouseEnter={() => setHoveredItem(item.href)}
                 className="group relative px-2 py-2 text-[11px] xl:text-[13px] font-bold uppercase tracking-[0.05em] text-foreground/80 transition-colors hover:text-primary whitespace-nowrap z-10"
               >

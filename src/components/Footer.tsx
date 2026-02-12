@@ -68,6 +68,7 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    prefetch={false}
                     className="group relative text-sm font-medium text-muted transition-colors hover:text-primary"
                   >
                     {item.label}
@@ -112,8 +113,8 @@ export function Footer() {
         <div className="mt-20 border-t border-border/60 pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium text-muted/60">
           <p>© {new Date().getFullYear()} Hayattan.Net. Tüm hakları saklıdır.</p>
           <div className="flex gap-8">
-            <Link href="/gizlilik" className="hover:text-primary transition-colors">Gizlilik Politikası</Link>
-            <Link href="/kullanim-sartlari" className="hover:text-primary transition-colors">Kullanım Şartları</Link>
+            <Link href="/gizlilik" prefetch={false} className="hover:text-primary transition-colors">Gizlilik Politikası</Link>
+            <Link href="/kullanim-sartlari" prefetch={false} className="hover:text-primary transition-colors">Kullanım Şartları</Link>
           </div>
         </div>
       </div>
