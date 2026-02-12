@@ -63,6 +63,7 @@ export function YaziForm({
     const [excerpt, setExcerpt] = useState(defaultValues.excerpt || "");
     const [metaDesc, setMetaDesc] = useState(defaultValues.metaDescription || "");
     const [featuredImage, setFeaturedImage] = useState(defaultValues.featuredImage || "");
+    const [isAiLoading, setIsAiLoading] = useState<{ excerpt?: boolean, meta?: boolean }>({});
 
     const [onizleData, setOnizleData] = useState<{
         title: string;
@@ -103,6 +104,56 @@ export function YaziForm({
             showError("Hata Oluştu", errorMessage);
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleAiExcerpt = async () => {
+        if (!content || content === "<p></p>") {
+            showError("İçerik Eksik", "Özet üretebilmek için önce yazı içeriğini doldurmalısınız.");
+            return;
+        }
+        setIsAiLoading(prev => ({ ...prev, excerpt: true }));
+        try {
+            const res = await fetch("/api/admin/ai", {
+                method: "POST",
+                body: JSON.stringify({ action: "excerpt", content }),
+            });
+            const data = await res.json();
+            if (data.result) {
+                setExcerpt(data.result);
+                success("Özet Üretildi", "AI tarafından hazırlanan özet forma eklendi.");
+            } else {
+                throw new Error(data.error || "Hata oluştu");
+            }
+        } catch (err: any) {
+            showError("AI Hatası", err.message);
+        } finally {
+            setIsAiLoading(prev => ({ ...prev, excerpt: false }));
+        }
+    };
+
+    const handleAiMeta = async () => {
+        if (!title || !content || content === "<p></p>") {
+            showError("Bilgi Eksik", "SEO açıklaması için başlık ve içerik dolu olmalıdır.");
+            return;
+        }
+        setIsAiLoading(prev => ({ ...prev, meta: true }));
+        try {
+            const res = await fetch("/api/admin/ai", {
+                method: "POST",
+                body: JSON.stringify({ action: "meta", title, content }),
+            });
+            const data = await res.json();
+            if (data.result) {
+                setMetaDesc(data.result);
+                success("Açıklama Hazır", "Google için optimize edilen açıklama eklendi.");
+            } else {
+                throw new Error(data.error || "Hata oluştu");
+            }
+        } catch (err: any) {
+            showError("AI Hatası", err.message);
+        } finally {
+            setIsAiLoading(prev => ({ ...prev, meta: false }));
         }
     };
 
@@ -147,7 +198,7 @@ export function YaziForm({
 
                 {/* Temel Bilgiler */}
                 <FormSection title="📝 Temel Bilgiler">
-                    <FormField label="Başlık" required>
+                    <FormField label="Yazı Başlığı" required>
                         <input
                             name="title"
                             value={title}
@@ -158,7 +209,7 @@ export function YaziForm({
                         />
                     </FormField>
 
-                    <FormField label="Sayfa Adresi (URL)" help="Boş bırakırsanız otomatik oluşturulur">
+                    <FormField label="Sitenizdeki Bağlantı (Sayfa Adresi)" help="Yazının linki burada yazdığınız gibi görünecektir">
                         <input
                             name="slug"
                             value={slug}
@@ -171,24 +222,37 @@ export function YaziForm({
                         />
                     </FormField>
 
-                    <FormField label="Kısa Özet" help="Yazı listelerinde gösterilir">
+                    <FormField
+                        label="Yazı Özeti (Kısa Tanıtım)"
+                        help="Yazı listelerinde ve sosyal medyada gösterilecek kısa yazı."
+                        rightElement={
+                            <button
+                                type="button"
+                                onClick={handleAiExcerpt}
+                                disabled={isAiLoading.excerpt}
+                                className="text-xs font-semibold text-primary hover:text-primary-hover flex items-center gap-1 bg-primary/5 px-2 py-1 rounded-md transition-colors"
+                            >
+                                {isAiLoading.excerpt ? "✨ Hazırlanıyor..." : "✨ AI ile Özet Üret"}
+                            </button>
+                        }
+                    >
                         <textarea
                             name="excerpt"
                             value={excerpt}
                             onChange={(e) => setExcerpt(e.target.value)}
                             rows={3}
-                            placeholder="Yazının kısa bir özetini buraya yazın..."
+                            placeholder="Yazının kısa bir özetini buraya yazın veya AI'dan yardım alın..."
                             className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                     </FormField>
                 </FormSection>
 
                 {/* Görsel */}
-                <FormSection title="🖼️ Kapak Görseli">
+                <FormSection title="🖼️ Kapak Fotoğrafı">
                     <ImageUpload
                         name="featuredImage"
                         label="Kapak Resmi"
-                        help="Yazının önizlemesinde görünecek görsel"
+                        help="Yazının en üstünde ve listelerde görünecek ana fotoğraf"
                         defaultValue={defaultValues.featuredImage}
                         onChange={(url) => setFeaturedImage(url)}
                     />
@@ -268,15 +332,28 @@ export function YaziForm({
                 </FormSection>
 
                 {/* SEO */}
-                <FormSection title="🔍 SEO (İsteğe Bağlı)">
-                    <FormField label="Meta Açıklama" help="Google arama sonuçlarında görünür">
+                <FormSection title="🔍 Google ve Paylaşım Ayarları">
+                    <FormField
+                        label="Google Arama Sonucu Özeti"
+                        help="Google sonuçlarında başlığın altında çıkan açıklama yazısı."
+                        rightElement={
+                            <button
+                                type="button"
+                                onClick={handleAiMeta}
+                                disabled={isAiLoading.meta}
+                                className="text-xs font-semibold text-primary hover:text-primary-hover flex items-center gap-1 bg-primary/5 px-2 py-1 rounded-md transition-colors"
+                            >
+                                {isAiLoading.meta ? "✨ Hazırlanıyor..." : "✨ AI ile Optimize Et"}
+                            </button>
+                        }
+                    >
                         <textarea
                             name="metaDescription"
                             value={metaDesc}
                             onChange={(e) => setMetaDesc(e.target.value)}
                             rows={2}
                             maxLength={160}
-                            placeholder="Google'da görünecek açıklama..."
+                            placeholder="Google'da en iyi görünecek açıklamayı yazın..."
                             className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                     </FormField>

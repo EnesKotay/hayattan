@@ -58,6 +58,50 @@ export function ImageUpload({
     };
   }, []);
 
+  const resizeImage = (file: File): Promise<File | Blob> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new window.Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                // Sıkıştırılmış dosya orijinalinden büyükse (nadir ama mümkün) orijinali gönder
+                if (blob.size > file.size) {
+                  resolve(file);
+                } else {
+                  resolve(blob);
+                }
+              } else {
+                resolve(file);
+              }
+            },
+            "image/webp",
+            0.8
+          );
+        };
+      };
+    });
+  };
+
   const doUpload = useCallback(async (file: File) => {
     // Önceki upload'ı iptal et
     if (abortControllerRef.current) {
@@ -69,28 +113,23 @@ export function ImageUpload({
     setUploadProgress(0);
     setImageError(false);
 
-    // Yeni abort controller oluştur
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-
     try {
-      // Simüle edilmiş progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev < 90) return prev + 10;
-          return prev;
-        });
-      }, 200);
+      // Otomatik boyutlandırma ve sıkıştırma
+      const optimizedBlob = await resizeImage(file);
+      const uploadFile = optimizedBlob instanceof File ? optimizedBlob : new File([optimizedBlob], file.name.replace(/\.[^/.]+$/, "") + ".webp", { type: "image/webp" });
 
-      // Presigned URL ile doğrudan R2'ye yükle (Vercel'den geçmez!)
+      // Yeni abort controller oluştur
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       // 1. Presigned URL al
       const presignRes = await fetch("/api/r2/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          filename: file.name,
-          contentType: file.type,
-          size: file.size,
+          filename: uploadFile.name,
+          contentType: uploadFile.type,
+          size: uploadFile.size,
         }),
         signal: abortController.signal,
       });
@@ -105,8 +144,8 @@ export function ImageUpload({
       // 2. Dosyayı doğrudan R2'ye yükle
       const uploadRes = await fetch(uploadUrl, {
         method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
+        headers: { "Content-Type": uploadFile.type },
+        body: uploadFile,
         signal: abortController.signal,
       });
 
@@ -116,7 +155,6 @@ export function ImageUpload({
 
       const url = publicUrl;
 
-      clearInterval(progressInterval);
       setUploadProgress(100);
 
       if (!url) {
