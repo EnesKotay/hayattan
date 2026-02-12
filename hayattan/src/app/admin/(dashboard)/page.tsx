@@ -7,12 +7,9 @@ import { DashboardStats, type StatItem } from "@/components/admin/DashboardStats
 import { DashboardQuickActions, type QuickAction } from "@/components/admin/DashboardQuickActions";
 import { RecentActivity } from "@/components/admin/RecentActivity";
 
-import { getDashboardStats } from "@/app/admin/actions";
-import { DashboardCharts } from "@/components/admin/DashboardCharts";
-
 export default async function AdminDashboardPage() {
   const session = await auth();
-  const [yaziCount, yazarCount, kategoriCount, haberCount, sonYazilar, sonHaberler, dashboardStats] =
+  const [yaziCount, yazarCount, kategoriCount, haberCount, sonYazilar, sonHaberler] =
     await Promise.all([
       prisma.yazi.count(),
       prisma.yazar.count(),
@@ -39,7 +36,6 @@ export default async function AdminDashboardPage() {
           createdAt: true,
         },
       }),
-      getDashboardStats(),
     ]);
 
   // Taslak sayısı
@@ -193,11 +189,6 @@ export default async function AdminDashboardPage() {
 
       {/* İstatistik Kartları */}
       <DashboardStats stats={stats} />
-
-      {/* Grafikler */}
-      <div className="animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-        <DashboardCharts stats={dashboardStats} />
-      </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Orta: Yönetim Kartları */}

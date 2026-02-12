@@ -7,17 +7,9 @@ import { DashboardStats, type StatItem } from "@/components/admin/DashboardStats
 import { DashboardQuickActions, type QuickAction } from "@/components/admin/DashboardQuickActions";
 import { RecentActivity } from "@/components/admin/RecentActivity";
 
-import { getDashboardStats } from "@/app/admin/actions";
-import dynamic from "next/dynamic";
-
-const DashboardCharts = dynamic(
-  () => import("@/components/admin/DashboardCharts").then((mod) => mod.DashboardCharts),
-  { ssr: false }
-);
-
 export default async function AdminDashboardPage() {
   const session = await auth();
-  const [yaziCount, yazarCount, kategoriCount, haberCount, sonYazilar, sonHaberler, dashboardStats] =
+  const [yaziCount, yazarCount, kategoriCount, haberCount, sonYazilar, sonHaberler] =
     await Promise.all([
       prisma.yazi.count(),
       prisma.yazar.count(),
@@ -44,7 +36,6 @@ export default async function AdminDashboardPage() {
           createdAt: true,
         },
       }),
-      getDashboardStats(),
     ]);
 
   // Taslak sayısı

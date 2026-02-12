@@ -30,7 +30,7 @@ const STATIC_MENU_ENTRIES: Record<string, { label: string; href: string }> = {
   iletisim: { label: "İletişim", href: "/iletisim" },
   hakkimizda: { label: "Hakkımızda", href: "/hakkimizda" },
   arsiv: { label: "Arşiv", href: "/arsiv" },
-  eski_yazilar: { label: "Eski Yazılar", href: "/eski-yazilar" },
+  "eski-yazilar": { label: "Eski Yazılar", href: "/eski-yazilar" },
   bakis_dergisi: { label: "Bakış Dergisi", href: "/bakis-dergisi" },
 };
 
