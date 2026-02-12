@@ -1,4 +1,4 @@
-import { isExternalImageUrl, isValidImageSrc } from "@/lib/image";
+import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -150,12 +150,11 @@ export default async function YaziDetayPage({ params }: Props) {
             >
               {yazi.author.photo && isValidImageSrc(yazi.author.photo) ? (
                 <Image
-                  src={yazi.author.photo}
+                  src={normalizeImageUrl(yazi.author.photo)!}
                   alt={yazi.author.name}
                   width={32}
                   height={32}
                   className="rounded-full object-cover"
-                  unoptimized={isExternalImageUrl(yazi.author.photo)}
                 />
               ) : (
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-light text-sm font-bold text-primary">
@@ -197,13 +196,12 @@ export default async function YaziDetayPage({ params }: Props) {
       <div className="relative mb-8 aspect-video overflow-hidden rounded-lg bg-muted-bg">
         {yazi.featuredImage ? (
           <Image
-            src={yazi.featuredImage}
+            src={normalizeImageUrl(yazi.featuredImage)!}
             alt={yazi.imageAlt || yazi.title}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 672px"
             priority
-            unoptimized={isExternalImageUrl(yazi.featuredImage)}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/40">
@@ -244,12 +242,11 @@ export default async function YaziDetayPage({ params }: Props) {
                   <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded bg-muted-bg">
                     {iy.featuredImage ? (
                       <Image
-                        src={iy.featuredImage}
+                        src={normalizeImageUrl(iy.featuredImage)!}
                         alt={iy.title}
                         fill
                         className="object-cover transition-transform group-hover:scale-105"
                         sizes="96px"
-                        unoptimized={isExternalImageUrl(iy.featuredImage)}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-2xl font-serif text-primary/40">Y</div>

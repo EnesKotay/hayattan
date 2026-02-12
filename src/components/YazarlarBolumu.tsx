@@ -1,6 +1,6 @@
 "use client";
 
-import { isExternalImageUrl, isValidImageSrc } from "@/lib/image";
+import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
@@ -19,6 +19,8 @@ type YazarlarBolumuProps = {
   allLinkLabel?: string;
   allLinkHref?: string;
 };
+
+import { Reveal, StaggerContainer, StaggerItem } from "./Animations/Reveal";
 
 export function YazarlarBolumu({
   yazarlar,
@@ -51,25 +53,26 @@ export function YazarlarBolumu({
   };
 
   return (
-    <section className="bg-gradient-to-b from-transparent to-muted-bg/30 py-16">
+    <section className="bg-gradient-to-b from-transparent to-muted-bg/30 py-16 md:py-24">
       <div className="container mx-auto px-4">
         {/* Başlık ve Kontroller */}
-        <div className="mb-10 flex items-end justify-between">
-          <div>
-            <span className="mb-2 block font-sans text-sm font-bold uppercase tracking-wider text-primary">
-              Kalemlerimiz
-            </span>
-            <h2 className="font-serif text-3xl font-bold text-foreground md:text-4xl">
-              {title}
-            </h2>
-          </div>
+        <div className="mb-12 flex items-end justify-between">
+          <Reveal>
+            <div>
+              <span className="mb-3 block font-sans text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                Köşe Yazarlarımız
+              </span>
+              <h2 className="font-serif text-3xl font-bold text-foreground md:text-5xl">
+                {title}
+              </h2>
+            </div>
+          </Reveal>
 
-          <div className="hidden gap-3 md:flex">
+          <div className="hidden gap-4 md:flex">
             <button
               onClick={() => scroll("left")}
               disabled={!showLeftArrow}
-              className={`flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background shadow-sm transition-all hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30 ${!showLeftArrow ? "cursor-not-allowed opacity-30" : ""
-                }`}
+              className={`flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background shadow-premium transition-all hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-30`}
               aria-label="Sola kaydır"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,8 +82,7 @@ export function YazarlarBolumu({
             <button
               onClick={() => scroll("right")}
               disabled={!showRightArrow}
-              className={`flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background shadow-sm transition-all hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30 ${!showRightArrow ? "cursor-not-allowed opacity-30" : ""
-                }`}
+              className={`flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background shadow-premium transition-all hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-30`}
               aria-label="Sağa kaydır"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,63 +93,60 @@ export function YazarlarBolumu({
         </div>
 
         {/* Yazarlar Slider */}
-        <div
+        <StaggerContainer
           ref={scrollRef}
           onScroll={handleScroll}
-          className="scrollbar-hide -mx-4 flex gap-6 overflow-x-auto px-4 pb-8 md:mx-0 md:px-0"
+          className="scrollbar-hide -mx-4 flex gap-8 overflow-x-auto px-4 pb-12 md:mx-0 md:px-0"
           style={{ scrollSnapType: "x mandatory" }}
         >
           {yazarlar.map((yazar) => (
-            <Link
-              key={yazar.id}
-              href={`/yazarlar/${yazar.slug}`}
-              className="group relative flex h-[340px] w-[280px] flex-none snap-start flex-col items-center justify-center rounded-2xl border border-border bg-background p-6 text-center shadow-sm transition-all hover:-translate-y-2 hover:border-primary/20 hover:shadow-xl"
-            >
-              {/* Dekoratif Arkaplan */}
-              <div className="absolute top-0 h-24 w-full rounded-t-2xl bg-gradient-to-br from-muted-bg to-transparent opacity-50 transition-opacity group-hover:from-primary/5" />
+            <StaggerItem key={yazar.id}>
+              <Link
+                href={`/yazarlar/${yazar.slug}`}
+                className="group card relative flex h-[380px] w-[290px] flex-none snap-start flex-col items-center justify-center p-8 text-center transition-all"
+              >
+                {/* Dekoratif Arkaplan */}
+                <div className="absolute top-0 h-32 w-full rounded-t-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-40 transition-opacity group-hover:opacity-100" />
 
-              {/* Fotoğraf */}
-              <div className="relative mb-6">
-                <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-background shadow-md transition-all group-hover:scale-105 group-hover:border-primary/20 group-hover:shadow-lg">
-                  {yazar.photo && isValidImageSrc(yazar.photo) ? (
-                    <Image
-                      src={yazar.photo}
-                      alt={yazar.name}
-                      fill
-                      className="object-cover"
-                      sizes="128px"
-                      unoptimized={isExternalImageUrl(yazar.photo)}
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-primary-light text-3xl font-bold text-primary">
-                      {yazar.name.charAt(0)}
-                    </div>
-                  )}
+                {/* Fotoğraf */}
+                <div className="relative mb-8">
+                  <div className="image-container relative h-36 w-36 overflow-hidden rounded-full border-4 border-background shadow-md group-hover:shadow-premium">
+                    {yazar.photo && isValidImageSrc(yazar.photo) ? (
+                      <Image
+                        src={normalizeImageUrl(yazar.photo)!}
+                        alt={yazar.name}
+                        fill
+                        className="object-cover"
+                        sizes="144px"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-primary-light text-4xl font-bold text-primary">
+                        {yazar.name.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  {/* İkon */}
+                  <div className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white shadow-lg opacity-0 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2">
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </div>
                 </div>
-                {/* İkon */}
-                <div className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-md opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-1">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                </div>
-              </div>
 
-              {/* İsim ve Bilgi */}
-              <div className="relative z-10 w-full px-2">
-                <h3 className="font-serif text-xl font-bold text-foreground transition-colors group-hover:text-primary">
-                  {yazar.name}
-                </h3>
-                <div className="my-3 mx-auto h-0.5 w-12 bg-border transition-all group-hover:w-20 group-hover:bg-primary/40" />
-                <span className="inline-block rounded-full bg-muted-bg px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted transition-colors group-hover:bg-primary-light group-hover:text-primary">
-                  Köşe Yazarı
-                </span>
-                <p className="mt-4 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-                  Yazılarını Oku →
-                </p>
-              </div>
-            </Link>
+                {/* İsim ve Bilgi - Better Typography */}
+                <div className="relative z-10 w-full px-2 space-y-4">
+                  <h3 className="font-serif text-2xl font-extrabold text-foreground transition-all duration-500 group-hover:text-primary tracking-tight">
+                    {yazar.name}
+                  </h3>
+                  <div className="mx-auto h-[1px] w-12 bg-primary/10 transition-all duration-700 group-hover:w-20 group-hover:bg-primary/30" />
+                  <span className="inline-block rounded-full bg-muted-bg/50 px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-muted transition-all duration-500 group-hover:bg-primary-light group-hover:text-primary">
+                    {(yazar as any).unvan || "YAZAR"}
+                  </span>
+                </div>
+              </Link>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
 
         {/* Alt Link (Mobil ve genel) */}
         <div className="mt-6 text-center md:hidden">

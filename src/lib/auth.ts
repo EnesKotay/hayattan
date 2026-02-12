@@ -25,7 +25,14 @@ export const authConfig = {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
+        // Sadece izin verilen e-posta adresleri giriş yapabilir
+        const ALLOWED_EMAILS = ["omerfarukkotay@gmail.com"];
+        const email = (credentials.email as string).toLowerCase().trim();
+        if (!ALLOWED_EMAILS.includes(email)) {
+          return null;
+        }
+
+        const user = await prisma.yazar.findUnique({
           where: { email: credentials.email as string },
         });
 
@@ -46,7 +53,7 @@ export const authConfig = {
 
         const isValid = await compare(
           credentials.password as string,
-          user.passwordHash
+          user.password || ""
         );
 
         if (!isValid) {
@@ -72,7 +79,7 @@ export const authConfig = {
 
         await logSuccessfulLogin(
           user.id,
-          user.email,
+          user.email || "",
           ipAddress,
           userAgent
         );

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/admin/ToastProvider";
 import { FormField, FormSection } from "@/components/admin/FormField";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { YayimlaSection } from "@/components/admin/YayimlaSection";
@@ -81,12 +82,11 @@ export function YaziForm({
     }, [title, autoSlug]);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    const { success, error: showError } = useToast();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
-        setStatusMessage(null);
 
         const formData = new FormData(e.currentTarget);
         formData.set("content", content);
@@ -97,16 +97,15 @@ export function YaziForm({
 
         try {
             await action(formData);
-            setStatusMessage({ type: "success", text: "Yazı başarıyla kaydedildi." });
-            // 3 saniye sonra mesajı kaldır
-            setTimeout(() => setStatusMessage(null), 3000);
+            success("Yazı başarıyla kaydedildi.", "Değişiklikler sisteme işlendi.");
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Kaydedilirken bir hata oluştu.";
-            setStatusMessage({ type: "error", text: errorMessage });
+            showError("Hata Oluştu", errorMessage);
         } finally {
             setIsSubmitting(false);
         }
     };
+
 
     const handleOnizle = () => {
         const form = formRef.current;
@@ -146,23 +145,10 @@ export function YaziForm({
                 }}
                 className="space-y-6 pb-24"
             >
-                {/* Status Message */}
-                {statusMessage && (
-                    <div className={`fixed top-4 right-4 z-50 rounded-lg px-4 py-3 shadow-lg transition-all ${statusMessage.type === "success" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
-                        <div className="flex items-center gap-2">
-                            {statusMessage.type === "success" ? (
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                            ) : (
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            )}
-                            <p className="font-medium">{statusMessage.text}</p>
-                        </div>
-                    </div>
-                )}
 
                 {/* Temel Bilgiler */}
                 <FormSection title="📝 Temel Bilgiler">
-                    <FormField label="Başlık" required>
+                    <FormField label="Yazı Başlığı" required>
                         <input
                             name="title"
                             value={title}
@@ -173,7 +159,7 @@ export function YaziForm({
                         />
                     </FormField>
 
-                    <FormField label="Sayfa Adresi (URL)" help="Boş bırakırsanız otomatik oluşturulur">
+                    <FormField label="Sitenizdeki Bağlantı (Sayfa Adresi)" help="Yazının linki burada yazdığınız gibi görünecektir">
                         <input
                             name="slug"
                             value={slug}
@@ -186,24 +172,27 @@ export function YaziForm({
                         />
                     </FormField>
 
-                    <FormField label="Kısa Özet" help="Yazı listelerinde gösterilir">
+                    <FormField
+                        label="Yazı Özeti (Kısa Tanıtım)"
+                        help="Yazı listelerinde ve sosyal medyada gösterilecek kısa yazı."
+                    >
                         <textarea
                             name="excerpt"
                             value={excerpt}
                             onChange={(e) => setExcerpt(e.target.value)}
                             rows={3}
-                            placeholder="Yazının kısa bir özetini buraya yazın..."
+                            placeholder="Yazının kısa bir özetini buraya yazın veya AI'dan yardım alın..."
                             className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                     </FormField>
                 </FormSection>
 
                 {/* Görsel */}
-                <FormSection title="🖼️ Kapak Görseli">
+                <FormSection title="🖼️ Kapak Fotoğrafı">
                     <ImageUpload
                         name="featuredImage"
                         label="Kapak Resmi"
-                        help="Yazının önizlemesinde görünecek görsel"
+                        help="Yazının en üstünde ve listelerde görünecek ana fotoğraf"
                         defaultValue={defaultValues.featuredImage}
                         onChange={(url) => setFeaturedImage(url)}
                     />
@@ -283,15 +272,18 @@ export function YaziForm({
                 </FormSection>
 
                 {/* SEO */}
-                <FormSection title="🔍 SEO (İsteğe Bağlı)">
-                    <FormField label="Meta Açıklama" help="Google arama sonuçlarında görünür">
+                <FormSection title="🔍 Google ve Paylaşım Ayarları">
+                    <FormField
+                        label="Google Arama Sonucu Özeti"
+                        help="Google sonuçlarında başlığın altında çıkan açıklama yazısı."
+                    >
                         <textarea
                             name="metaDescription"
                             value={metaDesc}
                             onChange={(e) => setMetaDesc(e.target.value)}
                             rows={2}
                             maxLength={160}
-                            placeholder="Google'da görünecek açıklama..."
+                            placeholder="Google'da en iyi görünecek açıklamayı yazın..."
                             className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                     </FormField>

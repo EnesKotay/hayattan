@@ -26,29 +26,32 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-background pt-16 pb-8 text-foreground">
+    <footer className="relative border-t border-border bg-background pt-20 pb-10 text-foreground overflow-hidden">
+      {/* Decorative gradient background */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
       <div className="container mx-auto px-4">
-        <div className="grid gap-8 md:grid-cols-3 md:gap-8 lg:gap-12">
+        <div className="grid gap-12 md:grid-cols-3 lg:gap-24">
           {/* Kolon 1: Marka & Hakkında */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             <Link
               href="/"
-              className="font-serif text-2xl font-bold text-primary"
+              className="font-serif text-3xl font-bold tracking-tight text-primary hover:opacity-80 transition-opacity"
             >
               Hayattan.Net
             </Link>
-            <p className="text-sm leading-relaxed text-muted">
+            <p className="text-base leading-relaxed text-muted/80 font-sans">
               Hayatın içinden, engelsiz ve samimi haber platformu.
-              Güncel gelişmeler, köşe yazıları ve kültürel içerikler.
+              Güncel gelişmeler, köşe yazıları ve kültürel içerikler ile hayatın tam kalbindeyiz.
             </p>
-            <div className="flex gap-4 mt-2">
+            <div className="flex gap-5 mt-2">
               {socialLinks.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted transition-colors hover:text-primary"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-muted-bg text-muted transition-all hover:bg-primary hover:text-white hover:-translate-y-1 shadow-sm"
                   aria-label={item.label}
                 >
                   <SocialIcon name={item.label} />
@@ -59,15 +62,16 @@ export function Footer() {
 
           {/* Kolon 2: Hızlı Erişim */}
           <div>
-            <h3 className="mb-4 font-serif text-lg font-bold">Hızlı Erişim</h3>
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
+            <h3 className="mb-8 font-serif text-xl font-bold tracking-tight">Hızlı Erişim</h3>
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-4">
               {footerLinks.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-muted transition-colors hover:text-primary"
+                    className="group relative text-sm font-medium text-muted transition-colors hover:text-primary"
                   >
                     {item.label}
+                    <span className="absolute -bottom-1 left-0 h-px w-0 bg-primary transition-all group-hover:w-full" />
                   </Link>
                 </li>
               ))}
@@ -76,27 +80,41 @@ export function Footer() {
 
           {/* Kolon 3: İletişim */}
           <div>
-            <h3 className="mb-4 font-serif text-lg font-bold">İletişim</h3>
-            <ul className="space-y-3 text-sm text-muted">
-              <li className="flex items-start gap-3">
-                <svg className="h-5 w-5 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>iletisim@hayattan.net</span>
+            <h3 className="mb-8 font-serif text-xl font-bold tracking-tight">İletişim</h3>
+            <ul className="space-y-6 text-sm text-muted">
+              <li className="flex items-start gap-4 p-4 rounded-2xl bg-muted-bg/50 border border-border/40 transition-colors hover:bg-muted-bg">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">E-Posta</span>
+                  <span className="text-foreground font-medium">hayattan2@gmail.com</span>
+                </div>
               </li>
-              <li className="flex items-start gap-3">
-                <svg className="h-5 w-5 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>İstanbul, Türkiye</span>
+              <li className="flex items-start gap-4 p-4 rounded-2xl bg-muted-bg/50 border border-border/40 transition-colors hover:bg-muted-bg">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Konum</span>
+                  <span className="text-foreground font-medium">Kayseri, Türkiye</span>
+                </div>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 border-t border-border pt-8 text-center text-sm text-muted">
+        <div className="mt-20 border-t border-border/60 pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium text-muted/60">
           <p>© {new Date().getFullYear()} Hayattan.Net. Tüm hakları saklıdır.</p>
+          <div className="flex gap-8">
+            <Link href="/gizlilik" className="hover:text-primary transition-colors">Gizlilik Politikası</Link>
+            <Link href="/kullanim-sartlari" className="hover:text-primary transition-colors">Kullanım Şartları</Link>
+          </div>
         </div>
       </div>
     </footer>

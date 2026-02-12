@@ -12,6 +12,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/Toast/ToastProvider";
 import { ToastContainer } from "@/components/Toast/Toast";
 import { CommandMenu } from "@/components/CommandMenu";
+import { ProgressBar } from "@/components/ProgressBar";
 import "./globals.css";
 import "@/styles/admin.css";
 
@@ -28,7 +29,8 @@ const merriweather = Merriweather({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hayattan.net";
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hayattan.net";
+const siteUrl = rawSiteUrl.startsWith("http") ? rawSiteUrl : `https://${rawSiteUrl}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -37,6 +39,7 @@ export const metadata: Metadata = {
     template: "%s | Hayattan.Net",
   },
   description: "Hayattan.Net - Hayatın Engelsiz Tarafı",
+  keywords: ["kültür", "sanat", "edebiyat", "deneme", "engelsiz yaşam", "blog", "dergi", "yazar", "şair", "fotoğraf"],
   openGraph: {
     type: "website",
     locale: "tr_TR",
@@ -61,7 +64,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const navItems = await getMenuItems();
   return (
     <html lang="tr" suppressHydrationWarning>
       <body
@@ -72,7 +74,8 @@ export default async function RootLayout({
             <SessionProvider>
               <CommandMenu />
               <SkipLink />
-              <Header navItems={navItems} />
+              <ProgressBar />
+              <Header />
               <ReadingProgress />
               <main id="main-content" className="min-h-full flex-1 bg-background">
                 <PageTransition>{children}</PageTransition>

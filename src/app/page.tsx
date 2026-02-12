@@ -50,7 +50,11 @@ async function getYazarlar(): Promise<YazarRow[]> {
       misafir: false,
       ayrilmis: false,
     },
-    orderBy: { name: "asc" },
+    orderBy: [
+      { sortOrder: "asc" },
+      { yazilar: { _count: "desc" } },
+      { name: "asc" }
+    ] as any,
     select: {
       id: true,
       name: true,
@@ -59,6 +63,7 @@ async function getYazarlar(): Promise<YazarRow[]> {
       photo: true,
     },
   });
+
   return rows;
 }
 

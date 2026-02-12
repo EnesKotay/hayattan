@@ -77,19 +77,19 @@ export function AdSlot({ slotId, size = "leaderboard", content, className = "", 
           className={`overflow-hidden rounded-md border-2 border-dashed border-primary/30 bg-primary-light/20 ${sizeClass} ${className}`}
           aria-label="Reklam alanı (boş)"
         >
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
-          <div className="text-sm font-bold text-primary">📢 REKLAM ALANI (BOŞ)</div>
-          <div className="text-xs text-muted">
-            <strong>ID:</strong> {slotId || "bilinmiyor"}
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+            <div className="text-sm font-bold text-primary">📢 REKLAM ALANI (BOŞ)</div>
+            <div className="text-xs text-muted">
+              <strong>ID:</strong> {slotId || "bilinmiyor"}
+            </div>
+            <div className="text-xs text-muted">
+              <strong>Standart Boyut:</strong> {sizeLabels[size]}
+            </div>
+            <div className="mt-2 text-xs text-muted/70">
+              Admin panelinden içerik ekleyebilirsiniz
+            </div>
           </div>
-          <div className="text-xs text-muted">
-            <strong>Standart Boyut:</strong> {sizeLabels[size]}
-          </div>
-          <div className="mt-2 text-xs text-muted/70">
-            Admin panelinden içerik ekleyebilirsiniz
-          </div>
-        </div>
-      </aside>
+        </aside>
       </div>
     );
   }
@@ -108,28 +108,28 @@ export function AdSlot({ slotId, size = "leaderboard", content, className = "", 
         style={customStyle}
         aria-label="Reklam alanı"
       >
-      {content?.type === "html" && <AdSlotRenderer html={content.content} />}
-      {content?.type === "text" && (
-        <div className="flex h-full w-full items-center justify-center p-3 text-center text-sm text-foreground bg-gray-50">
-          {content.content}
-        </div>
-      )}
-      {content?.type === "image" && (
-        <a
-          href={content.content}
-          target="_blank"
-          rel="noopener noreferrer sponsored"
-          className="relative flex h-full w-full items-center justify-center"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={content.content}
-            alt="Reklam"
-            className="h-full w-full object-cover"
-          />
-        </a>
-      )}
-    </aside>
+        {content?.type === "html" && <AdSlotRenderer html={content.content} />}
+        {content?.type === "text" && (
+          <div className="flex h-full w-full items-center justify-center p-3 text-center text-sm text-foreground bg-gray-50">
+            {content.content}
+          </div>
+        )}
+        {content?.type === "image" && (
+          <a
+            href={content.content}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            className="relative flex h-full w-full items-center justify-center"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={content.content}
+              alt="Reklam"
+              className="h-full w-full object-cover"
+            />
+          </a>
+        )}
+      </aside>
     </div>
   );
 }

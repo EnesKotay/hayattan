@@ -1,4 +1,4 @@
-import { isExternalImageUrl } from "@/lib/image";
+import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
@@ -102,14 +102,17 @@ export default async function YazilarPage({
     }),
     prisma.yazar.findMany({
       where: { yazilar: { some: { publishedAt: { not: null } } } },
-      orderBy: { name: "asc" },
+      orderBy: [
+        { sortOrder: "asc" },
+        { yazilar: { _count: "desc" } },
+        { name: "asc" }
+      ] as any,
       select: { name: true, slug: true },
     }),
     getAdSlots(),
   ]);
 
   const totalPages = Math.ceil(totalCount / YAZILAR_PER_PAGE);
-
   function paginationUrl(p: number) {
     const params = new URLSearchParams();
     if (p > 1) params.set("sayfa", String(p));
@@ -210,12 +213,11 @@ export default async function YazilarPage({
                   <Link href={`/yazilar/${yazi.slug}`} className="relative block aspect-[16/10] overflow-hidden">
                     {yazi.featuredImage ? (
                       <Image
-                        src={yazi.featuredImage}
+                        src={normalizeImageUrl(yazi.featuredImage)!}
                         alt={yazi.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        unoptimized={isExternalImageUrl(yazi.featuredImage)}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-200">
