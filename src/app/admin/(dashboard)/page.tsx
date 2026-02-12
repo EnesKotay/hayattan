@@ -8,7 +8,12 @@ import { DashboardQuickActions, type QuickAction } from "@/components/admin/Dash
 import { RecentActivity } from "@/components/admin/RecentActivity";
 
 import { getDashboardStats } from "@/app/admin/actions";
-import { DashboardCharts } from "@/components/admin/DashboardCharts";
+import dynamic from "next/dynamic";
+
+const DashboardCharts = dynamic(
+  () => import("@/components/admin/DashboardCharts").then((mod) => mod.DashboardCharts),
+  { ssr: false }
+);
 
 export default async function AdminDashboardPage() {
   const session = await auth();
