@@ -1,5 +1,4 @@
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { SignOutButton } from "@/components/admin/SignOutButton";
@@ -15,7 +14,7 @@ export default async function AdminLayout({
   const session = await auth();
 
   if (!session) {
-    redirect("/admin/giris");
+    return <>{children}</>;
   }
 
   return (
@@ -30,10 +29,10 @@ export default async function AdminLayout({
               Hayattan.Net — Yönetim Paneli
             </Link>
             <div className="flex items-center gap-4">
-              {session && <SignOutButton />}
+              <SignOutButton />
             </div>
           </div>
-          {session && <AdminNav />}
+          <AdminNav />
         </header>
         <main className="container mx-auto max-w-5xl px-4 py-8">
           {children}
