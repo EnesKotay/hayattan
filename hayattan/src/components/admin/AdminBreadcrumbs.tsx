@@ -14,6 +14,7 @@ const LABELS: Record<string, string> = {
   reklam: "Reklam",
   "bakis-dergisi": "Bakış Dergisi",
   profil: "Profil",
+  istatistik: "Istatistikler",
   yeni: "Yeni ekle",
   giris: "Giriş",
 };
