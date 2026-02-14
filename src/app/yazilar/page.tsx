@@ -96,12 +96,12 @@ export default async function YazilarPage({
     }),
     prisma.yazi.count({ where: whereConditions }),
     prisma.kategori.findMany({
-      where: { yazilar: { some: { publishedAt: { not: null } } } },
+      where: { yazilar: { some: { publishedAt: { lte: new Date() } } } },
       orderBy: { name: "asc" },
       select: { name: true, slug: true },
     }),
     prisma.yazar.findMany({
-      where: { yazilar: { some: { publishedAt: { not: null } } } },
+      where: { yazilar: { some: { publishedAt: { lte: new Date() } } } },
       orderBy: [
         { sortOrder: "asc" },
         { yazilar: { _count: "desc" } },

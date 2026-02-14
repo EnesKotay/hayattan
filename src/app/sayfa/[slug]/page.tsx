@@ -62,7 +62,7 @@ export default async function SayfaPage({ params, searchParams }: Props) {
         prisma.yazi.findMany({
           where: {
             kategoriler: { some: { id: kategori.id } },
-            publishedAt: { not: null },
+            publishedAt: { lte: new Date() },
           },
           orderBy: { publishedAt: "desc" },
           skip,
@@ -81,7 +81,7 @@ export default async function SayfaPage({ params, searchParams }: Props) {
         prisma.yazi.count({
           where: {
             kategoriler: { some: { id: kategori.id } },
-            publishedAt: { not: null },
+            publishedAt: { lte: new Date() },
           },
         }),
       ]);

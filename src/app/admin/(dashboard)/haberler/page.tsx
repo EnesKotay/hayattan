@@ -52,57 +52,104 @@ export default async function AdminHaberlerPage({
                     </Link>
                 </div>
             ) : (
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
-                            <thead>
-                                <tr className="border-b border-gray-200 bg-gray-50">
-                                    <th className="px-4 py-3 font-semibold text-foreground">Sıra</th>
-                                    <th className="px-4 py-3 font-semibold text-foreground">Başlık</th>
-                                    <th className="px-4 py-3 font-semibold text-foreground">Yazar (Görünen)</th>
-                                    <th className="px-4 py-3 font-semibold text-foreground">Durum</th>
-                                    <th className="px-4 py-3 font-semibold text-foreground">İşlem</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {haberler.map((haber: Haber) => (
-                                    <tr key={haber.id} className="border-b border-[#eee] last:border-0 hover:bg-gray-50/50">
-                                        <td className="px-4 py-3 font-medium text-foreground">{haber.sortOrder}</td>
-                                        <td className="px-4 py-3 font-medium text-foreground">{haber.title}</td>
-                                        <td className="px-4 py-3 text-muted">{haber.authorName || "—"}</td>
-                                        <td className="px-4 py-3">
-                                            <span
-                                                className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${haber.publishedAt
-                                                    ? "bg-green-100 text-green-800"
-                                                    : "bg-amber-100 text-amber-800"
-                                                    }`}
-                                            >
-                                                {haber.publishedAt ? "Yayında" : "Taslak"}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex flex-wrap gap-2">
-                                                <Link
-                                                    href={`/admin/haberler/${haber.id}`}
-                                                    className="font-medium text-primary hover:underline"
-                                                >
-                                                    Düzenle
-                                                </Link>
-                                                <span className="text-gray-300">|</span>
-                                                <form action={deleteHaber.bind(null, haber.id)} className="inline">
-                                                    <DeleteConfirmButton
-                                                        confirmMessage="Bu haberi silmek istediğinize emin misiniz?"
-                                                        className="font-medium text-red-600 hover:underline"
-                                                    />
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                <>
+                    {/* Mobil Kart Görünümü */}
+                    <div className="space-y-3 md:hidden">
+                        {haberler.map((haber: Haber) => (
+                            <div
+                                key={haber.id}
+                                className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs font-bold text-gray-700">{haber.sortOrder}</span>
+                                            <p className="font-medium text-foreground">{haber.title}</p>
+                                        </div>
+                                        {haber.authorName && (
+                                            <p className="text-xs text-muted">{haber.authorName}</p>
+                                        )}
+                                    </div>
+                                    <span
+                                        className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${haber.publishedAt
+                                            ? "bg-green-100 text-green-800"
+                                            : "bg-amber-100 text-amber-800"
+                                            }`}
+                                    >
+                                        {haber.publishedAt ? "Yayında" : "Taslak"}
+                                    </span>
+                                </div>
+                                <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3">
+                                    <Link
+                                        href={`/admin/haberler/${haber.id}`}
+                                        className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+                                    >
+                                        Düzenle
+                                    </Link>
+                                    <form action={deleteHaber.bind(null, haber.id)} className="inline ml-auto">
+                                        <DeleteConfirmButton
+                                            confirmMessage="Bu haberi silmek istediğinize emin misiniz?"
+                                            className="inline-flex items-center gap-1 rounded-md bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors"
+                                        />
+                                    </form>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                </div>
+
+                    {/* Masaüstü Tablo Görünümü */}
+                    <div className="hidden md:block overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm">
+                                <thead>
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <th className="px-4 py-3 font-semibold text-foreground">Sıra</th>
+                                        <th className="px-4 py-3 font-semibold text-foreground">Başlık</th>
+                                        <th className="px-4 py-3 font-semibold text-foreground">Yazar (Görünen)</th>
+                                        <th className="px-4 py-3 font-semibold text-foreground">Durum</th>
+                                        <th className="px-4 py-3 font-semibold text-foreground">İşlem</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {haberler.map((haber: Haber) => (
+                                        <tr key={haber.id} className="border-b border-[#eee] last:border-0 hover:bg-gray-50/50">
+                                            <td className="px-4 py-3 font-medium text-foreground">{haber.sortOrder}</td>
+                                            <td className="px-4 py-3 font-medium text-foreground">{haber.title}</td>
+                                            <td className="px-4 py-3 text-muted">{haber.authorName || "—"}</td>
+                                            <td className="px-4 py-3">
+                                                <span
+                                                    className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${haber.publishedAt
+                                                        ? "bg-green-100 text-green-800"
+                                                        : "bg-amber-100 text-amber-800"
+                                                        }`}
+                                                >
+                                                    {haber.publishedAt ? "Yayında" : "Taslak"}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex flex-wrap gap-2">
+                                                    <Link
+                                                        href={`/admin/haberler/${haber.id}`}
+                                                        className="font-medium text-primary hover:underline"
+                                                    >
+                                                        Düzenle
+                                                    </Link>
+                                                    <span className="text-gray-300">|</span>
+                                                    <form action={deleteHaber.bind(null, haber.id)} className="inline">
+                                                        <DeleteConfirmButton
+                                                            confirmMessage="Bu haberi silmek istediğinize emin misiniz?"
+                                                            className="font-medium text-red-600 hover:underline"
+                                                        />
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     );

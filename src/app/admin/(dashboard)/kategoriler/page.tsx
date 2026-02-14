@@ -81,74 +81,128 @@ export default async function AdminKategorilerPage({
                     )}
                 </div>
             ) : (
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
-                            <thead>
-                                <tr className="border-b border-gray-200 bg-gray-50">
-                                    <th className="px-4 py-3 font-semibold text-gray-700">Kategori</th>
-                                    <th className="px-4 py-3 font-semibold text-gray-700">URL</th>
-                                    <th className="px-4 py-3 font-semibold text-gray-700">Yazı Sayısı</th>
-                                    <th className="px-4 py-3 font-semibold text-gray-700 text-right">İşlemler</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {kategoriler.map((kategori) => (
-                                    <tr
-                                        key={kategori.id}
-                                        className="group hover:bg-gray-50 transition-colors"
+                <>
+                    {/* Mobil Kart Görünümü */}
+                    <div className="space-y-3 md:hidden">
+                        {kategoriler.map((kategori) => (
+                            <div
+                                key={kategori.id}
+                                className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <Link
+                                        href={`/admin/kategoriler/${kategori.id}`}
+                                        className="font-semibold text-gray-900 hover:text-primary transition-colors"
                                     >
-                                        <td className="px-4 py-4">
-                                            <Link
-                                                href={`/admin/kategoriler/${kategori.id}`}
-                                                className="font-semibold text-gray-900 hover:text-primary transition-colors"
-                                            >
-                                                {kategori.name}
-                                            </Link>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <code className="rounded bg-gray-100 px-2 py-1 text-xs font-mono text-gray-700">
-                                                /{kategori.slug}
-                                            </code>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <span className="text-sm text-gray-700">
-                                                {kategori._count.yazilar} yazı
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Link
-                                                    href={`/kategoriler/${kategori.slug}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
-                                                    title="Sitede Gör"
-                                                >
-                                                    <Icons.Magazine className="h-3.5 w-3.5" />
-                                                    Görüntüle
-                                                </Link>
+                                        {kategori.name}
+                                    </Link>
+                                    <span className="shrink-0 text-sm text-gray-500">
+                                        {kategori._count.yazilar} yazı
+                                    </span>
+                                </div>
+                                <div className="mt-2">
+                                    <code className="rounded bg-gray-100 px-2 py-1 text-xs font-mono text-gray-700">
+                                        /{kategori.slug}
+                                    </code>
+                                </div>
+                                <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3">
+                                    <Link
+                                        href={`/kategoriler/${kategori.slug}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                                    >
+                                        <Icons.Magazine className="h-3.5 w-3.5" />
+                                        Görüntüle
+                                    </Link>
+                                    <Link
+                                        href={`/admin/kategoriler/${kategori.id}`}
+                                        className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+                                    >
+                                        <Icons.Tag className="h-3.5 w-3.5" />
+                                        Düzenle
+                                    </Link>
+                                    <form action={deleteKategori.bind(null, kategori.id)} className="inline ml-auto">
+                                        <DeleteConfirmButton
+                                            confirmMessage={`"${kategori.name}" kategorisini silmek istediğinize emin misiniz?`}
+                                            className="inline-flex items-center gap-1 rounded-md bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors"
+                                        />
+                                    </form>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Masaüstü Tablo Görünümü */}
+                    <div className="hidden md:block overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm">
+                                <thead>
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <th className="px-4 py-3 font-semibold text-gray-700">Kategori</th>
+                                        <th className="px-4 py-3 font-semibold text-gray-700">URL</th>
+                                        <th className="px-4 py-3 font-semibold text-gray-700">Yazı Sayısı</th>
+                                        <th className="px-4 py-3 font-semibold text-gray-700 text-right">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {kategoriler.map((kategori) => (
+                                        <tr
+                                            key={kategori.id}
+                                            className="group hover:bg-gray-50 transition-colors"
+                                        >
+                                            <td className="px-4 py-4">
                                                 <Link
                                                     href={`/admin/kategoriler/${kategori.id}`}
-                                                    className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+                                                    className="font-semibold text-gray-900 hover:text-primary transition-colors"
                                                 >
-                                                    <Icons.Tag className="h-3.5 w-3.5" />
-                                                    Düzenle
+                                                    {kategori.name}
                                                 </Link>
-                                                <form action={deleteKategori.bind(null, kategori.id)} className="inline">
-                                                    <DeleteConfirmButton
-                                                        confirmMessage={`"${kategori.name}" kategorisini silmek istediğinize emin misiniz?`}
-                                                        className="inline-flex items-center gap-1 rounded-md bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors"
-                                                    />
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <code className="rounded bg-gray-100 px-2 py-1 text-xs font-mono text-gray-700">
+                                                    /{kategori.slug}
+                                                </code>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <span className="text-sm text-gray-700">
+                                                    {kategori._count.yazilar} yazı
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Link
+                                                        href={`/kategoriler/${kategori.slug}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                                                        title="Sitede Gör"
+                                                    >
+                                                        <Icons.Magazine className="h-3.5 w-3.5" />
+                                                        Görüntüle
+                                                    </Link>
+                                                    <Link
+                                                        href={`/admin/kategoriler/${kategori.id}`}
+                                                        className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+                                                    >
+                                                        <Icons.Tag className="h-3.5 w-3.5" />
+                                                        Düzenle
+                                                    </Link>
+                                                    <form action={deleteKategori.bind(null, kategori.id)} className="inline">
+                                                        <DeleteConfirmButton
+                                                            confirmMessage={`"${kategori.name}" kategorisini silmek istediğinize emin misiniz?`}
+                                                            className="inline-flex items-center gap-1 rounded-md bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors"
+                                                        />
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                </>
             )}
         </div>
     );
