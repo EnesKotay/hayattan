@@ -13,6 +13,7 @@ import { ToastProvider } from "@/components/Toast/ToastProvider";
 import { ToastContainer } from "@/components/Toast/Toast";
 import { CommandMenu } from "@/components/CommandMenu";
 import { ProgressBar } from "@/components/ProgressBar";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import "@/styles/admin.css";
 
@@ -86,6 +87,7 @@ export default async function RootLayout({
             </SessionProvider>
           </ThemeProvider>
         </ToastProvider>
+        <Analytics />
       </body>
     </html>
   );
