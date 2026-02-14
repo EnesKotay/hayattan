@@ -25,3 +25,24 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     `,
     });
 };
+
+export const sendTwoFactorCodeEmail = async (email: string, code: string) => {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    await resend.emails.send({
+        from: "Hayattan.Net <noreply@hayattan.net>",
+        to: email,
+        subject: "Giris Dogrulama Kodu",
+        html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #8D1C3D; text-align: center;">Hayattan.Net Guvenlik</h2>
+        <p>Yonetim paneli girisi icin dogrulama kodunuz:</p>
+        <div style="text-align: center; margin: 24px 0;">
+          <span style="display:inline-block; letter-spacing: 6px; font-size: 28px; font-weight: 700; color: #111;">${code}</span>
+        </div>
+        <p>Bu kod 10 dakika gecerlidir ve tek kullanimliktir.</p>
+        <p>Eger bu istegi siz yapmadiysaniz sifrenizi degistirmenizi oneririz.</p>
+      </div>
+    `,
+    });
+};

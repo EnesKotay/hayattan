@@ -15,7 +15,10 @@ export type SecurityEventType =
     | "admin_access"
     | "data_modification"
     | "data_deletion"
-    | "unauthorized_access";
+    | "unauthorized_access"
+    | "two_factor_challenge"
+    | "two_factor_success"
+    | "two_factor_failed";
 
 export type SecurityLogData = {
     eventType: SecurityEventType;
@@ -25,14 +28,14 @@ export type SecurityLogData = {
     metadata?: Prisma.JsonObject;
 };
 
-/**
- * Type guard to check if securityLog model exists
- */
-function hasSecurityLog(
-    client: typeof prisma
-): client is typeof prisma & { securityLog: { create: (args: { data: SecurityLogData }) => Promise<unknown> } } {
-    return "securityLog" in client && client.securityLog !== undefined;
-}
+type SecurityLogModel = {
+    create: (args: { data: { eventType: string; userId: string | null; ipAddress: string | null; userAgent: string | null; metadata: Prisma.JsonObject | null } }) => Promise<unknown>;
+    findMany: (args: Record<string, unknown>) => Promise<unknown[]>;
+};
+
+type DbWithOptionalSecurityLog = typeof prisma & {
+    securityLog?: SecurityLogModel;
+};
 
 /**
  * Log a security event
@@ -40,7 +43,7 @@ function hasSecurityLog(
 export async function logSecurityEvent(data: SecurityLogData): Promise<void> {
     try {
         // Check if SecurityLog model exists - runtime safety check
-        const db = prisma as any;
+        const db = prisma as DbWithOptionalSecurityLog;
         if (!db.securityLog) {
             // Fallback to console logging if SecurityLog model doesn't exist yet
             console.warn("[SECURITY]", {
@@ -137,6 +140,49 @@ export async function logSuspiciousActivity(
     });
 }
 
+export async function logTwoFactorChallenge(
+    userId: string,
+    email: string,
+    ipAddress?: string,
+    userAgent?: string
+): Promise<void> {
+    await logSecurityEvent({
+        eventType: "two_factor_challenge",
+        userId,
+        ipAddress,
+        userAgent,
+        metadata: { email },
+    });
+}
+
+export async function logTwoFactorSuccess(
+    userId: string,
+    ipAddress?: string,
+    userAgent?: string
+): Promise<void> {
+    await logSecurityEvent({
+        eventType: "two_factor_success",
+        userId,
+        ipAddress,
+        userAgent,
+    });
+}
+
+export async function logTwoFactorFailure(
+    userId: string,
+    reason: string,
+    ipAddress?: string,
+    userAgent?: string
+): Promise<void> {
+    await logSecurityEvent({
+        eventType: "two_factor_failed",
+        userId,
+        ipAddress,
+        userAgent,
+        metadata: { reason },
+    });
+}
+
 /**
  * Log password change
  */
@@ -211,7 +257,7 @@ export async function logDataDeletion(
  */
 export async function getRecentSecurityLogs(limit: number = 100) {
     try {
-        const db = prisma as any;
+        const db = prisma as DbWithOptionalSecurityLog;
         if (!db.securityLog) {
             return [];
         }
@@ -234,7 +280,7 @@ export async function getFailedLoginAttempts(
     since: Date = new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
 ) {
     try {
-        const db = prisma as any;
+        const db = prisma as DbWithOptionalSecurityLog;
         if (!db.securityLog) {
             return [];
         }

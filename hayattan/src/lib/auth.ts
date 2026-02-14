@@ -7,8 +7,11 @@ import { prisma } from "./db";
 import {
   logFailedLogin,
   logSuccessfulLogin,
+  logTwoFactorFailure,
+  logTwoFactorSuccess,
 } from "./security-logger";
 import { getClientIdentifier, resetRateLimit } from "./rate-limit";
+import { isTwoFactorEnabled, verifyTwoFactorChallenge } from "./two-factor";
 
 export const authConfig = {
   secret: process.env.AUTH_SECRET,
@@ -18,14 +21,15 @@ export const authConfig = {
       name: "credentials",
       credentials: {
         email: { label: "E-posta", type: "email" },
-        password: { label: "Şifre", type: "password" },
+        password: { label: "Sifre", type: "password" },
+        twoFactorCode: { label: "2FA", type: "text" },
+        challengeToken: { label: "Challenge", type: "text" },
       },
       async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
-        // Sadece izin verilen e-posta adresleri giriş yapabilir
         const ALLOWED_EMAILS = ["omerfarukkotay@gmail.com"];
         const email = (credentials.email as string).toLowerCase().trim();
         if (!ALLOWED_EMAILS.includes(email)) {
@@ -36,55 +40,43 @@ export const authConfig = {
           where: { email: credentials.email as string },
         });
 
-        if (!user) {
-          // Log failed login attempt (user not found)
-          const ipAddress = request?.headers?.get("x-forwarded-for")?.split(",")[0] ||
-            request?.headers?.get("x-real-ip") ||
-            undefined;
-          const userAgent = request?.headers?.get("user-agent") || undefined;
-
-          await logFailedLogin(
-            credentials.email as string,
-            ipAddress,
-            userAgent
-          );
-          return null;
-        }
-
-        const isValid = await compare(
-          credentials.password as string,
-          user.password || ""
-        );
-
-        if (!isValid) {
-          // Log failed login attempt (wrong password)
-          const ipAddress = request?.headers?.get("x-forwarded-for")?.split(",")[0] ||
-            request?.headers?.get("x-real-ip") ||
-            undefined;
-          const userAgent = request?.headers?.get("user-agent") || undefined;
-
-          await logFailedLogin(
-            credentials.email as string,
-            ipAddress,
-            userAgent
-          );
-          return null;
-        }
-
-        // Log successful login
         const ipAddress = request?.headers?.get("x-forwarded-for")?.split(",")[0] ||
           request?.headers?.get("x-real-ip") ||
           undefined;
         const userAgent = request?.headers?.get("user-agent") || undefined;
 
-        await logSuccessfulLogin(
-          user.id,
-          user.email || "",
-          ipAddress,
-          userAgent
-        );
+        if (!user) {
+          await logFailedLogin(credentials.email as string, ipAddress, userAgent);
+          return null;
+        }
 
-        // Reset login rate limit on success so valid users aren't blocked
+        const isValid = await compare(credentials.password as string, user.password || "");
+        if (!isValid) {
+          await logFailedLogin(credentials.email as string, ipAddress, userAgent);
+          return null;
+        }
+
+        const twoFactorEnabled = await isTwoFactorEnabled(user.id);
+        if (twoFactorEnabled) {
+          const twoFactorCode = (credentials.twoFactorCode as string | undefined)?.trim() || "";
+          const challengeToken = (credentials.challengeToken as string | undefined)?.trim() || "";
+
+          if (!twoFactorCode || !challengeToken) {
+            await logTwoFactorFailure(user.id, "missing_code_or_token", ipAddress, userAgent);
+            return null;
+          }
+
+          const verifyResult = await verifyTwoFactorChallenge(challengeToken, user.id, twoFactorCode);
+          if (!verifyResult.ok) {
+            await logTwoFactorFailure(user.id, verifyResult.reason || "invalid", ipAddress, userAgent);
+            return null;
+          }
+
+          await logTwoFactorSuccess(user.id, ipAddress, userAgent);
+        }
+
+        await logSuccessfulLogin(user.id, user.email || "", ipAddress, userAgent);
+
         if (request) {
           const clientId = getClientIdentifier(request as Request);
           await resetRateLimit(clientId, "login");
@@ -121,9 +113,8 @@ export const authConfig = {
   },
   session: {
     strategy: "jwt" as const,
-    maxAge: 30 * 24 * 60 * 60, // 30 gün
+    maxAge: 30 * 24 * 60 * 60,
   },
 };
 
 export const { handlers, signIn, signOut, auth } = NextAuth(authConfig);
-

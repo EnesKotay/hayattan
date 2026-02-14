@@ -20,8 +20,13 @@ async function logRateLimitSafely(identifier: string, limitType: string, ipAddre
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Rate limit for admin login endpoint
-  if (pathname === "/admin/giris" && request.method === "POST") {
+  // Rate limit for admin login endpoints
+  if (
+    request.method === "POST" &&
+    (pathname === "/admin/giris" ||
+      pathname === "/api/auth/2fa/challenge" ||
+      pathname === "/api/auth/callback/credentials")
+  ) {
     const identifier = getClientIdentifier(request);
     const rateLimit = await checkRateLimit(identifier, "login");
 
