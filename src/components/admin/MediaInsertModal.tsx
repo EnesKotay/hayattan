@@ -209,8 +209,9 @@ export function MediaInsertModal({
                 </div>
 
                 {!uploadedFile ? (
+
                   <div
-                    {...(getRootProps() as any)}
+                    {...getRootProps()}
                     className={`flex-1 flex flex-col items-center justify-center border-2 border-dashed rounded-xl transition-all duration-200 cursor-pointer ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"}`}>
                     <input {...getInputProps()} />
                     {uploading ? (
@@ -329,7 +330,7 @@ export function MediaInsertModal({
 
         </div>
       </div>
-    </Modal>
+    </Modal >
   );
 }
 

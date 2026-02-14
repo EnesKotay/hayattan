@@ -18,7 +18,7 @@ export async function POST(
     await prisma.yazi.updateMany({
       where: {
         slug: slug.trim(),
-        publishedAt: { not: null },
+        publishedAt: { lte: new Date() },
       },
       data: {
         viewCount: { increment: 1 },

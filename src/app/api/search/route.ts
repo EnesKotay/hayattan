@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
                     { title: { contains: searchTerm, mode: "insensitive" } },
                     { content: { contains: searchTerm, mode: "insensitive" } },
                 ],
-                publishedAt: { not: null }, // equivalent to yayinda: true if using publishedAt
+                publishedAt: { lte: new Date() },
             },
             select: {
                 id: true,

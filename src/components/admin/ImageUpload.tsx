@@ -396,8 +396,9 @@ export function ImageUpload({
 
         {/* Sürükle-bırak / dosya seç */}
         {(!imageUrl || !imageUrl.trim()) && (
+
           <div
-            {...(getRootProps() as any)}
+            {...getRootProps()}
             className={`cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors ${isDragActive
               ? "border-primary bg-primary-light"
               : "border-[#ddd] hover:border-primary hover:bg-[#f9f9f6]"
