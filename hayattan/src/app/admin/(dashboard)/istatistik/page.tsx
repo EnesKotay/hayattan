@@ -197,7 +197,7 @@ export default async function IstatistikPage() {
       <div className="flex flex-col gap-2">
         <AdminBreadcrumbs />
         <h1 className="mt-2 font-serif text-3xl font-bold text-gray-900">Istatistik Merkezi</h1>
-        <p className="text-gray-500">Icerik ekibinin yukunu azaltacak metrikler ve hizli aksiyon alani.</p>
+        <p className="text-gray-500">Icerik ekibinin yukunu azaltacak metrikler ve hizli aksiyon alani. Son guncelleme: Vercel deploy tetigi.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -353,3 +353,4 @@ export default async function IstatistikPage() {
     </div>
   );
 }
+
