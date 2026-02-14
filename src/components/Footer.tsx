@@ -91,7 +91,7 @@ export function Footer() {
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">E-Posta</span>
-                  <span className="text-foreground font-medium">hayattan2@gmail.com</span>
+                  <span className="text-foreground font-medium">hayattannet2@gmail.com</span>
                 </div>
               </li>
               <li className="flex items-start gap-4 p-4 rounded-2xl bg-muted-bg/50 border border-border/40 transition-colors hover:bg-muted-bg">
