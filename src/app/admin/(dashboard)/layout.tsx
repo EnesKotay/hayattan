@@ -1,27 +1,46 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
+import Link from "next/link";
+import { AdminNav } from "@/components/admin/AdminNav";
+import { SignOutButton } from "@/components/admin/SignOutButton";
+import { ToastProvider } from "@/components/admin/ToastProvider";
+import { ToastContainer } from "@/components/admin/Toast";
+import { AdminWelcome } from "@/components/admin/AdminWelcome";
 
-export default async function DashboardLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const session = await auth();
 
-  if (!session?.user) {
-    redirect("/admin/giris");
-  }
-
-  const role = session.user.role;
-  if (role !== "ADMIN" && role !== "AUTHOR") {
+  if (!session) {
     redirect("/admin/giris");
   }
 
   return (
-    <div className="space-y-4">
-      <AdminBreadcrumbs />
-      {children}
-    </div>
+    <ToastProvider>
+      <div className="min-h-screen bg-gray-50">
+        <header className="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm">
+          <div className="container mx-auto flex h-16 items-center justify-between px-4">
+            <Link
+              href="/admin"
+              className="font-serif text-xl font-bold text-gray-900 hover:text-primary transition-colors"
+            >
+              Hayattan.Net — Yönetim Paneli
+            </Link>
+            <div className="flex items-center gap-4">
+              {session && <SignOutButton />}
+            </div>
+          </div>
+          {session && <AdminNav />}
+        </header>
+        <main className="container mx-auto max-w-5xl px-4 py-8">
+          {children}
+        </main>
+        <AdminWelcome />
+        <ToastContainer />
+      </div>
+    </ToastProvider>
   );
 }
