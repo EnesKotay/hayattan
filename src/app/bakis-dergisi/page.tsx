@@ -1,4 +1,4 @@
-import { isExternalImageUrl } from "@/lib/image";
+import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -114,7 +114,7 @@ export default async function BakisDergisiPage({ searchParams }: Props) {
                   <div className="relative aspect-[16/10] overflow-hidden bg-muted-bg">
                     {yazi.featuredImage ? (
                       <Image
-                        src={yazi.featuredImage}
+                        src={normalizeImageUrl(yazi.featuredImage)!}
                         alt={yazi.title}
                         fill
                         className="object-cover transition-transform group-hover:scale-105"

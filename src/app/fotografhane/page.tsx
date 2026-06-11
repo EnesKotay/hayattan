@@ -1,4 +1,4 @@
-import { isExternalImageUrl } from "@/lib/image";
+import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
@@ -107,7 +107,7 @@ export default async function FotografhanePage({
                                     <Link href={`/yazilar/${yazi.slug}`} className="relative block aspect-[16/10] overflow-hidden">
                                         {yazi.featuredImage ? (
                                             <Image
-                                                src={yazi.featuredImage}
+                                                src={normalizeImageUrl(yazi.featuredImage)!}
                                                 alt={yazi.title}
                                                 fill
                                                 className="object-cover transition-transform duration-500 group-hover:scale-105"

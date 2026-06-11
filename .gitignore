@@ -153,3 +153,4 @@ package-lock 2.json
 
 # Claude Code settings
 .claude/
+.vercel
