@@ -1,7 +1,5 @@
-import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
-import Image from "next/image";
+import { ArticleImage } from "@/components/ArticleImage";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import type { Metadata } from "next";
 
@@ -112,20 +110,12 @@ export default async function BakisDergisiPage({ searchParams }: Props) {
               >
                 <Link href={`/yazilar/${yazi.slug}`} className="block">
                   <div className="relative aspect-[16/10] overflow-hidden bg-muted-bg">
-                    {yazi.featuredImage ? (
-                      <Image
-                        src={normalizeImageUrl(yazi.featuredImage)!}
-                        alt={yazi.title}
-                        fill
-                        className="object-cover transition-transform group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        unoptimized={isExternalImageUrl(yazi.featuredImage)}
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/50">
-                        <span className="font-serif text-5xl">Y</span>
-                      </div>
-                    )}
+                    <ArticleImage
+                      src={yazi.featuredImage}
+                      alt={yazi.title}
+                      className="object-cover transition-transform group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
                   </div>
                 </Link>
                 <div className="flex flex-1 flex-col p-4">

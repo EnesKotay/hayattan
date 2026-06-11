@@ -1,5 +1,4 @@
-import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
-import Image from "next/image";
+import { ArticleImage } from "@/components/ArticleImage";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -321,23 +320,12 @@ export default async function YazilarPage({
                     className="relative block aspect-[16/10] overflow-hidden bg-muted-bg"
                     aria-label={`${yazi.title} yazısını oku`}
                   >
-                    {yazi.featuredImage ? (
-                      <Image
-                        src={normalizeImageUrl(yazi.featuredImage)!}
-                        alt={yazi.title}
-                        fill
-                        className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        unoptimized={isExternalImageUrl(yazi.featuredImage)}
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-muted-bg text-primary/30">
-                        <svg className="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" />
-                          <path d="M14 17H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                        </svg>
-                      </div>
-                    )}
+                    <ArticleImage
+                      src={yazi.featuredImage}
+                      alt={yazi.title}
+                      className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                     <div className="absolute left-4 top-4 flex flex-wrap gap-2">
                       {yazi.kategoriler.slice(0, 1).map((k) => (

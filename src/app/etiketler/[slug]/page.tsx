@@ -1,5 +1,4 @@
-import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
-import Image from "next/image";
+import { ArticleImage } from "@/components/ArticleImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -120,21 +119,12 @@ export default async function EtiketDetayPage({ params, searchParams }: Props) {
                   className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-background shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                 >
                   <Link href={`/yazilar/${yazi.slug}`} className="relative block aspect-[16/10] overflow-hidden">
-                    {yazi.featuredImage ? (
-                      <Image
-                        src={normalizeImageUrl(yazi.featuredImage)!}
-                        alt={yazi.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-200">
-                        <svg className="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" />
-                        </svg>
-                      </div>
-                    )}
+                    <ArticleImage
+                      src={yazi.featuredImage}
+                      alt={yazi.title}
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
                     {yazi.kategoriler[0] && (
                       <div className="absolute left-4 top-4">
                         <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-gray-900 shadow-sm backdrop-blur-md">

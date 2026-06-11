@@ -1,12 +1,11 @@
-import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
-import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getAdSlots } from "@/app/admin/actions";
 import { AdSlot } from "@/components/AdSlot";
 
 const YAZILAR_PER_PAGE = 12;
+const FOTOGRAFHANE_IMAGE = "/1770842021512_107a00fa0f362_unnamed__1_.jpg";
 
 export const dynamic = 'force-dynamic';
 
@@ -105,23 +104,13 @@ export default async function FotografhanePage({
                                     className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-background shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                                 >
                                     <Link href={`/yazilar/${yazi.slug}`} className="relative block aspect-[16/10] overflow-hidden">
-                                        {yazi.featuredImage ? (
-                                            <Image
-                                                src={normalizeImageUrl(yazi.featuredImage)!}
-                                                alt={yazi.title}
-                                                fill
-                                                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                                unoptimized={isExternalImageUrl(yazi.featuredImage)}
-                                            />
-                                        ) : (
-                                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-200">
-                                                <svg className="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" />
-                                                    <path d="M14 17H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                                                </svg>
-                                            </div>
-                                        )}
+                                        <Image
+                                            src={FOTOGRAFHANE_IMAGE}
+                                            alt={yazi.title}
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                        />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
                                         {/* Kategori Badge - Fotoğrafhane için özel renk olabilir ama şimdilik standart */}

@@ -1,4 +1,5 @@
 import { isValidImageSrc, normalizeImageUrl } from "@/lib/image";
+import { ArticleImage } from "@/components/ArticleImage";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -269,20 +270,13 @@ export default async function YaziDetayPage({ params }: Props) {
       />
 
       <div className="relative mb-8 aspect-video overflow-hidden rounded-lg bg-muted-bg">
-        {yazi.featuredImage ? (
-          <Image
-            src={normalizeImageUrl(yazi.featuredImage)!}
-            alt={yazi.imageAlt || yazi.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 672px"
-            priority
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/40">
-            <span className="font-serif text-6xl">Y</span>
-          </div>
-        )}
+        <ArticleImage
+          src={yazi.featuredImage}
+          alt={yazi.imageAlt || yazi.title}
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 672px"
+          priority
+        />
       </div>
 
       <div className="sm:hidden mb-6 flex justify-center">
@@ -346,17 +340,12 @@ export default async function YaziDetayPage({ params }: Props) {
                   className="group flex gap-4 rounded-lg border border-border bg-background p-4 transition-shadow hover:shadow-md"
                 >
                   <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded bg-muted-bg">
-                    {iy.featuredImage ? (
-                      <Image
-                        src={normalizeImageUrl(iy.featuredImage)!}
-                        alt={iy.title}
-                        fill
-                        className="object-cover transition-transform group-hover:scale-105"
-                        sizes="96px"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-2xl font-serif text-primary/40">Y</div>
-                    )}
+                    <ArticleImage
+                      src={iy.featuredImage}
+                      alt={iy.title}
+                      className="object-cover transition-transform group-hover:scale-105"
+                      sizes="96px"
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-serif font-bold leading-tight text-foreground line-clamp-2 group-hover:text-primary">

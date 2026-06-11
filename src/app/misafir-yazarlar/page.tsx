@@ -1,4 +1,5 @@
-import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
+import { ArticleImage } from "@/components/ArticleImage";
+import { isValidImageSrc, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
@@ -96,22 +97,12 @@ export default async function MisafirYazarlarPage({
                                     className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-background shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                                 >
                                     <Link href={`/yazilar/${yazi.slug}`} className="relative block aspect-[16/10] overflow-hidden">
-                                        {yazi.featuredImage ? (
-                                            <Image
-                                                src={normalizeImageUrl(yazi.featuredImage)!}
-                                                alt={yazi.title}
-                                                fill
-                                                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                                unoptimized={isExternalImageUrl(yazi.featuredImage)}
-                                            />
-                                        ) : (
-                                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 text-indigo-200">
-                                                <svg className="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M14.06,9.02l0.92-0.92L5.92,10.56v10.44h10.44l2.46-9.06l0.92-0.92L14.06,9.02z M10,13c-1.1,0-2-0.9-2-2s0.9-2,2-2 s2,0.9,2,2S11.1,13,10,13z" />
-                                                </svg>
-                                            </div>
-                                        )}
+                                        <ArticleImage
+                                            src={yazi.featuredImage}
+                                            alt={yazi.title}
+                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                        />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                                         <div className="absolute left-4 top-4">
                                             <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-gray-900 shadow-sm backdrop-blur-md">
