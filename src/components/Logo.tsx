@@ -34,6 +34,8 @@ export function Logo({ size = "lg", showTagline = true, centered = true, iconSca
             width={iconSize}
             height={iconSize}
             className="object-cover"
+            priority
+            unoptimized
           />
         </div>
         <span

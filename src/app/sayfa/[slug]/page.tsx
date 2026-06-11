@@ -12,6 +12,7 @@ import { prisma } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 const YAZILAR_PER_PAGE = 12;
+const FOTOGRAFHANE_IMAGE = "/1770842021512_107a00fa0f362_unnamed__1_.jpg";
 const ESKI_YAZILAR_PAGE_SLUGS = new Set([
   "eski-yazar",
   "eski-yazarlar",
@@ -161,20 +162,13 @@ export default async function SayfaPage({ params, searchParams }: Props) {
                   >
                     <Link href={`/yazilar/${yazi.slug}`} className="block">
                       <div className="relative aspect-[16/10] overflow-hidden bg-muted-bg">
-                        {yazi.featuredImage ? (
-                          <Image
-                            src={normalizeImageUrl(yazi.featuredImage)!}
-                            alt={yazi.title}
-                            fill
-                            className="object-cover transition-transform group-hover:scale-105"
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                            unoptimized={isExternalImageUrl(yazi.featuredImage)}
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary/50">
-                            <span className="font-serif text-5xl">Y</span>
-                          </div>
-                        )}
+                        <Image
+                          src={FOTOGRAFHANE_IMAGE}
+                          alt={yazi.title}
+                          fill
+                          className="object-cover transition-transform group-hover:scale-105"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
                       </div>
                     </Link>
                     <div className="flex flex-1 flex-col p-4">

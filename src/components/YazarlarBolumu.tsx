@@ -103,7 +103,7 @@ export function YazarlarBolumu({
             <StaggerItem key={yazar.id}>
               <Link
                 href={`/yazarlar/${yazar.slug}`}
-                className="group card relative flex h-[380px] w-[290px] flex-none snap-start flex-col items-center justify-center p-8 text-center transition-all"
+                className="group card relative flex h-[360px] w-[260px] sm:h-[380px] sm:w-[290px] flex-none snap-start flex-col items-center justify-center p-6 sm:p-8 text-center transition-all"
               >
                 {/* Dekoratif Arkaplan */}
                 <div className="absolute top-0 h-32 w-full rounded-t-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-40 transition-opacity group-hover:opacity-100" />

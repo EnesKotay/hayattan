@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-
 import { MobileMenu } from "./MobileMenu";
 import { SearchWithSuggestions } from "./Search/SearchWithSuggestions";
 import { ThemeSelector } from "./ThemeSelector";
@@ -9,34 +8,21 @@ import { Logo } from "./Logo";
 import { getMenuItems } from "@/app/admin/actions";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import {
-  HomeIcon,
-  UsersIcon,
-  DocumentTextIcon,
-  Squares2X2Icon,
-  EnvelopeIcon,
-  InformationCircleIcon,
-  ArchiveBoxIcon,
-  ClockIcon,
-  PhotoIcon,
-  UserPlusIcon,
-  BookOpenIcon
-} from "@heroicons/react/24/outline";
 
 type NavItem = { href: string; label: string; icon?: any };
 
 const defaultNavItems: NavItem[] = [
   { href: "/", label: "Ana Sayfa" },
   { href: "/yazarlar", label: "Yazarlar" },
+  { href: "/misafir-yazarlar", label: "Misafir Yazıları" },
   { href: "/yazilar", label: "Yazılar" },
   { href: "/kategoriler", label: "Kategoriler" },
+  { href: "/fotografhane", label: "Fotoğrafhane" },
+  { href: "/iletisim", label: "İletişim" },
+  { href: "/arsiv", label: "Arşiv" },
+  { href: "/eski-yazilar", label: "Eski Yazılar" },
   { href: "/bakis-dergisi", label: "Bakış Dergisi" },
-  { href: "/iletisim", label: "İletişim", icon: EnvelopeIcon },
-  { href: "/hakkimizda", label: "Hakkımızda", icon: InformationCircleIcon },
-  { href: "/arsiv", label: "Arşiv", icon: ArchiveBoxIcon },
-  { href: "/eski-yazilar", label: "Eski Yazılar", icon: ClockIcon },
-  { href: "/fotografhane", label: "Fotoğrafhane", icon: PhotoIcon },
-  { href: "/misafir-yazarlar", label: "Misafir Yazıları", icon: UserPlusIcon },
+  { href: "/hakkimizda", label: "Hakkımızda" },
 ];
 
 export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
@@ -53,73 +39,91 @@ export function Header({ navItems: propNavItems }: { navItems?: NavItem[] }) {
   }, [propNavItems]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-500 ease-in-out ${isScrolled
-        ? "backdrop-blur-md bg-background/80 border-b border-primary/10 shadow-[0_8px_32px_rgba(0,0,0,0.05)] py-2"
-        : "bg-background border-b border-border/50 py-4"
-        }`}
+      className={`sticky top-0 z-50 w-full transition-all duration-500 ease-in-out ${
+        isScrolled
+          ? "backdrop-blur-md bg-background/85 shadow-[0_4px_20px_rgba(0,0,0,0.07)]"
+          : "bg-background"
+      }`}
     >
-      <div className="container relative mx-auto flex items-center justify-between px-4">
-        <motion.div
-          animate={{ scale: isScrolled ? 0.85 : 1 }}
-          transition={{ duration: 0.4, ease: "circOut" }}
-          className="flex-shrink-0"
-        >
-          <Logo size="md" showTagline={false} centered={false} iconScale={isScrolled ? 0.8 : 0.9} />
-        </motion.div>
+      {/* Top row: Logo + Search + Theme */}
+      <div className={`border-b border-border/50 transition-all duration-300 ${isScrolled ? "py-2" : "py-3"}`}>
+        <div className="container mx-auto flex items-center justify-between px-4 md:px-6">
+          <motion.div
+            animate={{ scale: isScrolled ? 0.9 : 1 }}
+            transition={{ duration: 0.35, ease: "circOut" }}
+            className="flex-shrink-0"
+          >
+            <Logo size="md" showTagline={false} centered={false} iconScale={isScrolled ? 0.85 : 0.95} />
+          </motion.div>
 
-        <nav
-          className="hidden lg:flex lg:items-center lg:gap-1 xl:gap-2 relative ml-8"
-          aria-label="Ana navigasyon"
-          onMouseLeave={() => setHoveredItem(null)}
-        >
-          <div className="flex items-center">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                prefetch={false}
-                onMouseEnter={() => setHoveredItem(item.href)}
-                className="group relative px-2 py-2 text-[11px] xl:text-[13px] font-bold uppercase tracking-[0.05em] text-foreground/80 transition-colors hover:text-primary whitespace-nowrap z-10"
-              >
-                <span className="relative z-10">{item.label}</span>
-                {hoveredItem === item.href && (
-                  <motion.div
-                    layoutId="nav-hover"
-                    className="absolute inset-x-0 inset-y-1 z-0 rounded-full bg-primary/5"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-              </Link>
-            ))}
+          {/* Desktop: search + theme */}
+          <div className="hidden lg:flex items-center gap-4">
+            <div className="w-[220px] xl:w-[260px]">
+              <SearchWithSuggestions />
+            </div>
+            <div className="h-5 w-px bg-border/40" />
+            <ThemeSelector />
           </div>
-        </nav>
 
-        <div className="hidden md:flex md:items-center md:gap-4 xl:gap-6 justify-end flex-1 max-w-md ml-auto">
-          <div className="w-full max-w-[200px] xl:max-w-[240px] opacity-90 hover:opacity-100 transition-opacity">
-            <SearchWithSuggestions />
+          {/* Tablet (md–lg): search + theme + hamburger */}
+          <div className="hidden md:flex lg:hidden items-center gap-3">
+            <div className="w-[180px]">
+              <SearchWithSuggestions />
+            </div>
+            <ThemeSelector />
+            <MobileMenu navItems={navItems} />
           </div>
-          <div className="h-6 w-px bg-border/40" />
-          <ThemeSelector />
-        </div>
 
-        <div className="lg:hidden flex items-center gap-3">
-          <ThemeSelector />
-          <MobileMenu navItems={navItems} />
+          {/* Mobile (< md): theme + hamburger */}
+          <div className="flex md:hidden items-center gap-3">
+            <ThemeSelector />
+            <MobileMenu navItems={navItems} />
+          </div>
         </div>
       </div>
+
+      {/* Bottom row: Nav links (lg+ only) */}
+      <nav
+        className="hidden lg:block border-b border-border/30"
+        aria-label="Ana navigasyon"
+        onMouseLeave={() => setHoveredItem(null)}
+      >
+        <div className="container mx-auto px-4 md:px-6">
+          <ul className="flex items-center justify-center">
+            {navItems.map((item, index) => (
+              <li key={item.href} className="flex items-center">
+                {index > 0 && (
+                  <span className="text-border/60 text-[10px] select-none mx-0.5">·</span>
+                )}
+                <Link
+                  href={item.href}
+                  prefetch={false}
+                  onMouseEnter={() => setHoveredItem(item.href)}
+                  className="relative px-2.5 xl:px-3 py-2.5 text-[11px] xl:text-[12.5px] font-bold uppercase tracking-[0.07em] text-foreground/70 hover:text-primary transition-colors whitespace-nowrap block"
+                >
+                  {item.label}
+                  {hoveredItem === item.href && (
+                    <motion.div
+                      layoutId="nav-underline"
+                      className="absolute bottom-1 left-1 right-1 h-[2px] bg-primary rounded-full"
+                      initial={{ opacity: 0, scaleX: 0.5 }}
+                      animate={{ opacity: 1, scaleX: 1 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
     </header>
   );
 }

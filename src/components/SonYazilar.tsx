@@ -116,13 +116,13 @@ export function SonYazilar({ yazilar }: SonYazilarProps) {
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/30">
-                  <span className="font-serif text-7xl">Y</span>
+                  <span className="font-serif text-4xl">Y</span>
                 </div>
               )}
               {/* Cinematic Vignette Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40 transition-opacity duration-700 group-hover:opacity-60" />
             </Link>
-            <div className="p-8 md:p-10 relative">
+            <div className="p-5 md:p-8 lg:p-10 relative">
               <Link href={`/yazilar/${featured.slug}`}>
                 <h3 className="font-serif text-2xl font-bold leading-tight text-foreground transition-all duration-500 group-hover:text-primary md:text-3xl lg:text-4xl tracking-tight group-hover:translate-x-1">
                   {featured.title}

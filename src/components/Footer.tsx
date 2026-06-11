@@ -52,7 +52,7 @@ export function Footer() {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-muted-bg text-muted transition-all hover:bg-primary hover:text-white hover:-translate-y-1 shadow-sm"
+                  className="flex h-12 w-12 items-center justify-center rounded-full bg-muted-bg text-muted transition-all hover:bg-primary hover:text-white hover:-translate-y-1 shadow-sm"
                   aria-label={item.label}
                 >
                   <SocialIcon name={item.label} />

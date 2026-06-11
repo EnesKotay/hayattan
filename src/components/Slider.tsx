@@ -1,6 +1,6 @@
 "use client";
 
-import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
+import { normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -160,10 +160,10 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                       </h2>
 
                       {/* Açıklama ve Yazar - Airy Layout */}
-                      <div className="flex flex-col gap-8 pt-6 md:flex-row md:items-center">
+                      <div className="flex flex-col gap-3 pt-3 md:gap-8 md:pt-6 md:flex-row md:items-center">
                         {/* Açıklama */}
                         {item.excerpt && (
-                          <div className="relative border-l-2 border-primary/40 pl-8 backdrop-blur-[2px]">
+                          <div className="relative border-l-2 border-primary/40 pl-4 md:pl-8 backdrop-blur-[2px]">
                             <p className="line-clamp-2 text-base font-medium text-white/90 md:text-xl md:leading-relaxed italic font-serif opacity-90">
                               "{item.excerpt}"
                             </p>
