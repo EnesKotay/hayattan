@@ -1,0 +1,447 @@
+/* ========================================
+   Admin Panel - Global Styles
+   ======================================== */
+
+:root {
+    /* === Primary Colors === */
+    --admin-primary: #2563eb;
+    --admin-primary-hover: #1d4ed8;
+    --admin-primary-light: #dbeafe;
+    --admin-primary-dark: #1e40af;
+
+    /* === Gradients === */
+    --admin-gradient-blue: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --admin-gradient-purple: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    --admin-gradient-orange: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --admin-gradient-green: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+
+    /* === Shadows === */
+    --admin-shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --admin-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --admin-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --admin-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --admin-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --admin-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+    /* === Transitions === */
+    --admin-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --admin-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --admin-transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* === Border Radius === */
+    --admin-radius-sm: 0.375rem;
+    --admin-radius-md: 0.5rem;
+    --admin-radius-lg: 0.75rem;
+    --admin-radius-xl: 1rem;
+    --admin-radius-2xl: 1.5rem;
+    --admin-radius-full: 9999px;
+
+    /* === Spacing === */
+    --admin-space-xs: 0.5rem;
+    --admin-space-sm: 0.75rem;
+    --admin-space-md: 1rem;
+    --admin-space-lg: 1.5rem;
+    --admin-space-xl: 2rem;
+    --admin-space-2xl: 3rem;
+}
+
+/* ========================================
+   Glassmorphism Effects
+   ======================================== */
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: var(--admin-shadow-lg);
+}
+
+.glass-card-strong {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-header {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+/* Animation Classes */
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-fade-in-down {
+    animation: fadeInDown 0.4s ease-out;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.4s ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.4s ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Stagger animations for lists */
+.stagger-item {
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+.stagger-item:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.stagger-item:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.stagger-item:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.stagger-item:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.stagger-item:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+.stagger-item:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+/* ========================================
+   Hover Effects
+   ======================================== */
+
+.hover-lift {
+    transition: var(--admin-transition);
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-lg);
+}
+
+.hover-scale {
+    transition: var(--admin-transition);
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.hover-glow {
+    position: relative;
+    transition: var(--admin-transition);
+}
+
+.hover-glow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    background: radial-gradient(circle at center, rgba(37, 99, 235, 0.2) 0%, transparent 70%);
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.hover-glow:hover::after {
+    opacity: 1;
+}
+
+/* ========================================
+   Skeleton Loaders
+   ======================================== */
+
+.skeleton {
+    background: linear-gradient(90deg,
+            #f0f0f0 0%,
+            #f8f8f8 50%,
+            #f0f0f0 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--admin-radius-md);
+}
+
+.skeleton-text {
+    height: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-title {
+    height: 1.5rem;
+    width: 60%;
+    margin-bottom: 1rem;
+}
+
+.skeleton-paragraph {
+    height: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-paragraph:last-child {
+    width: 80%;
+}
+
+.skeleton-circle {
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+}
+
+.skeleton-rect {
+    height: 12rem;
+    width: 100%;
+}
+
+/* ========================================
+   Focus Styles (Accessibility)
+   ======================================== */
+
+*:focus {
+    outline: none;
+}
+
+*:focus-visible {
+    outline: 2px solid var(--admin-primary);
+    outline-offset: 2px;
+    border-radius: var(--admin-radius-sm);
+}
+
+/* ========================================
+   Gradient Backgrounds
+   ======================================== */
+
+.bg-gradient-blue {
+    background: var(--admin-gradient-blue);
+}
+
+.bg-gradient-purple {
+    background: var(--admin-gradient-purple);
+}
+
+.bg-gradient-orange {
+    background: var(--admin-gradient-orange);
+}
+
+.bg-gradient-green {
+    background: var(--admin-gradient-green);
+}
+
+/* ========================================
+   Badge Styles
+   ======================================== */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: var(--admin-radius-full);
+    transition: var(--admin-transition);
+}
+
+.badge-primary {
+    background-color: var(--admin-primary-light);
+    color: var(--admin-primary);
+}
+
+.badge-success {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.badge-warning {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.badge-danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.badge-info {
+    background-color: #dbeafe;
+    color: #2563eb;
+}
+
+/* ========================================
+   Scrollbar Styling
+   ======================================== */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: var(--admin-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+
+.text-gradient {
+    background: var(--admin-gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.card-hover {
+    transition: var(--admin-transition);
+    border: 1px solid transparent;
+}
+
+.card-hover:hover {
+    border-color: var(--admin-primary);
+    box-shadow: var(--admin-shadow-lg);
+    transform: translateY(-2px);
+}
+
+.truncate-2-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.truncate-3-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
