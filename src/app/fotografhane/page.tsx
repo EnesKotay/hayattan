@@ -5,7 +5,7 @@ import { getAdSlots } from "@/app/admin/actions";
 import { AdSlot } from "@/components/AdSlot";
 
 const YAZILAR_PER_PAGE = 12;
-const FOTOGRAFHANE_IMAGE = "/1770842021512_107a00fa0f362_unnamed__1_.jpg";
+const FOTOGRAFHANE_IMAGE = "/fotografhane-kapak.jpg";
 
 export const dynamic = 'force-dynamic';
 
