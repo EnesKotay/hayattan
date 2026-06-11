@@ -1,4 +1,4 @@
-import { isExternalImageUrl, isValidImageSrc } from "@/lib/image";
+import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -91,7 +91,7 @@ export default async function YazarlarPage({
               <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-primary-light">
                 {yazar.photo && isValidImageSrc(yazar.photo) ? (
                   <Image
-                    src={yazar.photo}
+                    src={normalizeImageUrl(yazar.photo)!}
                     alt={yazar.name}
                     fill
                     className="object-cover transition-transform group-hover:scale-105"
@@ -153,7 +153,7 @@ export default async function YazarlarPage({
                 <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-primary-light">
                   {yazar.photo && isValidImageSrc(yazar.photo) ? (
                     <Image
-                      src={yazar.photo}
+                      src={normalizeImageUrl(yazar.photo)!}
                       alt={yazar.name}
                       fill
                       className="object-cover transition-transform group-hover:scale-105"

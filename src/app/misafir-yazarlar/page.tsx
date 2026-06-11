@@ -140,7 +140,7 @@ export default async function MisafirYazarlarPage({
                                             >
                                                 <div className="relative h-6 w-6 overflow-hidden rounded-full border border-border">
                                                     {yazi.author.photo && isValidImageSrc(yazi.author.photo) ? (
-                                                        <Image src={yazi.author.photo} alt={yazi.author.name} fill className="object-cover" sizes="24px" unoptimized={isExternalImageUrl(yazi.author.photo)} />
+                                                        <Image src={normalizeImageUrl(yazi.author.photo)!} alt={yazi.author.name} fill className="object-cover" sizes="24px" unoptimized={isExternalImageUrl(yazi.author.photo)} />
                                                     ) : (
                                                         <div className="flex h-full w-full items-center justify-center bg-primary/10 text-[10px] font-bold text-primary">
                                                             {yazi.author.name.charAt(0)}

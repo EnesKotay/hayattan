@@ -125,7 +125,7 @@ export default async function SayfaPage({ params, searchParams }: Props) {
       {page.featuredImage && (
         <div className="relative mb-8 aspect-video w-full overflow-hidden rounded-lg bg-muted-bg">
           <Image
-            src={page.featuredImage}
+            src={normalizeImageUrl(page.featuredImage)!}
             alt={page.title}
             fill
             className="object-cover"
