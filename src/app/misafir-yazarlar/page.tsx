@@ -1,5 +1,5 @@
 import { ArticleImage } from "@/components/ArticleImage";
-import { isValidImageSrc, normalizeImageUrl } from "@/lib/image";
+import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
