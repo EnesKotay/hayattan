@@ -28,6 +28,7 @@ export async function POST(req: Request) {
         "audio/mpeg",
         "audio/mp3",
         "audio/wav",
+        "application/pdf",
     ]);
 
     if (!allowed.has(contentType)) {

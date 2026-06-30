@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { AuthorFollowButton } from "@/components/AuthorFollowButton";
 import { SiteBreadcrumb } from "@/components/SiteBreadcrumb";
+import { auth } from "@/lib/auth";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -30,6 +31,8 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function YazarDetayPage({ params, searchParams }: Props) {
+  const session = await auth();
+  const isAdmin = session?.user?.role === "ADMIN";
   const { slug } = await params;
   const { sayfa = "1" } = await searchParams;
   const page = Math.max(1, parseInt(sayfa, 10) || 1);
@@ -157,9 +160,11 @@ export default async function YazarDetayPage({ params, searchParams }: Props) {
                     <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                       {totalCount} yazı
                     </span>
-                    <span className="rounded-full bg-muted-bg px-3 py-1 text-xs font-semibold text-muted">
-                      {totalViews} okunma
-                    </span>
+                    {isAdmin && (
+                      <span className="rounded-full bg-muted-bg px-3 py-1 text-xs font-semibold text-muted">
+                        {totalViews} okunma
+                      </span>
+                    )}
                   </div>
 
                   <h1 className="mt-4 font-serif text-4xl font-bold tracking-tight text-foreground md:text-5xl">
@@ -245,7 +250,7 @@ export default async function YazarDetayPage({ params, searchParams }: Props) {
                   <p className="text-base leading-relaxed text-muted">{featuredYazi.excerpt}</p>
                 )}
                 <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
-                  <span>{featuredYazi.viewCount} okunma</span>
+                  {isAdmin && <span>{featuredYazi.viewCount} okunma</span>}
                   {featuredYazi.publishedAt && (
                     <>
                       <span>•</span>

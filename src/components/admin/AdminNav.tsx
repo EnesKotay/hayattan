@@ -14,18 +14,24 @@ const navItems = [
   { href: "/admin/sayfalar", label: "Sayfalar", icon: Icons.Magazine, badge: null },
   { href: "/admin/reklam", label: "Reklam", icon: Icons.Ad, badge: null },
   { href: "/admin/hakkimizda", label: "Hakkımızda", icon: Icons.Info, badge: null },
+  { href: "/admin/bulten", label: "Bülten", icon: Icons.User, badge: null },
   { href: "/admin/profil", label: "Profil", icon: Icons.Lock, badge: null },
-  { href: "/admin/istatistik", label: "İstatistikler", icon: Icons.News, badge: null },
+  { href: "/admin/istatistik", label: "İstatistikler", icon: Icons.Eye, badge: null },
   { href: "/admin/guvenlik", label: "Güvenlik", icon: Icons.ShieldCheck, badge: null },
 ];
 
-export function AdminNav() {
+export function AdminNav({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
+
+  const visibleItems = navItems.filter((item) => {
+    if (item.href === "/admin/istatistik" && !isAdmin) return false;
+    return true;
+  });
 
   return (
     <nav className="relative border-t border-gray-100 bg-white/95 px-4 backdrop-blur-sm">
       <div className="container mx-auto flex flex-wrap gap-1 py-2">
-        {navItems.map((item, index) => {
+        {visibleItems.map((item, index) => {
           const isActive =
             pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
           const Icon = item.icon;

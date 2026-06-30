@@ -19,6 +19,7 @@ function formatNumber(value: number) {
 
 export default async function AdminDashboardPage() {
   const session = await auth();
+  const isAdmin = session?.user?.role === "ADMIN";
   const [
     yaziCount,
     yazarCount,
@@ -121,15 +122,15 @@ export default async function AdminDashboardPage() {
       trend: taslakCount > 0 ? `${taslakCount} taslak` : bugunYayinlanan > 0 ? `+${bugunYayinlanan} bugün` : null,
       trendUp: true,
     },
-    {
+    ...(isAdmin ? [{
       label: "Toplam Okunma",
       value: totalViews,
-      icon: "Eye",
+      icon: "Eye" as const,
       color: "text-green-600",
       bg: "bg-green-50",
       trend: bugunYayinlanan > 0 ? `+${bugunYayinlanan} bugün` : null,
       trendUp: true,
-    },
+    }] : []),
     {
       label: "Paylaşım",
       value: shareCount,
@@ -246,24 +247,6 @@ export default async function AdminDashboardPage() {
 
       <DashboardStats stats={stats} />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">İçerik Havuzu</p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{formatNumber(yazarCount)}</p>
-          <p className="mt-1 text-sm text-gray-500">aktif/ kayıtlı yazar</p>
-        </div>
-        <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Manşet Haber</p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{formatNumber(haberCount)}</p>
-          <p className="mt-1 text-sm text-gray-500">slider ve duyuru içeriği</p>
-        </div>
-        <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Kategori</p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{formatNumber(kategoriCount)}</p>
-          <p className="mt-1 text-sm text-gray-500">keşif ve arşiv başlığı</p>
-        </div>
-      </div>
-
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Orta: Yönetim Kartları */}
         <div className="lg:col-span-2 space-y-6">
@@ -280,40 +263,42 @@ export default async function AdminDashboardPage() {
             ))}
           </div>
 
-          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="font-serif text-2xl font-bold text-gray-900">Performans Özeti</h2>
-                <p className="mt-1 text-sm text-gray-500">Okurların en çok açtığı son yayınlanmış yazılar.</p>
-              </div>
-              <Link href="/admin/istatistik" className="text-sm font-semibold text-primary hover:underline">
-                Detaylar →
-              </Link>
-            </div>
-            <div className="mt-5 divide-y divide-gray-100">
-              {enCokOkunanlar.map((yazi, index) => (
-                <Link
-                  key={yazi.id}
-                  href={`/admin/yazilar/${yazi.id}`}
-                  className="flex items-center justify-between gap-4 py-3 transition-colors hover:bg-gray-50"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-bold text-gray-600">
-                      {index + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <h3 className="truncate text-sm font-semibold text-gray-900">{yazi.title}</h3>
-                      <p className="mt-1 text-xs text-gray-500">
-                        {yazi.author.name}
-                        {yazi.publishedAt && <> · {new Date(yazi.publishedAt).toLocaleDateString("tr-TR")}</>}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="shrink-0 text-sm font-bold tabular-nums text-gray-900">{formatNumber(yazi.viewCount)}</span>
+          {isAdmin && (
+            <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="font-serif text-2xl font-bold text-gray-900">Performans Özeti</h2>
+                  <p className="mt-1 text-sm text-gray-500">Okurların en çok açtığı son yayınlanmış yazılar.</p>
+                </div>
+                <Link href="/admin/istatistik" className="text-sm font-semibold text-primary hover:underline">
+                  Detaylar →
                 </Link>
-              ))}
+              </div>
+              <div className="mt-5 divide-y divide-gray-100">
+                {enCokOkunanlar.map((yazi, index) => (
+                  <Link
+                    key={yazi.id}
+                    href={`/admin/yazilar/${yazi.id}`}
+                    className="flex items-center justify-between gap-4 py-3 transition-colors hover:bg-gray-50"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-bold text-gray-600">
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <h3 className="truncate text-sm font-semibold text-gray-900">{yazi.title}</h3>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {yazi.author.name}
+                          {yazi.publishedAt && <> · {new Date(yazi.publishedAt).toLocaleDateString("tr-TR")}</>}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="shrink-0 text-sm font-bold tabular-nums text-gray-900">{formatNumber(yazi.viewCount)}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Sağ: Son Aktiviteler */}

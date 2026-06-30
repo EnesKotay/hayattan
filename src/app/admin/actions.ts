@@ -328,6 +328,8 @@ export async function createYazi(formData: FormData) {
   const featuredImage = featuredImageRaw
     ? (featuredImageRaw.startsWith("/") ? featuredImageRaw : (sanitizeUrl(featuredImageRaw) ?? null))
     : null;
+  const pdfUrlRaw = (formData.get("pdfUrl") as string) || null;
+  const pdfUrl = pdfUrlRaw ? (sanitizeUrl(pdfUrlRaw) ?? null) : null;
   const showInSlider = formData.get("showInSlider") === "on";
 
   // SEO fields
@@ -355,6 +357,7 @@ export async function createYazi(formData: FormData) {
       content,
       authorId,
       featuredImage: featuredImage || null,
+      pdfUrl: pdfUrl || null,
       imageAlt: featuredImage ? imageAlt : null,
       showInSlider,
       publishedAt: publishedAt && !isNaN(publishedAt.getTime()) ? publishedAt : null,
@@ -400,6 +403,8 @@ export async function updateYazi(id: string, formData: FormData) {
   const featuredImage = featuredImageRaw
     ? (featuredImageRaw.startsWith("/") ? featuredImageRaw : (sanitizeUrl(featuredImageRaw) ?? null))
     : null;
+  const pdfUrlRaw = (formData.get("pdfUrl") as string) || null;
+  const pdfUrl = pdfUrlRaw ? (sanitizeUrl(pdfUrlRaw) ?? null) : null;
   const showInSlider = formData.get("showInSlider") === "on";
 
   // SEO fields
@@ -428,6 +433,7 @@ export async function updateYazi(id: string, formData: FormData) {
       content,
       author: { connect: { id: authorId } },
       featuredImage: featuredImage || null,
+      pdfUrl: pdfUrl || null,
       imageAlt: featuredImage ? imageAlt : null,
       showInSlider,
       publishedAt: publishedAt && !isNaN(publishedAt.getTime()) ? publishedAt : null,

@@ -53,6 +53,7 @@ model Yazi {
   excerpt         String?
   content         String
   featuredImage   String?
+  pdfUrl          String?
   publishedAt     DateTime?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt

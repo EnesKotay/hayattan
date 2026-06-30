@@ -250,7 +250,7 @@ export const PAGINATION = {
 } as const;
 
 export const FILE_UPLOAD = {
-    MAX_FILE_SIZE: 4 * 1024 * 1024, // 4MB
+    MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
     ALLOWED_IMAGE_TYPES: ["image/jpeg", "image/png", "image/gif", "image/webp"],
 } as const;
 

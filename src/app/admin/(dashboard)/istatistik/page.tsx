@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 
 type MetricCard = {
   label: string;
@@ -50,13 +52,18 @@ function buildLast30DaysActivity(dates: Date[]) {
 }
 
 export default async function IstatistikPage() {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    redirect("/admin");
+  }
+
   const now = new Date();
   const thirtyDaysAgo = new Date(now);
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const [
     totalPosts,
-    totalNews,
+    _totalNews,
     totalAuthors,
     totalCategories,
     totalPages,
@@ -135,34 +142,34 @@ export default async function IstatistikPage() {
 
   const mainCards: MetricCard[] = [
     {
-      label: "Toplam yazi",
+      label: "Toplam Yazı",
       value: formatNumber(totalPosts),
-      description: `${formatNumber(publishedPosts)} yayin, ${formatNumber(draftPosts)} taslak`,
+      description: `${formatNumber(publishedPosts)} yayın, ${formatNumber(draftPosts)} taslak`,
     },
     {
-      label: "Toplam goruntulenme",
+      label: "Toplam Görüntülenme",
       value: formatNumber(totalViews),
-      description: `Yayin basina ortalama ${formatNumber(avgViewsPerPublishedPost)} goruntulenme`,
+      description: `Yayın başına ortalama ${formatNumber(avgViewsPerPublishedPost)} görüntülenme`,
     },
     {
-      label: "Aktif yazar",
+      label: "Aktif Yazar",
       value: formatNumber(totalAuthors),
-      description: `${formatNumber(totalCategories)} kategori, ${formatNumber(totalPages)} ozel sayfa`,
+      description: `${formatNumber(totalCategories)} kategori, ${formatNumber(totalPages)} özel sayfa`,
     },
     {
-      label: "Yayinlanma orani",
+      label: "Yayınlanma Oranı",
       value: `%${publishRate}`,
-      description: `Planli: ${formatNumber(scheduledPosts)} yazi`,
+      description: `Planlı: ${formatNumber(scheduledPosts)} yazı`,
     },
   ];
 
   const last30Days = [
-    { label: "Eklenen yazi", value: postsLast30 },
-    { label: "Yayina alinan yazi", value: publishedLast30 },
-    { label: "Eklenen manset haber", value: newsLast30 },
-    { label: "Yayindaki haber", value: publishedNews },
+    { label: "Eklenen yazı", value: postsLast30 },
+    { label: "Yayına alınan yazı", value: publishedLast30 },
+    { label: "Eklenen manşet haber", value: newsLast30 },
+    { label: "Yayındaki haber", value: publishedNews },
     { label: "Taslak haber", value: draftNews },
-    { label: "Kategorisiz yazi", value: uncategorizedPosts },
+    { label: "Kategorisiz yazı", value: uncategorizedPosts },
   ];
 
   const activity = buildLast30DaysActivity(latestPostsForActivity.map((item) => item.createdAt));
@@ -196,8 +203,8 @@ export default async function IstatistikPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-2">
         <AdminBreadcrumbs />
-        <h1 className="mt-2 font-serif text-3xl font-bold text-gray-900">Istatistik Merkezi</h1>
-        <p className="text-gray-500">Icerik ekibinin yukunu azaltacak metrikler ve hizli aksiyon alani.</p>
+        <h1 className="mt-2 font-serif text-3xl font-bold text-gray-900">İstatistik Merkezi</h1>
+        <p className="text-gray-500">İçerik ekibinin yükünü azaltacak metrikler ve hızlı aksiyon alanı.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -222,8 +229,8 @@ export default async function IstatistikPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-serif text-xl font-semibold text-gray-900">Son 7 gunluk yazi hareketi</h2>
-            <span className="text-xs font-medium text-gray-500">Son 30 gun bazindan</span>
+            <h2 className="font-serif text-xl font-semibold text-gray-900">Son 7 Günlük Yazı Hareketi</h2>
+            <span className="text-xs font-medium text-gray-500">Son 30 gün bazından</span>
           </div>
           <div className="space-y-3">
             {weeklyActivity.map((day) => (
@@ -245,14 +252,14 @@ export default async function IstatistikPage() {
 
         <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-serif text-xl font-semibold text-gray-900">Kategori dagilimi</h2>
+            <h2 className="font-serif text-xl font-semibold text-gray-900">Kategori Dağılımı</h2>
             <Link href="/admin/kategoriler" className="text-sm font-medium text-primary hover:underline">
-              Kategorileri yonet
+              Kategorileri yönet
             </Link>
           </div>
 
           {categoryDistribution.length === 0 ? (
-            <p className="text-sm text-gray-500">Kategori verisi bulunamadi.</p>
+            <p className="text-sm text-gray-500">Kategori verisi bulunamadı.</p>
           ) : (
             <div className="space-y-3">
               {categoryDistribution.map((category) => (
@@ -278,23 +285,23 @@ export default async function IstatistikPage() {
 
       <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-serif text-xl font-semibold text-gray-900">En cok goruntulenen yazilar</h2>
+          <h2 className="font-serif text-xl font-semibold text-gray-900">En Çok Görüntülenen Yazılar</h2>
           <Link href="/admin/yazilar" className="text-sm font-medium text-primary hover:underline">
-            Tum yazilar
+            Tüm yazılar
           </Link>
         </div>
 
         {topViewedPosts.length === 0 ? (
-          <p className="text-sm text-gray-500">Yayinlanmis yazi bulunamadi.</p>
+          <p className="text-sm text-gray-500">Yayınlanmış yazı bulunamadı.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100 text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-gray-500">
-                  <th className="pb-3 pr-3">Yazi</th>
+                  <th className="pb-3 pr-3">Yazı</th>
                   <th className="pb-3 pr-3">Yazar</th>
-                  <th className="pb-3 pr-3">Yayin tarihi</th>
-                  <th className="pb-3 text-right">Goruntulenme</th>
+                  <th className="pb-3 pr-3">Yayın tarihi</th>
+                  <th className="pb-3 text-right">Görüntülenme</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -319,22 +326,22 @@ export default async function IstatistikPage() {
 
       <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-serif text-xl font-semibold text-gray-900">En aktif yazarlar</h2>
+          <h2 className="font-serif text-xl font-semibold text-gray-900">En Aktif Yazarlar</h2>
           <Link href="/admin/yazarlar" className="text-sm font-medium text-primary hover:underline">
-            Yazarlari yonet
+            Yazarları yönet
           </Link>
         </div>
 
         {topAuthors.length === 0 ? (
-          <p className="text-sm text-gray-500">Yazar aktivite verisi bulunamadi.</p>
+          <p className="text-sm text-gray-500">Yazar aktivite verisi bulunamadı.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100 text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-gray-500">
                   <th className="pb-3 pr-3">Yazar</th>
-                  <th className="pb-3 pr-3">Yayindaki yazi</th>
-                  <th className="pb-3 text-right">Toplam goruntulenme</th>
+                  <th className="pb-3 pr-3">Yayındaki yazı</th>
+                  <th className="pb-3 text-right">Toplam görüntülenme</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">

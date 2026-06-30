@@ -33,7 +33,7 @@ export default async function AdminLayout({
               {session && <SignOutButton />}
             </div>
           </div>
-          {session && <AdminNav />}
+          {session && <AdminNav isAdmin={session.user.role === "ADMIN"} />}
         </header>
         <main className="container mx-auto max-w-5xl px-4 py-8">
           {children}

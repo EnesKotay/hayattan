@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useToast } from "@/components/admin/ToastProvider";
 import { FormField, FormSection } from "@/components/admin/FormField";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { PdfUpload } from "@/components/admin/PdfUpload";
 import { YayimlaSection } from "@/components/admin/YayimlaSection";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { OnizleModal } from "@/components/admin/OnizleModal";
@@ -20,6 +21,7 @@ type YaziFormProps = {
         excerpt?: string;
         content?: string;
         featuredImage?: string;
+        pdfUrl?: string;
         showInSlider?: boolean;
         authorId?: string;
         kategoriIds?: string[];
@@ -65,6 +67,7 @@ export function YaziForm({
     const [metaDesc, setMetaDesc] = useState(defaultValues.metaDescription || "");
     const [featuredImage, setFeaturedImage] = useState(defaultValues.featuredImage || "");
     const [imageAlt, setImageAlt] = useState(defaultValues.imageAlt || "");
+    const [pdfUrl, setPdfUrl] = useState(defaultValues.pdfUrl || "");
 
     const [onizleData, setOnizleData] = useState<{
         title: string;
@@ -96,6 +99,9 @@ export function YaziForm({
         formData.set("imageAlt", imageAlt.trim());
         if (featuredImage) {
             formData.set("featuredImage", featuredImage);
+        }
+        if (pdfUrl) {
+            formData.set("pdfUrl", pdfUrl);
         }
 
         if (featuredImage && !imageAlt.trim()) {
@@ -240,6 +246,18 @@ export function YaziForm({
                             </div>
                         </label>
                     </div>
+                </FormSection>
+
+                {/* PDF Dosyası */}
+                <FormSection title="📄 PDF Dosyası (Opsiyonel)">
+                    <p className="text-sm text-muted mb-3">
+                        Bakış Dergisi gibi sayfalarda okuyuculara indirilebilir bir PDF sunmak için buraya yükleyin.
+                    </p>
+                    <PdfUpload
+                        name="pdfUrl"
+                        defaultValue={defaultValues.pdfUrl}
+                        onChange={(url) => setPdfUrl(url)}
+                    />
                 </FormSection>
 
                 {/* Yazı İçeriği */}

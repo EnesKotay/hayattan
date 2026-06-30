@@ -12,7 +12,7 @@ const authMiddleware = async () => {
 // File router: image, audio, video for articles
 export const ourFileRouter = {
     articleImage: f({
-        image: { maxFileSize: "4MB", maxFileCount: 1 },
+        image: { maxFileSize: "32MB", maxFileCount: 1 },
     })
         .middleware(authMiddleware)
         .onUploadComplete(async ({ metadata, file }) => {

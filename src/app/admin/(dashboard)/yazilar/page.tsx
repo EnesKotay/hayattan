@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import type { Prisma } from "@prisma/client";
 import { deleteYazi } from "../../actions";
 import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
@@ -9,12 +10,13 @@ import { Icons } from "@/components/admin/Icons";
 
 const YAZILAR_PER_PAGE = 20;
 
-function paginationUrl(page: number, params: { durum?: string; yazar?: string; q?: string }) {
+function paginationUrl(page: number, params: { durum?: string; yazar?: string; q?: string; siralama?: string }) {
   const search = new URLSearchParams();
   if (page > 1) search.set("sayfa", String(page));
   if (params.durum) search.set("durum", params.durum);
   if (params.yazar) search.set("yazar", params.yazar);
   if (params.q?.trim()) search.set("q", params.q.trim());
+  if (params.siralama && params.siralama !== "createdAt-desc") search.set("siralama", params.siralama);
   const q = search.toString();
   return q ? `/admin/yazilar?${q}` : "/admin/yazilar";
 }
@@ -31,17 +33,29 @@ function formatDate(date: Date | null): string {
   return new Date(date).toLocaleDateString('tr-TR', options);
 }
 
+const SIRALAMA_OPTIONS: Record<string, Prisma.YaziOrderByWithRelationInput[]> = {
+  "createdAt-desc": [{ createdAt: "desc" }],
+  "publishedAt-desc": [{ publishedAt: { sort: "desc", nulls: "last" } }],
+  "viewCount-desc": [{ viewCount: "desc" }, { createdAt: "desc" }],
+  "title-asc": [{ title: "asc" }],
+};
+
 export default async function AdminYazilarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string; deleted?: string; error?: string; sayfa?: string; durum?: string; yazar?: string; q?: string }>;
+  searchParams: Promise<{ success?: string; deleted?: string; error?: string; sayfa?: string; durum?: string; yazar?: string; q?: string; siralama?: string }>;
 }) {
+  const session = await auth();
+  const isAdmin = session?.user?.role === "ADMIN";
   const params = await searchParams;
   const durum = params.durum ?? "";
   const yazarId = params.yazar ?? "";
   const q = (params.q ?? "").trim();
+  const siralama = params.siralama ?? "createdAt-desc";
   const sayfa = Math.max(1, parseInt(params.sayfa ?? "1", 10) || 1);
   const skip = (sayfa - 1) * YAZILAR_PER_PAGE;
+
+  const orderBy = SIRALAMA_OPTIONS[siralama] ?? SIRALAMA_OPTIONS["createdAt-desc"];
 
   const where: Prisma.YaziWhereInput = {};
   if (durum === "yayinda") where.publishedAt = { not: null };
@@ -52,7 +66,7 @@ export default async function AdminYazilarPage({
   const [yazilar, totalCount, yazarlar, yayindaCount, taslakCount, toplamOkunma] = await Promise.all([
     prisma.yazi.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy,
       skip,
       take: YAZILAR_PER_PAGE,
       include: {
@@ -74,7 +88,7 @@ export default async function AdminYazilarPage({
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / YAZILAR_PER_PAGE));
-  const paginationParams = { durum, yazar: yazarId, q };
+  const paginationParams = { durum, yazar: yazarId, q, siralama };
 
   return (
     <div className="space-y-6">
@@ -100,7 +114,7 @@ export default async function AdminYazilarPage({
       </div>
 
       {/* İstatistik Kartları */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className={`grid gap-4 sm:grid-cols-2 ${isAdmin ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
         <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
@@ -134,17 +148,19 @@ export default async function AdminYazilarPage({
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-violet-50 to-white p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100">
-              <Icons.Eye className="h-5 w-5 text-violet-600" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-600">Toplam Okunma</p>
-              <p className="text-2xl font-bold text-gray-900">{toplamOkunma._sum.viewCount ?? 0}</p>
+        {isAdmin && (
+          <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-violet-50 to-white p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100">
+                <Icons.Eye className="h-5 w-5 text-violet-600" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600">Toplam Okunma</p>
+                <p className="text-2xl font-bold text-gray-900">{toplamOkunma._sum.viewCount ?? 0}</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Filtreler */}
@@ -167,6 +183,17 @@ export default async function AdminYazilarPage({
             options: [
               { label: "Tüm yazarlar", value: "" },
               ...yazarlar.map((y) => ({ label: y.name, value: y.id })),
+            ],
+          },
+          {
+            type: "select",
+            name: "siralama",
+            label: "Sıralama",
+            options: [
+              { label: "En yeni eklenen", value: "createdAt-desc" },
+              { label: "Yayın tarihi (yeni)", value: "publishedAt-desc" },
+              ...(isAdmin ? [{ label: "En çok okunan", value: "viewCount-desc" }] : []),
+              { label: "Başlık (A-Z)", value: "title-asc" },
             ],
           },
           {
@@ -237,10 +264,12 @@ export default async function AdminYazilarPage({
                     {yazi.author.name}
                   </span>
                   <span>{yazi.publishedAt ? formatDate(yazi.publishedAt) : formatDate(yazi.createdAt)}</span>
-                  <span className="flex items-center gap-1">
-                    <Icons.Eye className="h-3.5 w-3.5 text-gray-400" />
-                    {yazi.viewCount}
-                  </span>
+                  {isAdmin && (
+                    <span className="flex items-center gap-1">
+                      <Icons.Eye className="h-3.5 w-3.5 text-gray-400" />
+                      {yazi.viewCount}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3">
                   <Link
@@ -280,7 +309,7 @@ export default async function AdminYazilarPage({
                     <th className="px-4 py-3 font-semibold text-gray-700">Yazar</th>
                     <th className="px-4 py-3 font-semibold text-gray-700">Tarih</th>
                     <th className="px-4 py-3 font-semibold text-gray-700">Durum</th>
-                    <th className="px-4 py-3 font-semibold text-gray-700 text-center" title="Kaç kez okundu">Okunma</th>
+                    {isAdmin && <th className="px-4 py-3 font-semibold text-gray-700 text-center" title="Kaç kez okundu">Okunma</th>}
                     <th className="px-4 py-3 font-semibold text-gray-700 text-right">İşlemler</th>
                   </tr>
                 </thead>
@@ -345,12 +374,14 @@ export default async function AdminYazilarPage({
                           )}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-center">
-                        <span className="inline-flex items-center justify-center gap-1.5 text-gray-600" title="Okunma sayısı">
-                          <Icons.Eye className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium tabular-nums">{yazi.viewCount}</span>
-                        </span>
-                      </td>
+                      {isAdmin && (
+                        <td className="px-4 py-4 text-center">
+                          <span className="inline-flex items-center justify-center gap-1.5 text-gray-600" title="Okunma sayısı">
+                            <Icons.Eye className="h-4 w-4 text-gray-400" />
+                            <span className="font-medium tabular-nums">{yazi.viewCount}</span>
+                          </span>
+                        </td>
+                      )}
                       <td className="px-4 py-4">
                         <div className="flex items-center justify-end gap-2">
                           <Link

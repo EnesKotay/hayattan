@@ -82,6 +82,7 @@ export default async function YaziDuzenlePage({
           excerpt: yazi.excerpt ?? undefined,
           content: yazi.content,
           featuredImage: yazi.featuredImage ?? undefined,
+          pdfUrl: (yazi as any).pdfUrl ?? undefined,
           showInSlider: yazi.showInSlider,
           authorId: yazi.authorId,
           kategoriIds: yazi.kategoriler.map((k) => k.id),

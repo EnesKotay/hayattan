@@ -209,7 +209,7 @@ export async function logDataDeletion(
 /**
  * Get recent security logs (admin use)
  */
-export async function getRecentSecurityLogs(limit: number = 100) {
+export async function getRecentSecurityLogs(limit: number = 100, eventType?: SecurityEventType) {
     try {
         const db = prisma as any;
         if (!db.securityLog) {
@@ -219,6 +219,7 @@ export async function getRecentSecurityLogs(limit: number = 100) {
         return await db.securityLog.findMany({
             take: limit,
             orderBy: { createdAt: "desc" },
+            where: eventType ? { eventType } : undefined,
         });
     } catch (error) {
         console.error("Failed to fetch security logs:", error);

@@ -13,7 +13,8 @@ type ImageUploadProps = {
   onChange?: (url: string) => void;
 };
 
-const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_SIZE_MB = 50;
+const MAX_SIZE = MAX_SIZE_MB * 1024 * 1024;
 
 /**
  * Görsel alanı: dosya yükle (sürükle-bırak veya seç) veya URL yapıştır.
@@ -23,7 +24,7 @@ export function ImageUpload({
   name,
   defaultValue = null,
   label = "Fotoğraf",
-  help = "Görseli sürükleyip bırakın, dosya seçin veya aşağıya URL yapıştırın. Maks. 10MB.",
+  help = "Görseli sürükleyip bırakın, dosya seçin veya aşağıya URL yapıştırın. Maks. 50MB.",
   className,
   onChange,
 }: ImageUploadProps) {
@@ -454,7 +455,7 @@ export function ImageUpload({
                     Görseli sürükleyip bırakın veya tıklayarak seçin
                   </p>
                   <p className="mt-2 text-xs text-muted">
-                    PNG, JPG, GIF, WebP (maks. 4MB)
+                    PNG, JPG, GIF, WebP (maks. {MAX_SIZE_MB}MB)
                   </p>
                 </>
               )}

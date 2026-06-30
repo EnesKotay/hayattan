@@ -6,7 +6,7 @@ import { r2 } from "@/lib/r2";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 const UPLOAD_DIR = "public/uploads";
-const MAX_SIZE_IMAGE = 10 * 1024 * 1024; // 10MB
+const MAX_SIZE_IMAGE = 50 * 1024 * 1024; // 50MB
 const MAX_SIZE_MEDIA = 100 * 1024 * 1024; // 100MB
 const ALLOWED_IMAGES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const ALLOWED_AUDIO = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/ogg", "audio/webm", "audio/mp4", "audio/x-m4a"];

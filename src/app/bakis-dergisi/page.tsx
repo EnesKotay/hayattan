@@ -64,6 +64,7 @@ export default async function BakisDergisiPage({ searchParams }: Props) {
         slug: true,
         excerpt: true,
         featuredImage: true,
+        pdfUrl: true,
         publishedAt: true,
         author: { select: { name: true, slug: true } },
         kategoriler: { select: { name: true, slug: true } },
@@ -153,6 +154,19 @@ export default async function BakisDergisiPage({ searchParams }: Props) {
                       </span>
                     )}
                   </div>
+                  {(yazi as any).pdfUrl && (
+                    <a
+                      href={(yazi as any).pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-primary px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-white"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z" />
+                      </svg>
+                      PDF İndir
+                    </a>
+                  )}
                 </div>
               </article>
             ))}
