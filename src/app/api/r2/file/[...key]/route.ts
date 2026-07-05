@@ -76,16 +76,28 @@ export async function GET(
 
         const bytes = await getResponse.Body.transformToByteArray();
 
-        // 206 Partial Content döndür
+        // Sadece gerçekten kısmi bir yanıt döndürüyorsak (Range istendiyse ya da
+        // dosya MAX_CHUNK_SIZE'dan büyük olduğu için parçaladıysak) 206 dönelim.
+        // Aksi halde (istemci Range istemedi ve dosyanın tamamını gönderdik)
+        // standart 200 dönmemiz gerekiyor — bazı istemciler (ör. Next.js image
+        // optimizer) Range istemeden gelen 206 yanıtları geçersiz sayıp
+        // görseli reddedebiliyor.
+        const isFullContent = !rangeHeader && start === 0 && end === totalSize - 1;
+
+        const headers: Record<string, string> = {
+            "Content-Type": contentType,
+            "Content-Length": String(end - start + 1),
+            "Accept-Ranges": "bytes",
+            "Cache-Control": "public, max-age=31536000, immutable",
+        };
+
+        if (!isFullContent) {
+            headers["Content-Range"] = `bytes ${start}-${end}/${totalSize}`;
+        }
+
         return new NextResponse(Buffer.from(bytes), {
-            status: 206, // Partial Content
-            headers: {
-                "Content-Type": contentType,
-                "Content-Length": String(end - start + 1),
-                "Content-Range": `bytes ${start}-${end}/${totalSize}`,
-                "Accept-Ranges": "bytes",
-                "Cache-Control": "public, max-age=31536000, immutable",
-            },
+            status: isFullContent ? 200 : 206,
+            headers,
         });
 
     } catch (error: any) {
