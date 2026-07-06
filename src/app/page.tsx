@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/Animations/Reveal";
-import { prisma } from "@/lib/db";
+import { prisma, runInBatches } from "@/lib/db";
 import { getAdSlots } from "@/app/admin/actions";
 import { AdSlot } from "@/components/AdSlot";
 import { Logo } from "@/components/Logo";
@@ -105,27 +105,27 @@ async function getFeaturedYazilar(): Promise<HaberRow[]> {
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [haberler, featuredYazilar, sonYazilar, yazarlar, adSlots] = await Promise.all([
-    getHaberler(),
-    getFeaturedYazilar(),
-    prisma.yazi.findMany({
-      where: { publishedAt: { lte: new Date() }, author: { ayrilmis: false } } as any,
-      orderBy: { publishedAt: "desc" },
-      take: 6,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        excerpt: true,
-        featuredImage: true,
-        publishedAt: true,
-        author: { select: { name: true, slug: true } },
-        kategoriler: { select: { name: true, slug: true } },
-      },
-    }),
-    getYazarlar(),
-
-    getAdSlots(),
+  const [haberler, featuredYazilar, sonYazilar, yazarlar, adSlots] = await runInBatches([
+    () => getHaberler(),
+    () => getFeaturedYazilar(),
+    () =>
+      prisma.yazi.findMany({
+        where: { publishedAt: { lte: new Date() }, author: { ayrilmis: false } } as any,
+        orderBy: { publishedAt: "desc" },
+        take: 6,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          featuredImage: true,
+          publishedAt: true,
+          author: { select: { name: true, slug: true } },
+          kategoriler: { select: { name: true, slug: true } },
+        },
+      }),
+    () => getYazarlar(),
+    () => getAdSlots(),
   ]);
 
   const allSliderItemsRaw = [...haberler, ...featuredYazilar];

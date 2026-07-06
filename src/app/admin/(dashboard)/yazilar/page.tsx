@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { prisma, runInBatches } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import type { Prisma } from "@prisma/client";
 import { deleteYazi } from "../../actions";
@@ -63,28 +63,30 @@ export default async function AdminYazilarPage({
   if (yazarId) where.authorId = yazarId;
   if (q) where.title = { contains: q, mode: "insensitive" };
 
-  const [yazilar, totalCount, yazarlar, yayindaCount, taslakCount, toplamOkunma] = await Promise.all([
-    prisma.yazi.findMany({
-      where,
-      orderBy,
-      skip,
-      take: YAZILAR_PER_PAGE,
-      include: {
-        author: { select: { name: true } },
-      },
-    }),
-    prisma.yazi.count({ where }),
-    prisma.yazar.findMany({
-      orderBy: [
-        { sortOrder: "asc" },
-        { yazilar: { _count: "desc" } },
-        { name: "asc" }
-      ] as any,
-      select: { id: true, name: true }
-    }),
-    prisma.yazi.count({ where: { publishedAt: { not: null } } }),
-    prisma.yazi.count({ where: { publishedAt: null } }),
-    prisma.yazi.aggregate({ where: { publishedAt: { not: null } }, _sum: { viewCount: true } }),
+  const [yazilar, totalCount, yazarlar, yayindaCount, taslakCount, toplamOkunma] = await runInBatches([
+    () =>
+      prisma.yazi.findMany({
+        where,
+        orderBy,
+        skip,
+        take: YAZILAR_PER_PAGE,
+        include: {
+          author: { select: { name: true } },
+        },
+      }),
+    () => prisma.yazi.count({ where }),
+    () =>
+      prisma.yazar.findMany({
+        orderBy: [
+          { sortOrder: "asc" },
+          { yazilar: { _count: "desc" } },
+          { name: "asc" }
+        ] as any,
+        select: { id: true, name: true }
+      }),
+    () => prisma.yazi.count({ where: { publishedAt: { not: null } } }),
+    () => prisma.yazi.count({ where: { publishedAt: null } }),
+    () => prisma.yazi.aggregate({ where: { publishedAt: { not: null } }, _sum: { viewCount: true } }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / YAZILAR_PER_PAGE));

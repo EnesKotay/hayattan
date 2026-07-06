@@ -10,7 +10,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { prisma, runInBatches } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { type AdSlotContent, AD_SLOT_KEYS, adSlotKey, parseAdSlotValue, serializeAdSlotContent } from "@/lib/ad-slots";
 import { sanitizeHtml, sanitizeAdHtml, sanitizeText, sanitizeUrl } from "@/lib/sanitize";
@@ -919,14 +919,14 @@ export type HakkimizdaContent = {
 
 /** Hakkımızda sayfa içeriğini getirir */
 export async function getHakkimizdaContent(): Promise<HakkimizdaContent> {
-  const [mainTitle, mainContent, detailsTitle, detailsContent, rulesTitle, rulesContent, imageUrl] = await Promise.all([
-    getSetting(HAKKIMIZDA_KEYS.mainTitle),
-    getSetting(HAKKIMIZDA_KEYS.mainContent),
-    getSetting(HAKKIMIZDA_KEYS.detailsTitle),
-    getSetting(HAKKIMIZDA_KEYS.detailsContent),
-    getSetting(HAKKIMIZDA_KEYS.rulesTitle),
-    getSetting(HAKKIMIZDA_KEYS.rulesContent),
-    getSetting("hakkimizda_image_url"),
+  const [mainTitle, mainContent, detailsTitle, detailsContent, rulesTitle, rulesContent, imageUrl] = await runInBatches([
+    () => getSetting(HAKKIMIZDA_KEYS.mainTitle),
+    () => getSetting(HAKKIMIZDA_KEYS.mainContent),
+    () => getSetting(HAKKIMIZDA_KEYS.detailsTitle),
+    () => getSetting(HAKKIMIZDA_KEYS.detailsContent),
+    () => getSetting(HAKKIMIZDA_KEYS.rulesTitle),
+    () => getSetting(HAKKIMIZDA_KEYS.rulesContent),
+    () => getSetting("hakkimizda_image_url"),
   ]);
 
   // Varsayılan değerler (eğer veritabanı boşsa)

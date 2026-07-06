@@ -51,9 +51,9 @@ export async function GET(
             }
         }
 
-        // Eğer istenen aralık 5MB'dan büyükse, chunk boyutunu sınırla
+        // Eğer rangeHeader varsa ve istenen aralık 5MB'dan büyükse, chunk boyutunu sınırla
         // Bu sayede Vercel memory/timeout limitlerine takılmadan video stream edilir
-        if (end - start + 1 > MAX_CHUNK_SIZE) {
+        if (rangeHeader && (end - start + 1 > MAX_CHUNK_SIZE)) {
             end = start + MAX_CHUNK_SIZE - 1;
         }
 

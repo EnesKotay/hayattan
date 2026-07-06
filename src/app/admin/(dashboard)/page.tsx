@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { prisma, runInBatches } from "@/lib/db";
 
 import { DashboardCard, type Card } from "@/components/admin/DashboardCard";
 import { DashboardStats, type StatItem } from "@/components/admin/DashboardStats";
@@ -32,57 +32,65 @@ export default async function AdminDashboardPage() {
     engagementRows,
     enCokOkunanlar,
   ] =
-    await Promise.all([
-      prisma.yazi.count(),
-      prisma.yazar.count(),
-      prisma.kategori.count(),
-      prisma.haber.count(),
-      prisma.yazi.findMany({
-        take: 5,
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          publishedAt: true,
-          createdAt: true,
-          author: { select: { name: true } },
-        },
-      }),
-      prisma.haber.findMany({
-        take: 3,
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          title: true,
-          createdAt: true,
-        },
-      }),
-      prisma.yazi.aggregate({ _sum: { viewCount: true } }),
-      prisma.newsletterSubscriber.count({ where: { active: true } }),
-      prisma.siteSetting.findMany({
-        where: {
-          OR: [
-            { key: { startsWith: SHARE_COUNT_PREFIX } },
-            { key: { startsWith: FEEDBACK_UP_PREFIX } },
-            { key: { startsWith: FEEDBACK_DOWN_PREFIX } },
-          ],
-        },
-        select: { key: true, value: true },
-      }),
-      prisma.yazi.findMany({
-        where: { publishedAt: { lte: new Date() } },
-        orderBy: [{ viewCount: "desc" }, { publishedAt: "desc" }],
-        take: 5,
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          viewCount: true,
-          publishedAt: true,
-          author: { select: { name: true } },
-        },
-      }),
+    // Not: Supabase pgbouncer havuzu (connection_limit) sınırlı olduğu için
+    // çok sayıda prisma sorgusunu tek Promise.all ile aynı anda ateşlemek
+    // havuzu tüketip 500 hatasına yol açabiliyor. runInBatches sorguları
+    // küçük gruplar halinde sırayla çalıştırır (bkz. src/lib/db.ts).
+    await runInBatches([
+      () => prisma.yazi.count(),
+      () => prisma.yazar.count(),
+      () => prisma.kategori.count(),
+      () => prisma.haber.count(),
+      () =>
+        prisma.yazi.findMany({
+          take: 5,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            publishedAt: true,
+            createdAt: true,
+            author: { select: { name: true } },
+          },
+        }),
+      () =>
+        prisma.haber.findMany({
+          take: 3,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            title: true,
+            createdAt: true,
+          },
+        }),
+      () => prisma.yazi.aggregate({ _sum: { viewCount: true } }),
+      () => prisma.newsletterSubscriber.count({ where: { active: true } }),
+      () =>
+        prisma.siteSetting.findMany({
+          where: {
+            OR: [
+              { key: { startsWith: SHARE_COUNT_PREFIX } },
+              { key: { startsWith: FEEDBACK_UP_PREFIX } },
+              { key: { startsWith: FEEDBACK_DOWN_PREFIX } },
+            ],
+          },
+          select: { key: true, value: true },
+        }),
+      () =>
+        prisma.yazi.findMany({
+          where: { publishedAt: { lte: new Date() } },
+          orderBy: [{ viewCount: "desc" }, { publishedAt: "desc" }],
+          take: 5,
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            viewCount: true,
+            publishedAt: true,
+            author: { select: { name: true } },
+          },
+        }),
     ]);
 
   // Taslak sayısı

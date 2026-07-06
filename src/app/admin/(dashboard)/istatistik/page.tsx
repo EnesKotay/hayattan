@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { prisma, runInBatches } from "@/lib/db";
 import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -61,6 +61,13 @@ export default async function IstatistikPage() {
   const thirtyDaysAgo = new Date(now);
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+  // Not: Bu sorguları Promise.all ile tamamen paralel çalıştırmıyoruz.
+  // Supabase'in pgbouncer (transaction mode) havuzu sınırlı sayıda bağlantı
+  // veriyor (DATABASE_URL'deki connection_limit ayarına bağlı); 19 sorguyu
+  // aynı anda ateşlemek havuzda "Timed out fetching a new connection from
+  // the pool" hatasına yol açıp bu sayfanın 500 vermesine sebep oluyordu.
+  // runInBatches (src/lib/db.ts) sorguları küçük gruplar halinde sırayla
+  // çalıştırarak aynı sonucu üretir.
   const [
     totalPosts,
     _totalNews,
@@ -81,59 +88,63 @@ export default async function IstatistikPage() {
     topViewedPosts,
     topAuthorsRaw,
     categoryDistributionRaw,
-  ] = await Promise.all([
-    prisma.yazi.count(),
-    prisma.haber.count(),
-    prisma.yazar.count({ where: { ayrilmis: false } }),
-    prisma.kategori.count(),
-    prisma.page.count(),
-    prisma.yazi.count({ where: { publishedAt: { lte: now } } }),
-    prisma.yazi.count({ where: { publishedAt: null } }),
-    prisma.yazi.count({ where: { publishedAt: { gt: now } } }),
-    prisma.haber.count({ where: { publishedAt: { lte: now } } }),
-    prisma.haber.count({ where: { publishedAt: null } }),
-    prisma.yazi.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
-    prisma.yazi.count({ where: { publishedAt: { gte: thirtyDaysAgo, lte: now } } }),
-    prisma.haber.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
-    prisma.yazi.count({ where: { kategoriler: { none: {} } } }),
-    prisma.yazi.aggregate({ _sum: { viewCount: true } }),
-    prisma.yazi.findMany({
-      where: { createdAt: { gte: thirtyDaysAgo } },
-      select: { createdAt: true },
-    }),
-    prisma.yazi.findMany({
-      where: { publishedAt: { lte: now } },
-      take: 8,
-      orderBy: [{ viewCount: "desc" }, { publishedAt: "desc" }],
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        viewCount: true,
-        publishedAt: true,
-        author: { select: { name: true } },
-      },
-    }),
-    prisma.yazar.findMany({
-      where: { ayrilmis: false },
-      select: {
-        id: true,
-        name: true,
-        yazilar: {
-          where: { publishedAt: { lte: now } },
-          select: { viewCount: true },
+  ] = await runInBatches([
+    () => prisma.yazi.count(),
+    () => prisma.haber.count(),
+    () => prisma.yazar.count({ where: { ayrilmis: false } }),
+    () => prisma.kategori.count(),
+    () => prisma.page.count(),
+    () => prisma.yazi.count({ where: { publishedAt: { lte: now } } }),
+    () => prisma.yazi.count({ where: { publishedAt: null } }),
+    () => prisma.yazi.count({ where: { publishedAt: { gt: now } } }),
+    () => prisma.haber.count({ where: { publishedAt: { lte: now } } }),
+    () => prisma.haber.count({ where: { publishedAt: null } }),
+    () => prisma.yazi.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+    () => prisma.yazi.count({ where: { publishedAt: { gte: thirtyDaysAgo, lte: now } } }),
+    () => prisma.haber.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+    () => prisma.yazi.count({ where: { kategoriler: { none: {} } } }),
+    () => prisma.yazi.aggregate({ _sum: { viewCount: true } }),
+    () =>
+      prisma.yazi.findMany({
+        where: { createdAt: { gte: thirtyDaysAgo } },
+        select: { createdAt: true },
+      }),
+    () =>
+      prisma.yazi.findMany({
+        where: { publishedAt: { lte: now } },
+        take: 8,
+        orderBy: [{ viewCount: "desc" }, { publishedAt: "desc" }],
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          viewCount: true,
+          publishedAt: true,
+          author: { select: { name: true } },
         },
-      },
-    }),
-    prisma.kategori.findMany({
-      select: {
-        id: true,
-        name: true,
-        _count: {
-          select: { yazilar: true },
+      }),
+    () =>
+      prisma.yazar.findMany({
+        where: { ayrilmis: false },
+        select: {
+          id: true,
+          name: true,
+          yazilar: {
+            where: { publishedAt: { lte: now } },
+            select: { viewCount: true },
+          },
         },
-      },
-    }),
+      }),
+    () =>
+      prisma.kategori.findMany({
+        select: {
+          id: true,
+          name: true,
+          _count: {
+            select: { yazilar: true },
+          },
+        },
+      }),
   ]);
 
   const totalViews = viewsAggregate._sum.viewCount ?? 0;

@@ -70,6 +70,7 @@ export default async function YaziDetayPage({ params }: Props) {
         metaDescription: true,
         metaKeywords: true,
         ogImage: true,
+        pdfUrl: true,
         authorId: true,
         author: { select: { name: true, slug: true, photo: true } },
         kategoriler: { select: { id: true, name: true, slug: true } },
@@ -268,6 +269,22 @@ export default async function YaziDetayPage({ params }: Props) {
         className="mb-6"
         ariaLabel="Görme engelliler için sesli okuma: yazıyı dinle, duraklat veya durdur"
       />
+
+      {yazi.pdfUrl && (
+        <div className="mb-6">
+          <a
+            href={yazi.pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-primary bg-primary/5 px-4 py-3 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary hover:text-white sm:w-auto"
+          >
+            <svg className="h-4.5 w-4.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z" />
+            </svg>
+            PDF Sürümünü İndir / Görüntüle
+          </a>
+        </div>
+      )}
 
       <div className="relative mb-8 aspect-video overflow-hidden rounded-lg bg-muted-bg">
         <ArticleImage
