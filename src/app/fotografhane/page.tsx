@@ -82,7 +82,7 @@ export default async function FotografhanePage({
 
                 {/* Reklam - Sayfa üstü */}
                 <div className="my-8 flex justify-center">
-                    <AdSlot slotId="fotografhane-top" size="leaderboard" content={adSlots["yazilar-top"]} />
+                    <AdSlot slotId="yazilar-top" size="leaderboard" content={adSlots["yazilar-top"]} />
                 </div>
 
                 {yazilar.length === 0 ? (
@@ -161,7 +161,7 @@ export default async function FotografhanePage({
 
                         {/* Reklam - Yazılar arası */}
                         <div className="my-12 flex justify-center">
-                            <AdSlot slotId="fotografhane-mid" size="rectangle" content={adSlots["yazilar-mid"]} />
+                            <AdSlot slotId="yazilar-mid" size="rectangle" content={adSlots["yazilar-mid"]} />
                         </div>
 
                         {totalPages > 1 && (

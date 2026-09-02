@@ -15,6 +15,7 @@ import { ToastContainer } from "@/components/Toast/Toast";
 import { CommandMenu } from "@/components/CommandMenu";
 import { ProgressBar } from "@/components/ProgressBar";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { PublicOnly } from "@/components/PublicOnly";
 import { generateOrganizationSchema } from "@/lib/seo";
 import "./globals.css";
 import "@/styles/admin.css";
@@ -90,13 +91,17 @@ export default async function RootLayout({
                 <CommandMenu />
                 <SkipLink />
                 <ProgressBar />
-                <Header />
-                <ReadingProgress />
+                <PublicOnly>
+                  <Header />
+                  <ReadingProgress />
+                </PublicOnly>
                 <main id="main-content" className="min-h-full flex-1 bg-background">
                   <PageTransition>{children}</PageTransition>
                 </main>
-                <Footer />
-                <BackToTop />
+                <PublicOnly>
+                  <Footer />
+                  <BackToTop />
+                </PublicOnly>
                 <ToastContainer />
                 <GoogleAnalytics />
               </SessionProvider>

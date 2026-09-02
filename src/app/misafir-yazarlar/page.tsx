@@ -75,7 +75,7 @@ export default async function MisafirYazarlarPage({
                 </header>
 
                 <div className="my-8 flex justify-center">
-                    <AdSlot slotId="misafir-top" size="leaderboard" content={adSlots["yazilar-top"]} />
+                    <AdSlot slotId="yazilar-top" size="leaderboard" content={adSlots["yazilar-top"]} />
                 </div>
 
                 {yazilar.length === 0 ? (
@@ -156,7 +156,7 @@ export default async function MisafirYazarlarPage({
                         </div>
 
                         <div className="my-12 flex justify-center">
-                            <AdSlot slotId="misafir-mid" size="rectangle" content={adSlots["yazilar-mid"]} />
+                            <AdSlot slotId="yazilar-mid" size="rectangle" content={adSlots["yazilar-mid"]} />
                         </div>
 
                         {totalPages > 1 && (

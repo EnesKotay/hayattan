@@ -12,7 +12,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma, runInBatches } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { type AdSlotContent, AD_SLOT_KEYS, adSlotKey, parseAdSlotValue, serializeAdSlotContent } from "@/lib/ad-slots";
+import { type AdSlotContent, type AdSlotCreative, AD_SLOT_KEYS, adMetricKey, adSlotIdFromKey, adSlotKey, parseAdSlotValue, serializeAdSlotContent } from "@/lib/ad-slots";
 import { sanitizeHtml, sanitizeAdHtml, sanitizeText, sanitizeUrl } from "@/lib/sanitize";
 import { titleCase } from "@/lib/text-case";
 import { estimateReadingMinutes } from "@/lib/article-utils";
@@ -142,11 +142,8 @@ export const getAdSlots = unstable_cache(
 
       // DB'den gelenleri doldur
       for (const slot of slots) {
-        // "ad_slot_header" -> "header"
-        const cleanKey = slot.key.replace("ad_slot_", "");
-        if (AD_SLOT_KEYS.includes(cleanKey)) {
-          result[cleanKey] = parseAdSlotValue(slot.value);
-        }
+        const slotId = adSlotIdFromKey(slot.key);
+        if (slotId) result[slotId] = parseAdSlotValue(slot.value);
       }
 
       return result;
@@ -161,6 +158,42 @@ export const getAdSlots = unstable_cache(
     revalidate: 3600,
   }
 );
+
+export async function getAdMetrics() {
+  await requireAuth();
+  const rows = await db.siteSetting.findMany({
+    where: {
+      key: {
+        in: AD_SLOT_KEYS.flatMap((slotId) => [
+          adMetricKey(slotId, "impression"),
+          adMetricKey(slotId, "click"),
+        ]),
+      },
+    },
+    select: { key: true, value: true },
+  });
+
+  const values = new Map<string, number>(
+    rows.map((row: { key: string; value: string }) => [row.key, Math.max(0, Number.parseInt(row.value, 10) || 0)])
+  );
+
+  return Object.fromEntries(
+    AD_SLOT_KEYS.map((slotId) => [slotId, {
+      impressions: values.get(adMetricKey(slotId, "impression")) ?? 0,
+      clicks: values.get(adMetricKey(slotId, "click")) ?? 0,
+    }])
+  ) as Record<(typeof AD_SLOT_KEYS)[number], { impressions: number; clicks: number }>;
+}
+
+export async function getAdPreviewPostPath() {
+  await requireAuth();
+  const post = await db.yazi.findFirst({
+    where: { publishedAt: { lte: new Date() } },
+    orderBy: { publishedAt: "desc" },
+    select: { slug: true },
+  });
+  return post?.slug ? `/yazilar/${post.slug}` : "/yazilar";
+}
 
 // ... existing code ...
 
@@ -238,24 +271,67 @@ export async function deletePage(id: string) {
   redirect("/admin/sayfalar?deleted=1");
 }
 
-export async function saveAllAdSlots(formData: FormData) {
-  await requireAuth();
-  for (const slotId of AD_SLOT_KEYS) {
-    const rawHtml = ((formData.get(`slot_${slotId}_html`) as string) ?? "").trim();
+function parseAdDimension(value: FormDataEntryValue | null, label: string) {
+  const dimension = sanitizeText(String(value ?? "").trim());
+  if (!dimension) return "";
+  if (!/^(?:auto|0|\d+(?:\.\d+)?(?:px|%|rem|em|vw|vh))$/i.test(dimension)) {
+    throw new Error(`${label} geçersiz. Örnek: 728px veya 100%`);
+  }
+  return dimension;
+}
+
+function parseAdDate(value: FormDataEntryValue | null, label: string) {
+  const rawValue = String(value ?? "").trim();
+  if (!rawValue) return undefined;
+  const date = new Date(rawValue);
+  if (Number.isNaN(date.getTime())) throw new Error(`${label} geçersiz.`);
+  return date.toISOString();
+}
+
+function parseAdCreative(formData: FormData, prefix: string): AdSlotCreative | null {
+    const rawHtml = String(formData.get(`${prefix}_html`) ?? "").trim();
     const html = rawHtml ? sanitizeAdHtml(rawHtml) : "";
-    const text = sanitizeText(((formData.get(`slot_${slotId}_text`) as string) ?? "").trim());
-    const rawImage = ((formData.get(`slot_${slotId}_image`) as string) ?? "").trim();
+    const text = sanitizeText(String(formData.get(`${prefix}_text`) ?? "").trim());
+    const rawImage = String(formData.get(`${prefix}_image`) ?? "").trim();
     const image = rawImage ? (sanitizeUrl(rawImage) ?? (rawImage.startsWith("/") ? rawImage : "")) : "";
-    const width = sanitizeText(((formData.get(`slot_${slotId}_width`) as string) ?? "").trim());
-    const height = sanitizeText(((formData.get(`slot_${slotId}_height`) as string) ?? "").trim());
-    const isActive = formData.get(`slot_${slotId}_active`) === "on";
+    const rawHref = String(formData.get(`${prefix}_href`) ?? "").trim();
+    const href = rawHref ? sanitizeUrl(rawHref) : null;
+    const width = parseAdDimension(formData.get(`${prefix}_width`), "Reklam genişliği");
+    const height = parseAdDimension(formData.get(`${prefix}_height`), "Reklam yüksekliği");
+
+    if (rawHtml && !/<[a-z][\s\S]*>/i.test(rawHtml)) {
+      throw new Error("Reklam kodu geçerli bir HTML etiketi içermiyor.");
+    }
+    if (rawImage && !image) throw new Error("Reklam görseli için geçerli bir URL girin.");
+    if (rawHref && !href) throw new Error("Hedef bağlantı için geçerli bir http veya https adresi girin.");
+
+    if (html) return { type: "html", content: html, width, height, href: href ?? undefined };
+    if (image) return { type: "image", content: image, width, height, href: href ?? undefined };
+    if (text) return { type: "text", content: text, width, height, href: href ?? undefined };
+    return null;
+}
+
+function parseAdSlotFormData(slotId: (typeof AD_SLOT_KEYS)[number], formData: FormData): AdSlotContent | null {
+    const prefix = `slot_${slotId}`;
+    const creative = parseAdCreative(formData, prefix);
+    if (!creative) return null;
+
+    const mobile = parseAdCreative(formData, `${prefix}_mobile`);
+    const isActive = formData.get(`${prefix}_active`) === "on";
     const rawAlign = ((formData.get(`slot_${slotId}_align`) as string) ?? "").trim().toLowerCase();
     const align = rawAlign === "left" || rawAlign === "right" ? rawAlign : "center";
+    const startAt = parseAdDate(formData.get(`${prefix}_start_at`), "Başlangıç tarihi");
+    const endAt = parseAdDate(formData.get(`${prefix}_end_at`), "Bitiş tarihi");
 
-    let content: AdSlotContent | null = null;
-    if (html) content = { type: "html", content: html, width, height, isActive, align } satisfies AdSlotContent;
-    else if (image) content = { type: "image", content: image, width, height, isActive, align } satisfies AdSlotContent;
-    else if (text) content = { type: "text", content: text, width, height, isActive, align } satisfies AdSlotContent;
+    if (startAt && endAt && new Date(endAt) <= new Date(startAt)) {
+      throw new Error("Bitiş tarihi başlangıç tarihinden sonra olmalıdır.");
+    }
+
+    return { ...creative, isActive, align, startAt, endAt, mobile };
+}
+
+async function persistAdSlot(slotId: (typeof AD_SLOT_KEYS)[number], formData: FormData) {
+    const content = parseAdSlotFormData(slotId, formData);
     const value = serializeAdSlotContent(content);
     const key = adSlotKey(slotId);
     await db.siteSetting.upsert({
@@ -263,13 +339,36 @@ export async function saveAllAdSlots(formData: FormData) {
       create: { key, value },
       update: { value },
     });
-  }
+}
+
+function revalidateAdPages() {
   revalidateTag("ad-slots", { expire: 0 });
   revalidatePath("/");
   revalidatePath("/yazilar");
   revalidatePath("/yazilar/[slug]", "page");
+  revalidatePath("/misafir-yazarlar");
+  revalidatePath("/fotografhane");
   revalidatePath("/admin/reklam");
-  redirect("/admin/reklam?success=1");
+}
+
+export async function saveAdSlot(slotId: string, formData: FormData) {
+  await requireAuth();
+  if (!AD_SLOT_KEYS.includes(slotId as (typeof AD_SLOT_KEYS)[number])) {
+    throw new Error("Geçersiz reklam alanı.");
+  }
+
+  await persistAdSlot(slotId as (typeof AD_SLOT_KEYS)[number], formData);
+  revalidateAdPages();
+  return { success: true };
+}
+
+export async function saveAllAdSlots(formData: FormData) {
+  await requireAuth();
+  for (const slotId of AD_SLOT_KEYS) {
+    await persistAdSlot(slotId, formData);
+  }
+  revalidateAdPages();
+  return { success: true };
 }
 
 // YAZI
