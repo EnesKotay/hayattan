@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { createHash } from "crypto";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 /**
@@ -6,7 +7,7 @@ import { prisma } from "@/lib/db";
  * Sadece yayındaki yazılar için çalışır.
  */
 export async function POST(
-  _request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
@@ -15,7 +16,15 @@ export async function POST(
       return NextResponse.json({ error: "Slug gerekli" }, { status: 400 });
     }
 
-    await prisma.yazi.updateMany({
+    const viewKey = createHash("sha256").update(slug.trim()).digest("hex").slice(0, 12);
+    const previousViews = (request.cookies.get("hayattan_views")?.value ?? "")
+      .split(".")
+      .filter(Boolean);
+    if (previousViews.includes(viewKey)) {
+      return new NextResponse(null, { status: 204 });
+    }
+
+    const result = await prisma.yazi.updateMany({
       where: {
         slug: slug.trim(),
         publishedAt: { lte: new Date() },
@@ -25,7 +34,17 @@ export async function POST(
       },
     });
 
-    return new NextResponse(null, { status: 204 });
+    const response = new NextResponse(null, { status: 204 });
+    if (result.count > 0) {
+      response.cookies.set("hayattan_views", [viewKey, ...previousViews].slice(0, 50).join("."), {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24 * 30,
+        path: "/",
+      });
+    }
+    return response;
   } catch (error) {
     console.error("View count increment error:", error);
     return NextResponse.json(

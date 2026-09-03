@@ -2,6 +2,7 @@ import { ArticleImage } from "@/components/ArticleImage";
 import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getAdSlots } from "@/app/admin/actions";
@@ -12,10 +13,24 @@ const YAZILAR_PER_PAGE = 12;
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-    title: "Misafir Yazıları | Hayattan.Net",
-    description: "Misafir yazarların katkıda bulunduğu yazılar.",
-};
+export async function generateMetadata({
+    searchParams,
+}: {
+    searchParams: Promise<{ sayfa?: string }>;
+}): Promise<Metadata> {
+    const { sayfa } = await searchParams;
+    const page = Math.max(1, parseInt(sayfa ?? "1", 10) || 1);
+    const pageSuffix = page > 1 ? ` — Sayfa ${page}` : "";
+    const canonical = page > 1 ? `/misafir-yazarlar?sayfa=${page}` : "/misafir-yazarlar";
+    const description = "Hayattan.Net misafir yazarlarının kültür, sanat, edebiyat ve yaşama dair yazıları.";
+
+    return {
+        title: `Misafir Yazıları${pageSuffix}`,
+        description,
+        alternates: { canonical },
+        openGraph: { type: "website", url: canonical, title: `Misafir Yazıları${pageSuffix}`, description },
+    };
+}
 
 export default async function MisafirYazarlarPage({
     searchParams,

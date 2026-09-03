@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "İletişim | Hayattan.Net",
-  description: "Hayattan.Net ile iletişime geçin",
+  title: "İletişim",
+  description: "Hayattan.Net’e görüş, öneri ve iş birliği talepleriniz için ulaşabileceğiniz iletişim kanalları.",
+  alternates: { canonical: "/iletisim" },
 };
 
 export default function IletisimPage() {

@@ -2,12 +2,14 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { updateHaber } from "@/app/admin/actions";
 import { HaberForm } from "@/components/admin/HaberForm";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 export default async function HaberDuzenlePage({
     params,
 }: {
     params: Promise<{ id: string }>;
 }) {
+    await requireAdminPage();
     const { id } = await params;
     const haber = await prisma.haber.findUnique({
         where: { id },

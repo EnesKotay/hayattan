@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Icons } from "@/components/admin/Icons";
 import { AdminFilters } from "@/components/admin/AdminFilters";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 const EVENT_LABELS: Record<string, string> = {
   failed_login: "Hatalı Giriş",
@@ -33,6 +34,7 @@ export default async function SecurityLogsPage({
 }: {
   searchParams: Promise<{ olay?: string }>;
 }) {
+  await requireAdminPage();
   const params = await searchParams;
   const olay = params.olay as SecurityEventType | undefined;
 

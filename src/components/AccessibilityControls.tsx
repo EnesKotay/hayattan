@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useAccessibility, type FontSizePreference } from "@/components/providers/AccessibilityProvider";
 
 type AccessibilityControlsProps = {
@@ -13,7 +14,7 @@ const FONT_OPTIONS: { value: FontSizePreference; label: string }[] = [
 ];
 
 export function AccessibilityControls({ variant = "panel" }: AccessibilityControlsProps) {
-  const { settings, isReady, setFontSize, setContrast, setReadingMode, resetSettings } = useAccessibility();
+  const { settings, isReady, setFontSize, setContrast, setReadingMode, setMotion, resetSettings } = useAccessibility();
 
   if (!isReady) {
     return <div className={variant === "panel" ? "h-32" : "h-24"} aria-hidden />;
@@ -105,11 +106,37 @@ export function AccessibilityControls({ variant = "panel" }: AccessibilityContro
             />
           </button>
         </div>
+
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted-bg/40 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-foreground">Hareketi Azalt</p>
+            <p className="text-xs text-muted">Geçiş ve hareket efektlerini kapatır.</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-label="Hareket efektlerini azalt"
+            aria-checked={settings.motion === "reduced"}
+            onClick={() => setMotion(settings.motion === "reduced" ? "normal" : "reduced")}
+            className={`relative h-7 w-12 rounded-full transition-colors ${
+              settings.motion === "reduced" ? "bg-primary" : "bg-border"
+            }`}
+          >
+            <span
+              className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-transform ${
+                settings.motion === "reduced" ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       <p className="text-xs leading-relaxed text-muted">
         Klavye ile gezinme ve görünür odak halkaları sitede varsayılan olarak aktiftir.
       </p>
+      <Link href="/erisilebilirlik" className="inline-flex text-xs font-semibold text-primary hover:underline">
+        Erişilebilirlik özellikleri ve geri bildirim
+      </Link>
     </section>
   );
 }

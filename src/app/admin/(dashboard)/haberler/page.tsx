@@ -4,12 +4,14 @@ import { deleteHaber } from "../../actions";
 import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
 import { AdminFeedback } from "@/components/admin/AdminFeedback";
 import { Haber } from "@prisma/client";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 export default async function AdminHaberlerPage({
     searchParams,
 }: {
     searchParams: Promise<{ success?: string; deleted?: string; error?: string }>;
 }) {
+    await requireAdminPage();
     const params = await searchParams;
 
     const haberler = await prisma.haber.findMany({

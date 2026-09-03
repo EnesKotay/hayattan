@@ -1,10 +1,12 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useState, useRef, startTransition, type ReactNode } from "react";
+import { useEffect, useState, useRef, useSyncExternalStore, startTransition, type ReactNode } from "react";
 import { AccessibilityControls } from "@/components/AccessibilityControls";
 
 type ThemeValue = "light" | "dark";
+
+const subscribeToHydration = () => () => undefined;
 
 const OPTIONS: { value: ThemeValue; label: string; icon: ReactNode }[] = [
   {
@@ -33,11 +35,9 @@ type ThemeSelectorProps = {
 
 export function ThemeSelector({ variant = "dropdown" }: ThemeSelectorProps) {
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const close = (e: MouseEvent) => {
@@ -48,7 +48,7 @@ export function ThemeSelector({ variant = "dropdown" }: ThemeSelectorProps) {
   }, []);
 
   if (!mounted) {
-    return <div className={variant === "inline" ? "flex gap-1" : "h-10 w-10 shrink-0"} aria-hidden />;
+    return <div className={variant === "inline" ? "flex gap-1" : "h-11 w-11 shrink-0"} aria-hidden />;
   }
 
   const current = (theme ?? "light") as ThemeValue;
@@ -83,7 +83,7 @@ export function ThemeSelector({ variant = "dropdown" }: ThemeSelectorProps) {
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label="Tema seçimi"
-        className="flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors hover:bg-muted-bg hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-muted-bg/60 text-muted hover:bg-muted-bg hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         {effectiveDark ? OPTIONS[1].icon : OPTIONS[0].icon}
       </button>
@@ -92,10 +92,10 @@ export function ThemeSelector({ variant = "dropdown" }: ThemeSelectorProps) {
         <div
           role="dialog"
           aria-label="Görünüm ve okuma ayarları"
-          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-border bg-background py-2 shadow-xl"
+          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-[16px] border border-border bg-background py-2 shadow-premium-xl"
         >
           <div className="px-4 pb-2">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Görünüm</p>
+            <p className="text-[13px] font-semibold text-muted">Görünüm</p>
           </div>
           {OPTIONS.map((opt) => (
             <button

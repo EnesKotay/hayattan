@@ -46,6 +46,11 @@ export default async function SifreSifirlaPage({
                             Bu bağlantı geçersiz veya süresi dolmuş.
                         </div>
                     )}
+                    {params.error === "zayif" && (
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                            Şifre en az 8 karakter, bir büyük harf, bir küçük harf ve bir rakam içermelidir.
+                        </div>
+                    )}
 
                     <div>
                         <label
@@ -59,7 +64,7 @@ export default async function SifreSifirlaPage({
                             name="password"
                             type="password"
                             required
-                            minLength={6}
+                            minLength={8}
                             placeholder="••••••••"
                             className="mt-1.5 w-full rounded-lg border border-[#ddd] px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />
@@ -77,7 +82,7 @@ export default async function SifreSifirlaPage({
                             name="passwordConfirm"
                             type="password"
                             required
-                            minLength={6}
+                            minLength={8}
                             placeholder="••••••••"
                             className="mt-1.5 w-full rounded-lg border border-[#ddd] px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />

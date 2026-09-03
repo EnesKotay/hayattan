@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props) {
     select: { title: true },
   });
   return {
-    title: yazi ? `Önizleme: ${yazi.title} | Hayattan.Net` : "Önizleme | Hayattan.Net",
+    title: yazi ? `Önizleme: ${yazi.title}` : "Önizleme",
   };
 }
 
@@ -38,6 +38,7 @@ export default async function YazıOnizlemePage({ params }: Props) {
   });
 
   if (!yazi) notFound();
+  if (session.user.role !== "ADMIN" && yazi.authorId !== session.user.id) notFound();
 
   const duzenleUrl = `/admin/yazilar/${id}`;
   const yayindaMi = !!yazi.publishedAt;

@@ -32,9 +32,77 @@ export const RATE_LIMITS = {
         windowMs: 60 * 1000, // 1 minute
         blockDurationMs: 10 * 60 * 1000, // 10 minutes block
     },
+    newsletter: {
+        maxAttempts: 5,
+        windowMs: 60 * 60 * 1000, // 1 hour
+        blockDurationMs: 60 * 60 * 1000, // 1 hour block
+    },
 } as const;
 
 type RateLimitType = keyof typeof RATE_LIMITS;
+
+// In-memory fallback store when KV is not configured
+type MemoryStoreItem = { count: number; resetAt: number; blockUntil?: number };
+const memoryStore = new Map<string, MemoryStoreItem>();
+
+function checkMemoryRateLimit(identifier: string, type: RateLimitType): RateLimitResult {
+    const config = RATE_LIMITS[type];
+    const now = Date.now();
+    const storeKey = `${type}:${identifier}`;
+
+    // Temizlik (eski kayıtları sil)
+    if (memoryStore.size > 10000) {
+        for (const [k, v] of memoryStore.entries()) {
+            if (v.resetAt < now && (!v.blockUntil || v.blockUntil < now)) {
+                memoryStore.delete(k);
+            }
+        }
+    }
+
+    const record = memoryStore.get(storeKey);
+
+    if (record?.blockUntil && record.blockUntil > now) {
+        return {
+            success: false,
+            limit: config.maxAttempts,
+            remaining: 0,
+            reset: record.blockUntil,
+            blocked: true,
+        };
+    }
+
+    if (!record || record.resetAt < now) {
+        memoryStore.set(storeKey, { count: 1, resetAt: now + config.windowMs });
+        return {
+            success: true,
+            limit: config.maxAttempts,
+            remaining: config.maxAttempts - 1,
+            reset: now + config.windowMs,
+            blocked: false,
+        };
+    }
+
+    if (record.count >= config.maxAttempts) {
+        const blockUntil = now + config.blockDurationMs;
+        record.blockUntil = blockUntil;
+        return {
+            success: false,
+            limit: config.maxAttempts,
+            remaining: 0,
+            reset: blockUntil,
+            blocked: true,
+        };
+    }
+
+    record.count += 1;
+    return {
+        success: true,
+        limit: config.maxAttempts,
+        remaining: config.maxAttempts - record.count,
+        reset: record.resetAt,
+        blocked: false,
+    };
+}
 
 /**
  * Check rate limit for a given identifier (IP, user ID, etc.)
@@ -43,19 +111,9 @@ export async function checkRateLimit(
     identifier: string,
     type: RateLimitType = "api"
 ): Promise<RateLimitResult> {
-    // If KV is not configured, allow all requests (dev mode)
+    // If KV is not configured, fallback to memory rate limiter
     if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
-        // Only warn in production, silent in development
-        if (process.env.NODE_ENV === "production") {
-            console.warn("⚠️  Rate limiting disabled: KV not configured");
-        }
-        return {
-            success: true,
-            limit: RATE_LIMITS[type].maxAttempts,
-            remaining: RATE_LIMITS[type].maxAttempts,
-            reset: Date.now() + RATE_LIMITS[type].windowMs,
-            blocked: false,
-        };
+        return checkMemoryRateLimit(identifier, type);
     }
 
     const config = RATE_LIMITS[type];

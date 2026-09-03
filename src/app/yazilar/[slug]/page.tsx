@@ -16,8 +16,8 @@ import { NewsletterForm } from "@/components/NewsletterForm";
 import { ArticleFeedbackCard } from "@/components/ArticleFeedbackCard";
 import { MostSharedArticles } from "@/components/MostSharedArticles";
 import { AuthorFollowButton } from "@/components/AuthorFollowButton";
-import { addHeadingIds, estimateReadingMinutes, extractHeadings } from "@/lib/article-utils";
-import { generateYaziMetadata, generateArticleSchema, generateBreadcrumbSchema } from "@/lib/seo";
+import { addHeadingIds, estimateReadingMinutes, extractHeadings, lazyLoadContentImages } from "@/lib/article-utils";
+import { generateYaziMetadata, generateArticleSchema, generateBreadcrumbSchema, serializeJsonLd } from "@/lib/seo";
 import { feedbackCountKey, parseCounter } from "@/lib/engagement";
 
 type Props = {
@@ -33,6 +33,7 @@ export async function generateMetadata({ params }: Props) {
     select: {
       title: true,
       excerpt: true,
+      content: true,
       featuredImage: true,
       slug: true,
       publishedAt: true,
@@ -41,11 +42,13 @@ export async function generateMetadata({ params }: Props) {
       metaKeywords: true,
       ogImage: true,
       imageAlt: true,
-      author: { select: { name: true } },
+      author: { select: { name: true, slug: true } },
+      kategoriler: { select: { name: true } },
+      etiketler: { select: { name: true } },
     },
   });
 
-  if (!yazi) return { title: "Yazı Bulunamadı | Hayattan.Net" };
+  if (!yazi) return { title: "Yazı Bulunamadı" };
 
   return generateYaziMetadata(yazi);
 }
@@ -178,7 +181,7 @@ export default async function YaziDetayPage({ params }: Props) {
   );
   const readingMinutes = estimateReadingMinutes(yazi.content);
   const headings = extractHeadings(yazi.content);
-  const contentWithHeadingIds = addHeadingIds(yazi.content, headings);
+  const contentWithHeadingIds = lazyLoadContentImages(addHeadingIds(yazi.content, headings));
 
   return (
     <article className="container mx-auto max-w-3xl px-4 py-12">
@@ -186,11 +189,11 @@ export default async function YaziDetayPage({ params }: Props) {
       {/* Schema.org JSON-LD for SEO */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleSchema) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbSchema) }}
       />
 
       <ReadingProgressBar />

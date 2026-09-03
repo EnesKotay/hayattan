@@ -154,3 +154,6 @@ package-lock 2.json
 # Claude Code settings
 .claude/
 .vercel
+
+# Migration yedekleri (yazı içerikleri — repoya girmemeli)
+scripts/.wp-media-backups/

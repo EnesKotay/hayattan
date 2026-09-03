@@ -1,7 +1,6 @@
-import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
 import Image from "next/image";
 import Link from "next/link";
-import { StaggerContainer, StaggerItem } from "@/components/Animations/Reveal";
+import { normalizeImageUrl } from "@/lib/image";
 
 type SonYazilarYazi = {
   id: string;
@@ -10,40 +9,35 @@ type SonYazilarYazi = {
   excerpt: string | null;
   featuredImage: string | null;
   publishedAt: Date | null;
-  author: {
-    name: string;
-    slug: string;
-  };
-  kategoriler: {
-    name: string;
-    slug: string;
-  }[];
+  author: { name: string; slug: string };
+  kategoriler: { name: string; slug: string }[];
 };
 
-type SonYazilarProps = {
-  yazilar: SonYazilarYazi[];
-};
+type SonYazilarProps = { yazilar: SonYazilarYazi[] };
 
 function KategoriBadge({ name, slug }: { name: string; slug: string }) {
   return (
     <Link
       href={`/kategoriler/${slug}`}
-      className="inline-block rounded bg-primary/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-primary transition-colors hover:bg-primary hover:text-white"
+      className="inline-flex rounded-full bg-primary-light px-3 py-1 text-[13px] font-semibold text-primary hover:bg-primary hover:text-white"
     >
       {name}
     </Link>
   );
 }
 
-function YaziMeta({ author, publishedAt }: { author: { name: string; slug: string }; publishedAt: Date | null }) {
+function YaziMeta({ author, publishedAt }: {
+  author: { name: string; slug: string };
+  publishedAt: Date | null;
+}) {
   return (
-    <div className="mt-2 flex items-center gap-2 text-xs text-muted">
-      <Link href={`/yazarlar/${author.slug}`} className="font-medium hover:text-primary">
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+      <Link href={`/yazarlar/${author.slug}`} className="font-semibold text-foreground/80 hover:text-primary">
         {author.name}
       </Link>
       {publishedAt && (
         <>
-          <span className="text-border">•</span>
+          <span aria-hidden>•</span>
           <time dateTime={publishedAt.toISOString()}>
             {new Date(publishedAt).toLocaleDateString("tr-TR", {
               day: "numeric",
@@ -57,140 +51,189 @@ function YaziMeta({ author, publishedAt }: { author: { name: string; slug: strin
   );
 }
 
-export function SonYazilar({ yazilar }: SonYazilarProps) {
-  if (yazilar.length === 0) {
-    return (
-      <section className="border-t border-border bg-muted-bg/30 py-16">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-1 bg-primary" />
-            <h2 className="font-serif text-2xl font-bold text-foreground">Son Yazılar</h2>
-          </div>
-          <div className="mt-8 rounded-lg border border-border bg-background p-16 text-center">
-            <p className="text-muted">Henüz yazı bulunmuyor.</p>
-          </div>
+function EmptyState() {
+  return (
+    <section className="py-14 md:py-20">
+      <div className="container mx-auto px-4 md:px-6">
+        <div className="rounded-[18px] border border-dashed border-border bg-muted-bg/55 p-12 text-center">
+          <h2 className="font-serif text-2xl font-bold text-foreground">Son Yazılar</h2>
+          <p className="mt-3 text-base text-muted">Henüz yayımlanmış bir yazı bulunmuyor.</p>
         </div>
-      </section>
-    );
-  }
+      </div>
+    </section>
+  );
+}
+
+export function SonYazilar({ yazilar }: SonYazilarProps) {
+  if (yazilar.length === 0) return <EmptyState />;
 
   const [featured, ...rest] = yazilar;
-  const sideYazilar = rest.slice(0, 5);
-  const hasSidebar = sideYazilar.length > 0;
+  const supporting = rest.slice(0, 4);
 
   return (
-    <section className="border-t border-border bg-muted-bg/30 py-12 md:py-16">
-      <div className="container mx-auto px-4">
-        {/* Bölüm başlığı - haber sitesi tarzı */}
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-1 shrink-0 bg-primary" aria-hidden />
-            <h2 className="font-serif text-2xl font-bold text-foreground md:text-3xl">Son Yazılar</h2>
+    <section className="border-y border-border/70 bg-surface py-14 md:py-20">
+      <div className="container mx-auto px-4 md:px-6">
+        <div className="mb-7 flex items-end justify-between gap-4 md:mb-9">
+          <div>
+            <p className="text-sm font-semibold text-primary">Yeni eklenenler</p>
+            <h2 className="mt-1 font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+              Son Yazılar
+            </h2>
           </div>
-          <Link
-            href="/yazilar"
-            className="hidden text-sm font-semibold text-primary transition-colors hover:text-primary-hover md:inline-flex"
-          >
-            Tümünü Gör →
+          <Link href="/yazilar" className="inline-flex min-h-11 items-center text-sm font-semibold text-primary hover:text-primary-hover">
+            Tüm yazılar <span className="ml-2" aria-hidden>→</span>
           </Link>
         </div>
 
-        {/* Öne çıkan + yan sütun layout */}
-        <div className={`grid gap-10 ${hasSidebar ? "lg:grid-cols-3" : ""}`}>
-          {/* Öne çıkan yazı - büyük kart */}
-          <article className={`group relative card overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:shadow-premium-xl hover:-translate-y-2 hover:border-primary/10 bg-background shadow-premium ${hasSidebar ? "lg:col-span-2" : ""}`}>
-            <div className="absolute left-4 top-4 z-10 flex flex-wrap gap-3 transition-transform duration-500 group-hover:translate-x-1">
-              {featured.kategoriler.slice(0, 2).map((k) => (
-                <KategoriBadge key={k.slug} name={k.name} slug={k.slug} />
+        {/* Featured article — always full width */}
+        <article className="card group mb-5 sm:hidden">
+          <Link href={`/yazilar/${featured.slug}`} className="image-container relative block aspect-[16/9] bg-muted-bg">
+            {featured.featuredImage ? (
+              <Image
+                src={normalizeImageUrl(featured.featuredImage)!}
+                alt={featured.title}
+                fill
+                priority
+                className="object-cover"
+                sizes="100vw"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-primary-light font-serif text-5xl text-primary/35">H</div>
+            )}
+          </Link>
+          <div className="p-5">
+            <div className="flex flex-wrap gap-2">
+              {featured.kategoriler.slice(0, 2).map((kategori) => (
+                <KategoriBadge key={kategori.slug} {...kategori} />
               ))}
             </div>
-            <Link href={`/yazilar/${featured.slug}`} className="image-container relative aspect-[16/9] w-full bg-muted-bg overflow-hidden border-b border-border/40 block">
+            <Link href={`/yazilar/${featured.slug}`}>
+              <h3 className="mt-4 font-serif text-2xl font-bold leading-tight tracking-tight text-foreground group-hover:text-primary">
+                {featured.title}
+              </h3>
+            </Link>
+            {featured.excerpt && (
+              <p className="mt-4 line-clamp-3 text-base leading-relaxed text-muted">
+                {featured.excerpt}
+              </p>
+            )}
+            <div className="mt-6 border-t border-border/70 pt-5">
+              <YaziMeta author={featured.author} publishedAt={featured.publishedAt} />
+            </div>
+          </div>
+        </article>
+
+        {/* Mobile: horizontal scroll strip for supporting articles */}
+        <div className="sm:hidden">
+          <div
+            className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4"
+            role="list"
+            aria-label="Son yazılar"
+          >
+            {supporting.map((yazi) => (
+              <article
+                key={yazi.id}
+                role="listitem"
+                className="card group w-[72vw] min-w-[72vw] flex-shrink-0 snap-start"
+              >
+                <Link href={`/yazilar/${yazi.slug}`} className="image-container relative block aspect-[4/3] bg-muted-bg">
+                  {yazi.featuredImage ? (
+                    <Image
+                      src={normalizeImageUrl(yazi.featuredImage)!}
+                      alt={yazi.title}
+                      fill
+                      className="object-cover"
+                      sizes="72vw"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-primary-light font-serif text-3xl text-primary/35">H</div>
+                  )}
+                </Link>
+                <div className="flex flex-1 flex-col p-4">
+                  {yazi.kategoriler[0] && <KategoriBadge {...yazi.kategoriler[0]} />}
+                  <Link href={`/yazilar/${yazi.slug}`}>
+                    <h3 className="mt-3 line-clamp-3 font-serif text-lg font-bold leading-snug text-foreground group-hover:text-primary">
+                      {yazi.title}
+                    </h3>
+                  </Link>
+                  <div className="mt-auto pt-4">
+                    <YaziMeta author={yazi.author} publishedAt={yazi.publishedAt} />
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+          {/* Scroll hint fade */}
+          <p className="mt-1 text-center text-xs text-muted">← kaydır →</p>
+        </div>
+
+        {/* Tablet + Desktop: original grid layout */}
+        <div className="hidden grid-cols-2 gap-5 sm:grid lg:grid-cols-4">
+          <article className="card group sm:col-span-2 lg:row-span-2">
+            <Link href={`/yazilar/${featured.slug}`} className="image-container relative block aspect-[16/9] bg-muted-bg">
               {featured.featuredImage ? (
                 <Image
                   src={normalizeImageUrl(featured.featuredImage)!}
                   alt={featured.title}
                   fill
-                  className="object-cover transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-105"
-                  sizes="(max-width: 1024px) 100vw, 66vw"
                   priority
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/30">
-                  <span className="font-serif text-4xl">Y</span>
-                </div>
+                <div className="flex h-full w-full items-center justify-center bg-primary-light font-serif text-5xl text-primary/35">H</div>
               )}
-              {/* Cinematic Vignette Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40 transition-opacity duration-700 group-hover:opacity-60" />
             </Link>
-            <div className="p-5 md:p-8 lg:p-10 relative">
+            <div className="p-5 md:p-7 lg:p-8">
+              <div className="flex flex-wrap gap-2">
+                {featured.kategoriler.slice(0, 2).map((kategori) => (
+                  <KategoriBadge key={kategori.slug} {...kategori} />
+                ))}
+              </div>
               <Link href={`/yazilar/${featured.slug}`}>
-                <h3 className="font-serif text-2xl font-bold leading-tight text-foreground transition-all duration-500 group-hover:text-primary md:text-3xl lg:text-4xl tracking-tight group-hover:translate-x-1">
+                <h3 className="mt-4 font-serif text-2xl font-bold leading-tight tracking-tight text-foreground group-hover:text-primary md:text-3xl">
                   {featured.title}
                 </h3>
               </Link>
               {featured.excerpt && (
-                <p className="mt-6 line-clamp-3 text-base md:text-lg text-muted/80 leading-relaxed font-sans transition-all duration-500 group-hover:text-muted group-hover:translate-x-1">
+                <p className="mt-4 line-clamp-3 text-base leading-relaxed text-muted">
                   {featured.excerpt}
                 </p>
               )}
-              <div className="mt-8 pt-8 border-t border-border/40 transition-colors group-hover:border-primary/10">
+              <div className="mt-6 border-t border-border/70 pt-5">
                 <YaziMeta author={featured.author} publishedAt={featured.publishedAt} />
               </div>
             </div>
           </article>
 
-          {/* Yan sütun - küçük kartlar */}
-          {hasSidebar && (
-            <StaggerContainer className="flex flex-col gap-8">
-              {sideYazilar.map((yazi) => (
-                <StaggerItem key={yazi.id}>
-                  <article className="group flex gap-5 h-full border-none shadow-none hover:shadow-none bg-transparent transition-all duration-500">
-                    <Link href={`/yazilar/${yazi.slug}`} className="image-container relative h-28 w-32 shrink-0 rounded-[20px] bg-muted-bg md:h-36 md:w-48 overflow-hidden shadow-premium-sm group-hover:shadow-premium transition-shadow duration-500">
-                      {yazi.featuredImage ? (
-                        <Image
-                          src={normalizeImageUrl(yazi.featuredImage)!}
-                          alt={yazi.title}
-                          fill
-                          className="object-cover transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-105"
-                          sizes="300px"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-primary-light text-primary/30">
-                          <span className="font-serif text-2xl">Y</span>
-                        </div>
-                      )}
-                    </Link>
-                    <div className="min-w-0 flex-1 flex flex-col justify-center py-2 group/text">
-                      <div className="mb-3 flex flex-wrap gap-2 transition-transform duration-500 group-hover:translate-x-1">
-                        {yazi.kategoriler.slice(0, 1).map((k) => (
-                          <KategoriBadge key={k.slug} name={k.name} slug={k.slug} />
-                        ))}
-                      </div>
-                      <Link href={`/yazilar/${yazi.slug}`}>
-                        <h4 className="font-serif line-clamp-2 text-base font-bold text-foreground transition-all duration-500 group-hover:text-primary md:text-lg tracking-tight group-hover:translate-x-1">
-                          {yazi.title}
-                        </h4>
-                      </Link>
-                      <div className="mt-3 text-xs opacity-70 transition-transform duration-500 group-hover:translate-x-1">
-                        <YaziMeta author={yazi.author} publishedAt={yazi.publishedAt} />
-                      </div>
-                    </div>
-                  </article>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          )}
-        </div>
-
-        {/* Mobil Tüm Yazılar butonu */}
-        <div className="mt-8 flex justify-center md:hidden">
-          <Link
-            href="/yazilar"
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover"
-          >
-            Tüm Yazıları Gör
-            <span aria-hidden>→</span>
-          </Link>
+          {supporting.map((yazi) => (
+            <article key={yazi.id} className="card group flex min-h-full flex-col">
+              <Link href={`/yazilar/${yazi.slug}`} className="image-container relative block aspect-[16/10] bg-muted-bg">
+                {yazi.featuredImage ? (
+                  <Image
+                    src={normalizeImageUrl(yazi.featuredImage)!}
+                    alt={yazi.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-primary-light font-serif text-3xl text-primary/35">H</div>
+                )}
+              </Link>
+              <div className="flex flex-1 flex-col p-4 md:p-5">
+                {yazi.kategoriler[0] && <KategoriBadge {...yazi.kategoriler[0]} />}
+                <Link href={`/yazilar/${yazi.slug}`}>
+                  <h3 className="mt-3 line-clamp-3 font-serif text-lg font-bold leading-snug text-foreground group-hover:text-primary md:text-xl">
+                    {yazi.title}
+                  </h3>
+                </Link>
+                <div className="mt-auto pt-5">
+                  <YaziMeta author={yazi.author} publishedAt={yazi.publishedAt} />
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>

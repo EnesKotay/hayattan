@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { SearchWithSuggestions } from "./Search/SearchWithSuggestions";
 import { ThemeSelector } from "./ThemeSelector";
 import { AccessibilityControls } from "./AccessibilityControls";
@@ -76,7 +77,9 @@ const socialLinks = [
 
 export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] }) {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
   const navItems = propNavItems || defaultNavItems;
+  const isActive = (href: string) => href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   // Prevent scroll when menu is open
   useEffect(() => {
@@ -94,7 +97,7 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`relative z-[60] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-500 ${isOpen ? "bg-primary text-white shadow-[0_8px_24px_rgba(var(--primary-rgb),0.3)] rotate-180" : "bg-muted-bg/80 text-foreground hover:bg-muted-bg/60 border border-border/40"
+        className={`relative z-[60] flex h-11 w-11 items-center justify-center rounded-xl border transition-colors ${isOpen ? "border-primary bg-primary text-white" : "border-border bg-muted-bg/70 text-foreground hover:bg-muted-bg"
           }`}
         aria-label={isOpen ? "Menüyü kapat" : "Menüyü aç"}
         aria-expanded={isOpen}
@@ -123,7 +126,7 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-background/60 backdrop-blur-md"
+              className="fixed inset-0 z-50 bg-foreground/20 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
 
@@ -132,17 +135,17 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
               initial={{ x: "100%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0 }}
-              transition={{ type: "spring", damping: 32, stiffness: 280 }}
-              className="fixed right-0 top-0 z-50 h-[100dvh] w-full max-w-[340px] bg-background/80 backdrop-blur-[32px] border-l border-white/10 p-6 flex flex-col shadow-[-20px_0_60px_rgba(0,0,0,0.15)] ring-1 ring-black/5"
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="fixed right-0 top-0 z-50 flex h-[100dvh] w-full max-w-[360px] flex-col border-l border-border bg-background/96 p-5 shadow-premium-xl backdrop-blur-xl"
               aria-label="Mobil navigasyon"
             >
-              <div className="mt-16 flex flex-col flex-1 gap-10 overflow-y-auto scrollbar-hide py-4 px-1">
+              <div className="mt-14 flex flex-1 flex-col gap-7 overflow-y-auto px-1 py-4 scrollbar-hide">
                 {/* Logo or Title Placeholder in Menu */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="flex items-center gap-3 mb-2"
+                  className="mb-1 flex items-center gap-3"
                 >
                   <div className="h-8 w-1 bg-primary rounded-full" />
                   <span className="font-serif text-xl font-bold tracking-tight text-foreground">Hayattan.Net</span>
@@ -155,21 +158,21 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
                   transition={{ delay: 0.15 }}
                   className="flex flex-col gap-4"
                 >
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/70 ml-1">Keşfet</span>
-                  <div className="relative group p-[1px] rounded-2xl bg-gradient-to-br from-primary/20 to-transparent">
-                    <div className="bg-background/40 backdrop-blur-sm rounded-[15px] overflow-hidden">
+                  <span className="ml-1 text-xs font-semibold text-muted">Keşfet</span>
+                  <div className="relative rounded-xl">
+                    <div className="overflow-hidden rounded-xl bg-background">
                       <SearchWithSuggestions />
                     </div>
                   </div>
                 </motion.div>
 
                 {/* Navigasyon Linkleri - Staggered Entry */}
-                <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-3">
                   <motion.span
                     initial={{ opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/70 ml-1"
+                    className="ml-1 text-xs font-semibold text-muted"
                   >
                     Menü
                   </motion.span>
@@ -185,16 +188,14 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
                           href={item.href}
                           prefetch={false}
                           onClick={() => setIsOpen(false)}
-                          className="group relative flex items-center gap-4 rounded-2xl px-4 py-3.5 text-[15px] font-bold text-foreground/80 transition-all hover:text-primary active:scale-[0.97]"
+                          aria-current={isActive(item.href) ? "page" : undefined}
+                          className={`group relative flex min-h-12 items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold ${isActive(item.href) ? "bg-primary-light text-primary" : "text-foreground/80 hover:bg-muted-bg hover:text-primary"}`}
                         >
-                          {/* Animated background on hover */}
-                          <div className="absolute inset-0 rounded-2xl bg-primary/0 opacity-0 transition-all duration-300 group-hover:bg-primary/5 group-hover:opacity-100" />
-
-                          <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-muted-bg/60 border border-border/40 group-hover:border-primary/20 group-hover:text-primary transition-all duration-300">
+                          <span className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background group-hover:border-primary/20 group-hover:text-primary">
                             {item.icon || <ArrowRightIcon className="w-5 h-5" />}
                           </span>
-                          <span className="relative flex-1 tracking-tight font-sans">{item.label}</span>
-                          <ArrowRightIcon className="relative w-4 h-4 opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-60 group-hover:translate-x-0 group-hover:text-primary" />
+                          <span className="relative flex-1 font-sans">{item.label}</span>
+                          <ArrowRightIcon className="relative h-4 w-4 text-muted group-hover:text-primary" />
                         </Link>
                       </motion.li>
                     ))}
@@ -202,7 +203,7 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
                 </div>
 
                 {/* Alt Bölüm: Tema & Sosyal Medya */}
-                <div className="mt-auto pt-8 border-t border-border/20 space-y-10">
+                <div className="mt-auto space-y-7 border-t border-border pt-6">
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -211,8 +212,8 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted/60">Görünüm</span>
-                        <span className="text-xs font-bold text-foreground/70">Karanlık / Aydınlık</span>
+                        <span className="text-xs font-semibold text-muted">Görünüm</span>
+                        <span className="text-sm font-semibold text-foreground/70">Koyu / Açık</span>
                       </div>
                       <ThemeSelector variant="inline" />
                     </div>
@@ -225,7 +226,7 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
                     transition={{ delay: 0.7 }}
                     className="flex flex-col gap-5 pb-6"
                   >
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted/60 ml-2">Sosyal Medya</span>
+                    <span className="ml-2 text-xs font-semibold text-muted">Sosyal medya</span>
                     <div className="flex justify-between gap-3 px-1">
                       {socialLinks.map((social, i) => (
                         <motion.a
@@ -235,8 +236,8 @@ export function MobileMenu({ navItems: propNavItems }: { navItems?: NavItem[] })
                           rel="noopener noreferrer"
                           initial={{ scale: 0.8, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.8 + i * 0.08, type: "spring", damping: 15 }}
-                          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted-bg/40 border border-border/30 text-muted/80 transition-all duration-300 hover:bg-primary hover:text-white hover:border-primary hover:-translate-y-1.5 hover:shadow-[0_10px_20px_rgba(var(--primary-rgb),0.15)]"
+                          transition={{ delay: 0.45 + i * 0.04, duration: 0.16 }}
+                          className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-muted-bg/50 text-muted hover:border-primary hover:bg-primary hover:text-white"
                           aria-label={social.label}
                         >
                           {social.icon}

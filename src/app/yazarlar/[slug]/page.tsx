@@ -7,6 +7,8 @@ import { NewsletterForm } from "@/components/NewsletterForm";
 import { AuthorFollowButton } from "@/components/AuthorFollowButton";
 import { SiteBreadcrumb } from "@/components/SiteBreadcrumb";
 import { auth } from "@/lib/auth";
+import { createExcerptFromHtml } from "@/lib/article-utils";
+import { generateAuthorSchema, serializeJsonLd } from "@/lib/seo";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -15,18 +17,34 @@ type Props = {
 
 const YAZILAR_PER_PAGE = 12;
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { sayfa } = await searchParams;
   const yazar = await prisma.yazar.findUnique({
     where: { slug },
-    select: { name: true, biyografi: true },
+    select: { name: true, biyografi: true, photo: true },
   });
 
   if (!yazar) return { title: "Yazar Bulunamadı" };
 
+  const page = Math.max(1, parseInt(sayfa ?? "1", 10) || 1);
+  const canonical = page > 1 ? `/yazarlar/${slug}?sayfa=${page}` : `/yazarlar/${slug}`;
+  const pageSuffix = page > 1 ? ` — Sayfa ${page}` : "";
+  const description = yazar.biyografi
+    ? createExcerptFromHtml(yazar.biyografi, 160)
+    : `${yazar.name} - Hayattan.Net yazarı. Tüm yazıları ve profili.`;
+
   return {
-    title: `${yazar.name} | Hayattan.Net`,
-    description: yazar.biyografi ?? `${yazar.name} - Hayattan.Net yazarı`,
+    title: `${yazar.name}${pageSuffix}`,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "profile",
+      url: canonical,
+      title: `${yazar.name}${pageSuffix}`,
+      description,
+      ...(yazar.photo ? { images: [yazar.photo] } : {}),
+    },
   };
 }
 
@@ -125,8 +143,20 @@ export default async function YazarDetayPage({ params, searchParams }: Props) {
     { href: `/yazarlar/${yazar.slug}`, label: yazar.name },
   ];
 
+  const authorSchema = generateAuthorSchema({
+    name: yazar.name,
+    slug: yazar.slug,
+    bio: yazar.biyografi,
+    photo: yazar.photo,
+    yaziSayisi: totalCount,
+  });
+
   return (
     <div className="bg-muted-bg/20 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(authorSchema) }}
+      />
       <div className="container mx-auto px-4">
         <SiteBreadcrumb items={breadcrumbItems} />
 

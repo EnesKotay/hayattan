@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { getAdSlots } from "@/app/admin/actions";
 import { AdSlot } from "@/components/AdSlot";
 import { YazilarFiltre } from "@/components/YazilarFiltre";
-import { generateBreadcrumbSchema } from "@/lib/seo";
+import { generateBreadcrumbSchema, serializeJsonLd } from "@/lib/seo";
 import {
   FOTOGRAFHANE_CATEGORY_WHERE,
   BAKIS_CATEGORY_WHERE,
@@ -23,29 +23,37 @@ export const revalidate = 60;
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ kategori?: string; yazar?: string; ara?: string }>;
+  searchParams: Promise<{ kategori?: string; yazar?: string; ara?: string; sayfa?: string }>;
 }) {
-  const { kategori, yazar, ara } = await searchParams;
+  const { kategori, yazar, ara, sayfa } = await searchParams;
   const parts = [];
   if (kategori) parts.push(kategori);
   if (yazar) parts.push(yazar);
   if (ara) parts.push(`"${ara}"`);
+  const page = Math.max(1, parseInt(sayfa ?? "1", 10) || 1);
+  if (page > 1) parts.push(`Sayfa ${page}`);
   const suffix = parts.length ? ` - ${parts.join(" / ")}` : "";
+
+  // Filtreli görünümler (kategori/yazar/arama) filtresiz listeye toplanır; sayfalama
+  // ise kendi kendine canonical olur, aksi halde 2+. sayfalardaki yazılar indexten düşer.
+  const isFiltered = Boolean(kategori || yazar || ara);
+  const canonical = !isFiltered && page > 1 ? `/yazilar?sayfa=${page}` : "/yazilar";
+  const description = ara
+    ? `"${ara}" araması - Hayattan.Net`
+    : "Hayattan.Net - Tüm yazılar";
 
   return {
     title: `Yazılar${suffix}`,
-    description: ara
-      ? `"${ara}" araması - Hayattan.Net`
-      : "Hayattan.Net - Tüm yazılar",
+    description,
     alternates: {
-      canonical: "/yazilar",
+      canonical,
     },
+    // Arama filtreli liste görünümleri indexlenmemeli — sonsuz URL varyasyonu üretir
+    ...(ara ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title: `Yazılar${suffix}`,
-      description: ara
-        ? `"${ara}" araması - Hayattan.Net`
-        : "Hayattan.Net yazı arşivi",
-      url: "/yazilar",
+      description: ara ? description : "Hayattan.Net yazı arşivi",
+      url: canonical,
       type: "website",
     },
   };
@@ -175,7 +183,7 @@ export default async function YazilarPage({
     <div className="min-h-screen bg-muted-bg/30 pb-20 pt-8 md:pt-10">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbSchema) }}
       />
       <div className="container mx-auto px-4">
         <section className="mb-8 rounded-2xl border border-border/50 bg-background px-5 py-8 shadow-sm md:px-8 md:py-10">
@@ -268,7 +276,7 @@ export default async function YazilarPage({
               <>
                 <h3 className="text-xl font-semibold text-foreground">Fotoğrafhane yazıları</h3>
                 <p className="mt-2 text-muted">Bu kategorideki yazılar sadece Fotoğrafhane sayfasında listelenir.</p>
-                <Link href="/sayfa/fotografhane" className="mt-6 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover">
+                <Link href="/fotografhane" className="mt-6 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover">
                   Fotoğrafhane sayfasına git →
                 </Link>
               </>

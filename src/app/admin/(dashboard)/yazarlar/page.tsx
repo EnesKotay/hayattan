@@ -4,12 +4,14 @@ import { deleteYazar } from "@/app/admin/actions";
 import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
 import { AdminFeedback } from "@/components/admin/AdminFeedback";
 import { AdminFilters } from "@/components/admin/AdminFilters";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 export default async function AdminYazarlarPage({
   searchParams,
 }: {
   searchParams: Promise<{ success?: string; deleted?: string; error?: string; q?: string }>;
 }) {
+  await requireAdminPage();
   const params = await searchParams;
   const q = (params.q ?? "").trim();
   const tumu = await prisma.yazar.findMany({

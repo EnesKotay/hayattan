@@ -1,8 +1,9 @@
 import Link from "next/link";
 
 export const metadata = {
-    title: "Kullanım Şartları | Hayattan.Net",
+    title: "Kullanım Şartları",
     description: "Hayattan.Net kullanım koşulları ve yasal uyarılar.",
+    alternates: { canonical: "/kullanim-sartlari" },
 };
 
 export default function KullanimSartlariPage() {

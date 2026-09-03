@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getPageBySlug } from "@/app/admin/actions";
 import { EskiYazilarArsivi } from "@/components/EskiYazilarArsivi";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { createExcerptFromHtml } from "@/lib/article-utils";
 import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
 import { isFotoğrafhanePageSlug, FOTOGRAFHANE_CATEGORY_WHERE } from "@/lib/site-categories";
 import { prisma } from "@/lib/db";
@@ -28,20 +29,36 @@ type Props = {
   searchParams: Promise<{ sayfa?: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const { sayfa } = await searchParams;
+  const pageNumber = Math.max(1, parseInt(sayfa ?? "1", 10) || 1);
+  const pageSuffix = pageNumber > 1 ? ` — Sayfa ${pageNumber}` : "";
+
   if (isEskiYazilarPageSlug(slug)) {
+    const canonical = pageNumber > 1 ? `/eski-yazilar?sayfa=${pageNumber}` : "/eski-yazilar";
     return {
-      title: "Eski Yazılar | Hayattan.Net",
+      title: `Eski Yazılar${pageSuffix}`,
       description: "Yayın ekibinden ayrılmış yazarlarımızın yazı arşivi",
+      alternates: { canonical },
+      robots: { index: false, follow: true },
     };
   }
 
   const page = await getPageBySlug(slug);
-  if (!page) return { title: "Sayfa bulunamadı | Hayattan.Net" };
+  if (!page) return { title: "Sayfa bulunamadı" };
+  const isFotoğrafhane = isFotoğrafhanePageSlug(slug);
+  const canonicalPath = isFotoğrafhane ? "/fotografhane" : `/sayfa/${slug}`;
+  const canonical = pageNumber > 1 ? `${canonicalPath}?sayfa=${pageNumber}` : canonicalPath;
+  const title = `${page.title}${isFotoğrafhane ? pageSuffix : ""}`;
+  const description = createExcerptFromHtml(page.content, 160) || page.title;
+
   return {
-    title: `${page.title} | Hayattan.Net`,
-    description: page.title,
+    title,
+    description,
+    alternates: { canonical },
+    ...(isFotoğrafhane ? { robots: { index: false, follow: true } } : {}),
+    openGraph: { type: "website", url: canonical, title, description },
   };
 }
 

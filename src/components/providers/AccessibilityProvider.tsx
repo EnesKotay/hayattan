@@ -11,11 +11,13 @@ import {
 export type FontSizePreference = "md" | "lg" | "xl";
 export type ContrastPreference = "normal" | "high";
 export type ReadingModePreference = "default" | "dyslexia";
+export type MotionPreference = "normal" | "reduced";
 
 type AccessibilitySettings = {
   fontSize: FontSizePreference;
   contrast: ContrastPreference;
   readingMode: ReadingModePreference;
+  motion: MotionPreference;
 };
 
 type AccessibilityContextValue = {
@@ -24,6 +26,7 @@ type AccessibilityContextValue = {
   setFontSize: (fontSize: FontSizePreference) => void;
   setContrast: (contrast: ContrastPreference) => void;
   setReadingMode: (readingMode: ReadingModePreference) => void;
+  setMotion: (motion: MotionPreference) => void;
   resetSettings: () => void;
 };
 
@@ -32,6 +35,7 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   fontSize: "md",
   contrast: "normal",
   readingMode: "default",
+  motion: "normal",
 };
 
 const AccessibilityContext = createContext<AccessibilityContextValue | undefined>(undefined);
@@ -41,6 +45,7 @@ function applySettings(settings: AccessibilitySettings) {
   root.dataset.fontSize = settings.fontSize;
   root.dataset.contrast = settings.contrast;
   root.dataset.readingMode = settings.readingMode;
+  root.dataset.motion = settings.motion;
 }
 
 export function AccessibilityProvider({ children }: { children: ReactNode }) {
@@ -56,6 +61,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
           fontSize: parsed.fontSize === "lg" || parsed.fontSize === "xl" ? parsed.fontSize : "md",
           contrast: parsed.contrast === "high" ? "high" : "normal",
           readingMode: parsed.readingMode === "dyslexia" ? "dyslexia" : "default",
+          motion: parsed.motion === "reduced" ? "reduced" : "normal",
         });
       }
     } catch {
@@ -77,6 +83,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     setFontSize: (fontSize) => setSettings((prev) => ({ ...prev, fontSize })),
     setContrast: (contrast) => setSettings((prev) => ({ ...prev, contrast })),
     setReadingMode: (readingMode) => setSettings((prev) => ({ ...prev, readingMode })),
+    setMotion: (motion) => setSettings((prev) => ({ ...prev, motion })),
     resetSettings: () => setSettings(DEFAULT_SETTINGS),
   };
 

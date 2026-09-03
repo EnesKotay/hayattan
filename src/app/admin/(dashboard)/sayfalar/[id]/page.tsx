@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { updatePage } from "../../../actions";
 import { PageForm } from "@/components/admin/PageForm";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 type PageRow = { id: string; title: string; slug: string; content: string; featuredImage: string | null; showInMenu: boolean; menuOrder: number; publishedAt: Date | null };
 
@@ -11,6 +12,7 @@ export default async function SayfaDuzenlePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireAdminPage();
   const { id } = await params;
   let page: PageRow | null = null;
   try {

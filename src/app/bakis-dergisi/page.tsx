@@ -12,10 +12,20 @@ const YAZILAR_PER_PAGE = 12;
 // Sabit kategori slug'ı
 const CATEGORY_SLUG = "bakis";
 
-export const metadata: Metadata = {
-  title: "Bakış Dergisi | Hayattan.Net",
-  description: "Hayattan.Net - Bakış Dergisi",
-};
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { sayfa } = await searchParams;
+  const page = Math.max(1, parseInt(sayfa ?? "1", 10) || 1);
+  const pageSuffix = page > 1 ? ` — Sayfa ${page}` : "";
+  const canonical = page > 1 ? `/bakis-dergisi?sayfa=${page}` : "/bakis-dergisi";
+  const description = "Bakış Dergisi’nde yayımlanan kültür, sanat, edebiyat ve yaşam yazılarını keşfedin.";
+
+  return {
+    title: `Bakış Dergisi${pageSuffix}`,
+    description,
+    alternates: { canonical },
+    openGraph: { type: "website", url: canonical, title: `Bakış Dergisi${pageSuffix}`, description },
+  };
+}
 
 export default async function BakisDergisiPage({ searchParams }: Props) {
   const { sayfa = "1" } = await searchParams;

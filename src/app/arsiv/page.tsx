@@ -2,8 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 
 export const metadata = {
-  title: "Arşiv | Hayattan.Net",
-  description: "Hayattan.Net - Yazı arşivi",
+  title: "Arşiv",
+  description: "Hayattan.Net’te yayımlanan kültür, sanat, edebiyat ve yaşam yazılarını tarihe göre keşfedin.",
+  alternates: { canonical: "/arsiv" },
 };
 
 export default async function ArsivPage() {

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { Icons } from "@/components/admin/Icons";
 import { AdminFilters } from "@/components/admin/AdminFilters";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export default async function AdminBultenPage({
 }: {
   searchParams: Promise<{ q?: string; durum?: string }>;
 }) {
+  await requireAdminPage();
   const params = await searchParams;
   const q = (params.q ?? "").trim();
   const durum = params.durum ?? "";

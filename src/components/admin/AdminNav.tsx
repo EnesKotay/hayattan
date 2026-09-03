@@ -24,8 +24,8 @@ export function AdminNav({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
 
   const visibleItems = navItems.filter((item) => {
-    if (item.href === "/admin/istatistik" && !isAdmin) return false;
-    return true;
+    if (isAdmin) return true;
+    return ["/admin", "/admin/yazilar", "/admin/profil"].includes(item.href);
   });
 
   return (

@@ -1,10 +1,13 @@
 import { prisma } from "@/lib/db";
 import { createYazi } from "../../../actions";
 import { YaziForm } from "@/components/admin/YaziForm";
+import { auth } from "@/lib/auth";
 
 export default async function YeniYaziPage() {
+  const session = await auth();
   const [yazarlar, kategoriler] = await Promise.all([
     prisma.yazar.findMany({
+      where: session?.user?.role === "ADMIN" ? undefined : { id: session?.user?.id },
       orderBy: [
         { sortOrder: "asc" },
         { yazilar: { _count: "desc" } },

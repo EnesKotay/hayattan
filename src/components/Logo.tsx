@@ -10,13 +10,13 @@ type LogoProps = {
 
 const sizeClasses = {
   sm: "text-lg md:text-xl",
-  md: "text-2xl md:text-3xl",
-  lg: "text-4xl md:text-5xl lg:text-6xl",
+  md: "text-xl md:text-2xl",
+  lg: "text-3xl md:text-4xl lg:text-5xl",
 };
 
 export function Logo({ size = "lg", showTagline = true, centered = true, iconScale = 1 }: LogoProps) {
   // Size multiplier for the icon
-  const iconSize = Math.round((size === "lg" ? 80 : size === "md" ? 56 : 42) * iconScale);
+  const iconSize = Math.round((size === "lg" ? 68 : size === "md" ? 48 : 38) * iconScale);
 
   return (
     <div
@@ -25,9 +25,9 @@ export function Logo({ size = "lg", showTagline = true, centered = true, iconSca
     >
       <Link
         href="/"
-        className="flex items-center gap-2 transition-opacity hover:opacity-90"
+        className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
       >
-        <div className="relative overflow-hidden rounded-full shadow-sm">
+        <div className="relative overflow-hidden rounded-full border border-border bg-background">
           <Image
             src="/amblem.jpg"
             alt="Hayattan.Net Amblem"
@@ -35,7 +35,6 @@ export function Logo({ size = "lg", showTagline = true, centered = true, iconSca
             height={iconSize}
             className="object-cover"
             priority
-            unoptimized
           />
         </div>
         <span
@@ -45,7 +44,7 @@ export function Logo({ size = "lg", showTagline = true, centered = true, iconSca
         </span>
       </Link>
       {showTagline && (
-        <p className="text-xs text-muted opacity-80">Hayatın Engelsiz Tarafı</p>
+        <p className="text-sm text-muted">Hayatın Engelsiz Tarafı</p>
       )}
     </div>
   );

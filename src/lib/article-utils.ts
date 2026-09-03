@@ -80,6 +80,20 @@ export function addHeadingIds(html: string, headings: ArticleHeading[]) {
   });
 }
 
+/**
+ * Yazı gövdesindeki <img>'lere lazy-loading ve async decoding ekler.
+ * Gövde HTML'i editörden ham geldiği için bu nitelikler yok; öne çıkan görsel
+ * zaten `priority` ile LCP'yi karşıladığından içerik görselleri güvenle
+ * ertelenebiliyor. Zaten `loading` niteliği olanlara dokunulmaz.
+ */
+export function lazyLoadContentImages(html: string) {
+  return html.replace(/<img\b([^>]*)>/gi, (full, attrs: string) => {
+    if (/\bloading\s*=/i.test(attrs)) return full;
+    const decoding = /\bdecoding\s*=/i.test(attrs) ? "" : ' decoding="async"';
+    return `<img${attrs} loading="lazy"${decoding}>`;
+  });
+}
+
 export function createExcerptFromHtml(html: string | null | undefined, maxLength = 180) {
   const text = stripHtml(html);
   if (text.length <= maxLength) return text;

@@ -5,8 +5,9 @@ import { SiteBreadcrumb } from "@/components/SiteBreadcrumb";
 export const revalidate = 60;
 
 export const metadata = {
-  title: "Etiketler | Hayattan.Net",
-  description: "Hayattan.Net - Tüm etiketler",
+  title: "Etiketler",
+  description: "Hayattan.Net yazılarını konu etiketleri üzerinden keşfedin.",
+  alternates: { canonical: "/etiketler" },
 };
 
 export default async function EtiketlerPage() {

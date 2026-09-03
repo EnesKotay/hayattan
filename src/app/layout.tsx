@@ -4,7 +4,6 @@ import { Header } from "@/components/Header";
 import { getMenuItems } from "@/app/admin/actions";
 import { Footer } from "@/components/Footer";
 import { SessionProvider } from "@/components/providers/SessionProvider";
-import { PageTransition } from "@/components/PageTransition";
 import { SkipLink } from "@/components/SkipLink";
 import { BackToTop } from "@/components/BackToTop";
 import { ReadingProgress } from "@/components/ReadingProgress";
@@ -16,7 +15,8 @@ import { CommandMenu } from "@/components/CommandMenu";
 import { ProgressBar } from "@/components/ProgressBar";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { PublicOnly } from "@/components/PublicOnly";
-import { generateOrganizationSchema } from "@/lib/seo";
+import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
+import { generateOrganizationSchema, serializeJsonLd, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 import "@/styles/admin.css";
 
@@ -33,21 +33,28 @@ const merriweather = Merriweather({
   display: "swap",
 });
 
-const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hayattan.net";
-const siteUrl = rawSiteUrl.startsWith("http") ? rawSiteUrl : `https://${rawSiteUrl}`;
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Hayattan.Net - Hayatın Engelsiz Tarafı",
     template: "%s | Hayattan.Net",
   },
   description: "Hayattan.Net - Hayatın Engelsiz Tarafı",
   keywords: ["kültür", "sanat", "edebiyat", "deneme", "engelsiz yaşam", "blog", "dergi", "yazar", "şair", "fotoğraf"],
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Hayattan.Net",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
     type: "website",
     locale: "tr_TR",
-    url: siteUrl,
+    url: SITE_URL,
     siteName: "Hayattan.Net",
     title: "Hayattan.Net - Hayatın Engelsiz Tarafı",
     description: "Hayattan.Net - Hayatın Engelsiz Tarafı",
@@ -60,12 +67,20 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   alternates: {
     types: {
-      "application/rss+xml": `${siteUrl}/feed.xml`,
+      "application/rss+xml": `${SITE_URL}/feed.xml`,
     },
   },
+  ...(process.env.GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export default async function RootLayout({
@@ -74,6 +89,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const organizationSchema = generateOrganizationSchema();
+  const menuItems = await getMenuItems();
 
   return (
     <html lang="tr" suppressHydrationWarning>
@@ -82,7 +98,7 @@ export default async function RootLayout({
       >
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationSchema) }}
         />
         <ToastProvider>
           <ThemeProvider>
@@ -92,15 +108,16 @@ export default async function RootLayout({
                 <SkipLink />
                 <ProgressBar />
                 <PublicOnly>
-                  <Header />
+                  <Header navItems={menuItems} />
                   <ReadingProgress />
                 </PublicOnly>
                 <main id="main-content" className="min-h-full flex-1 bg-background">
-                  <PageTransition>{children}</PageTransition>
+                  {children}
                 </main>
                 <PublicOnly>
                   <Footer />
                   <BackToTop />
+                  <PwaInstallPrompt />
                 </PublicOnly>
                 <ToastContainer />
                 <GoogleAnalytics />

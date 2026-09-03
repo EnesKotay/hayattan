@@ -2,11 +2,19 @@ import { Reveal } from "@/components/Animations/Reveal";
 import { prisma, runInBatches } from "@/lib/db";
 import { getAdSlots } from "@/app/admin/actions";
 import { AdSlot } from "@/components/AdSlot";
-import { Logo } from "@/components/Logo";
 import { Slider, type SliderItem } from "@/components/Slider";
 import { SonYazilar } from "@/components/SonYazilar";
 import { YazarlarBolumu } from "@/components/YazarlarBolumu";
-import Image from "next/image";
+import type { Metadata } from "next";
+import { generateWebSiteSchema, serializeJsonLd } from "@/lib/seo";
+import Link from "next/link";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+    types: { "application/rss+xml": "/feed.xml" },
+  },
+};
 
 type HaberRow = {
   id: string;
@@ -54,7 +62,7 @@ async function getYazarlar(): Promise<YazarRow[]> {
       { sortOrder: "asc" },
       { yazilar: { _count: "desc" } },
       { name: "asc" }
-    ] as any,
+    ],
     select: {
       id: true,
       name: true,
@@ -76,7 +84,7 @@ async function getFeaturedYazilar(): Promise<HaberRow[]> {
       publishedAt: { lte: new Date() },
       showInSlider: true,
       author: { ayrilmis: false },
-    } as any,
+    },
     orderBy: { publishedAt: "desc" },
     take: 5,
     select: {
@@ -110,7 +118,7 @@ export default async function HomePage() {
     () => getFeaturedYazilar(),
     () =>
       prisma.yazi.findMany({
-        where: { publishedAt: { lte: new Date() }, author: { ayrilmis: false } } as any,
+        where: { publishedAt: { lte: new Date() }, author: { ayrilmis: false } },
         orderBy: { publishedAt: "desc" },
         take: 6,
         select: {
@@ -139,41 +147,72 @@ export default async function HomePage() {
     authorName: h.authorName ?? "",
     publishedAt: h.publishedAt,
   }));
+  const categoryLinks = [
+    ...new Map(
+      sonYazilar
+        .flatMap((yazi) => yazi.kategoriler)
+        .map((kategori) => [kategori.slug, kategori] as const)
+    ).values(),
+  ].slice(0, 6);
 
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(generateWebSiteSchema()) }}
+      />
 
+      {/* Sayfanın tek h1'i. Görsel tasarımda başlığı Logo bileşeni taşıdığı için
+          ekran okuyucu / arama motoru tarafında gizli bir h1 ile karşılığını veriyoruz. */}
+      <h1 className="sr-only">Hayattan.Net — Hayatın Engelsiz Tarafı</h1>
 
-
-
-      <section className="py-12 md:py-16">
-        <Reveal width="100%" direction="up" delay={0.2}>
-          <div className="container mx-auto flex justify-center px-4">
-            <Logo size="lg" showTagline={true} centered={true} />
-          </div>
-        </Reveal>
-      </section>
-
-      {/* Reklam - Logo altı */}
-      <div className="container mx-auto px-4 py-2">
-        <AdSlot slotId="top-banner" size="leaderboard" content={adSlots["top-banner"]} />
-      </div>
-
-      <Reveal width="100%" delay={0.3}>
+      <Reveal width="100%" delay={0.15}>
         <Slider items={sliderItems} emptyMessage="Henüz haber yok. Admin panelinden haber ekleyebilirsiniz." />
       </Reveal>
 
-      {/* Reklam - Slider altı */}
-      <div className="container mx-auto px-4 py-4">
-        <AdSlot slotId="mid-banner" size="banner" content={adSlots["mid-banner"]} />
+      {/* Manşetin ardından gelen sakin reklam alanı */}
+      <div className="container mx-auto px-4 py-5 md:py-7">
+        <AdSlot slotId="top-banner" size="leaderboard" content={adSlots["top-banner"]} />
       </div>
 
       <SonYazilar yazilar={sonYazilar} />
 
-      {/* Reklam - Son Yazılar altı */}
-      <div className="container mx-auto px-4 py-6">
+      {categoryLinks.length > 0 && (
+        <section className="border-b border-border/70 bg-surface py-8 md:py-10" aria-labelledby="konular-baslik">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="shrink-0">
+                <p className="text-sm font-semibold text-primary">Konular</p>
+                <h2 id="konular-baslik" className="mt-1 font-serif text-2xl font-bold text-foreground">
+                  İlgi alanına göre keşfet
+                </h2>
+              </div>
+              {/* Mobile: horizontal scroll chip strip */}
+              <div className="scrollbar-hide -mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:px-0 md:pb-0">
+                {categoryLinks.map((kategori) => (
+                  <Link
+                    key={kategori.slug}
+                    href={`/kategoriler/${kategori.slug}`}
+                    className="inline-flex min-h-11 shrink-0 snap-start items-center rounded-full border border-border bg-background px-4 text-sm font-semibold text-foreground/80 hover:border-primary/30 hover:bg-primary-light hover:text-primary active:scale-95"
+                  >
+                    {kategori.name}
+                  </Link>
+                ))}
+                <Link
+                  href="/kategoriler"
+                  className="inline-flex min-h-11 shrink-0 snap-start items-center rounded-full bg-primary px-4 text-sm font-semibold text-white hover:bg-primary-hover active:scale-95"
+                >
+                  Tüm kategoriler
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <div className="container mx-auto px-4 py-6 md:py-8">
         <div className="flex justify-center">
-          <AdSlot slotId="rectangle-ad" size="rectangle" content={adSlots["rectangle-ad"]} />
+          <AdSlot slotId="mid-banner" size="banner" content={adSlots["mid-banner"]} />
         </div>
       </div>
 
@@ -182,7 +221,7 @@ export default async function HomePage() {
 
 
       {/* Reklam - Sayfa altı */}
-      <div className="border-t border-border bg-muted-bg/30 py-6">
+      <div className="border-t border-border bg-muted-bg/30 py-6 md:py-8">
         <div className="container mx-auto px-4">
           <AdSlot slotId="bottom-banner" size="leaderboard" content={adSlots["bottom-banner"]} />
         </div>

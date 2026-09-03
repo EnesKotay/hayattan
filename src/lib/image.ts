@@ -1,3 +1,12 @@
+/**
+ * next/image placeholder="blur" için hafif bir base64 SVG blur placeholder döner.
+ * Sunucu taraflı görsel işleme gerektirmez; boyut bağımsız çalışır.
+ */
+export function getBlurDataUrl(w = 8, h = 5): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"><filter id="b"><feGaussianBlur stdDeviation="1"/></filter><rect width="${w}" height="${h}" fill="#e8e0e8"/><rect width="${w}" height="${h}" fill="#c4b0c0" filter="url(#b)" opacity="0.5"/></svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
+
 /** Harici (http/https) URL'ler Next.js image proxy'sinden geçince timeout olabiliyor; unoptimized ile tarayıcı doğrudan yükler. */
 export function isExternalImageUrl(url: string | null | undefined): boolean {
   if (!url || typeof url !== "string") return false;

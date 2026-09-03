@@ -12,8 +12,9 @@ type Props = {
 
 const YAZILAR_PER_PAGE = 12;
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { sayfa } = await searchParams;
   const kategori = await prisma.kategori.findUnique({
     where: { slug },
     select: { name: true, description: true },
@@ -21,9 +22,22 @@ export async function generateMetadata({ params }: Props) {
 
   if (!kategori) return { title: "Kategori Bulunamadı" };
 
+  // Sayfalı görünümler kendi kendine canonical olur; aksi halde 2+. sayfalardaki
+  // yazılar tek bir URL'e toplanıp indexten düşüyor.
+  const page = Math.max(1, parseInt(sayfa ?? "1", 10) || 1);
+  const canonical = page > 1 ? `/kategoriler/${slug}?sayfa=${page}` : `/kategoriler/${slug}`;
+  const pageSuffix = page > 1 ? ` — Sayfa ${page}` : "";
+
   return {
-    title: `${kategori.name} | Hayattan.Net`,
+    title: `${kategori.name}${pageSuffix}`,
     description: kategori.description ?? `${kategori.name} kategorisindeki yazılar`,
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      url: canonical,
+      title: `${kategori.name}${pageSuffix}`,
+      description: kategori.description ?? `${kategori.name} kategorisindeki yazılar`,
+    },
   };
 }
 

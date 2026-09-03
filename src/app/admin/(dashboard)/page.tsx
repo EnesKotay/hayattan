@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma, runInBatches } from "@/lib/db";
 
@@ -20,6 +21,7 @@ function formatNumber(value: number) {
 export default async function AdminDashboardPage() {
   const session = await auth();
   const isAdmin = session?.user?.role === "ADMIN";
+  if (!isAdmin) redirect("/admin/yazilar");
   const [
     yaziCount,
     yazarCount,

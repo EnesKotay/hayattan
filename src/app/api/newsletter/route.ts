@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { isMailConfigured, sendNewsletterWelcomeEmail } from "@/lib/mail";
+import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
+    const clientId = getClientIdentifier(request);
+    const rateLimit = await checkRateLimit(clientId, "newsletter");
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Çok fazla deneme yaptınız. Lütfen daha sonra tekrar deneyin." },
+        { status: 429 }
+      );
+    }
+
+    const body = await request.json();
     const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
 
     if (!email || !EMAIL_REGEX.test(email)) {
@@ -14,33 +26,41 @@ export async function POST(req: NextRequest) {
 
     const existing = await (prisma as any).newsletterSubscriber.findUnique({ where: { email } });
 
+    if (existing?.active) {
+      return NextResponse.json({ error: "Bu e-posta zaten kayıtlı." }, { status: 409 });
+    }
+
     if (existing) {
-      if (existing.active) {
-        return NextResponse.json({ error: "Bu e-posta zaten kayıtlı." }, { status: 409 });
-      }
       await (prisma as any).newsletterSubscriber.update({ where: { email }, data: { active: true } });
-      return NextResponse.json({ success: true });
+    } else {
+      await (prisma as any).newsletterSubscriber.create({ data: { email } });
     }
 
-    await (prisma as any).newsletterSubscriber.create({ data: { email } });
-
-    // Send welcome email if Resend is configured (non-blocking)
-    const resendKey = process.env.RESEND_API_KEY;
-    if (resendKey) {
-      fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${resendKey}` },
-        body: JSON.stringify({
-          from: "Hayattan.Net <noreply@hayattan.net>",
-          to: email,
-          subject: "Hayattan.Net Bültenine Hoş Geldiniz!",
-          html: `<p>Merhaba,</p><p>Hayattan.Net bültenine abone olduğunuz için teşekkürler. En yeni yazılarımızdan haberdar olacaksınız.</p><p><a href="https://hayattan.net">Hayattan.Net</a></p>`,
-        }),
-      }).catch(() => {});
+    if (!isMailConfigured()) {
+      return NextResponse.json({
+        success: true,
+        emailSent: false,
+        warning: "Aboneliğiniz kaydedildi ancak e-posta servisi henüz yapılandırılmamış.",
+      });
     }
 
-    return NextResponse.json({ success: true });
-  } catch {
+    try {
+      await sendNewsletterWelcomeEmail(email);
+      return NextResponse.json({
+        success: true,
+        emailSent: true,
+        message: "Aboneliğiniz tamamlandı. Hoş geldiniz e-postasını kontrol edin.",
+      });
+    } catch (mailError) {
+      console.error("Newsletter welcome email failed:", mailError);
+      return NextResponse.json({
+        success: true,
+        emailSent: false,
+        warning: "Aboneliğiniz kaydedildi ancak hoş geldiniz e-postası gönderilemedi.",
+      });
+    }
+  } catch (error) {
+    console.error("Newsletter subscription failed:", error);
     return NextResponse.json({ error: "Bir hata oluştu. Lütfen tekrar deneyin." }, { status: 500 });
   }
 }

@@ -5,12 +5,13 @@ import { isFotoğrafhanePageSlug, isBakisCategorySlug } from "@/lib/site-categor
 export const revalidate = 60;
 
 export const metadata = {
-  title: "Kategoriler | Hayattan.Net",
+  title: "Kategoriler",
   description: "Hayattan.Net - Tüm kategoriler. Yazıları konuya göre keşfedin.",
+  alternates: { canonical: "/kategoriler" },
 };
 
 function getCategoryHref(slug: string): string {
-  if (isFotoğrafhanePageSlug(slug)) return "/sayfa/fotografhane";
+  if (isFotoğrafhanePageSlug(slug)) return "/fotografhane";
   if (isBakisCategorySlug(slug)) return "/bakis-dergisi";
   return `/kategoriler/${slug}`;
 }

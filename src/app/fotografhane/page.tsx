@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import { getAdSlots } from "@/app/admin/actions";
 import { AdSlot } from "@/components/AdSlot";
@@ -9,10 +10,24 @@ const FOTOGRAFHANE_IMAGE = "/fotografhane-kapak.jpg";
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = {
-    title: "Fotoğrafhane | Hayattan.Net",
-    description: "Hayattan kareler, görsel hikayeler ve fotoğraf galerisi.",
-};
+export async function generateMetadata({
+    searchParams,
+}: {
+    searchParams: Promise<{ sayfa?: string }>;
+}): Promise<Metadata> {
+    const { sayfa } = await searchParams;
+    const page = Math.max(1, parseInt(sayfa ?? "1", 10) || 1);
+    const pageSuffix = page > 1 ? ` — Sayfa ${page}` : "";
+    const canonical = page > 1 ? `/fotografhane?sayfa=${page}` : "/fotografhane";
+    const description = "Hayattan kareler, görsel hikâyeler ve fotoğraf yazıları.";
+
+    return {
+        title: `Fotoğrafhane${pageSuffix}`,
+        description,
+        alternates: { canonical },
+        openGraph: { type: "website", url: canonical, title: `Fotoğrafhane${pageSuffix}`, description },
+    };
+}
 
 export default async function FotografhanePage({
     searchParams,

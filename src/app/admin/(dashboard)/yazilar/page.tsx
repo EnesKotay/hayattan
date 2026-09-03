@@ -2,11 +2,10 @@ import Link from "next/link";
 import { prisma, runInBatches } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import type { Prisma } from "@prisma/client";
-import { deleteYazi } from "../../actions";
-import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
 import { AdminFeedback } from "@/components/admin/AdminFeedback";
 import { AdminFilters } from "@/components/admin/AdminFilters";
 import { Icons } from "@/components/admin/Icons";
+import { BulkActionsWrapper } from "@/components/admin/BulkActionsWrapper";
 
 const YAZILAR_PER_PAGE = 20;
 
@@ -40,6 +39,12 @@ const SIRALAMA_OPTIONS: Record<string, Prisma.YaziOrderByWithRelationInput[]> = 
   "title-asc": [{ title: "asc" }],
 };
 
+function getYaziDurum(yazi: { publishedAt: Date | null }): "yayinda" | "planli" | "taslak" {
+  if (!yazi.publishedAt) return "taslak";
+  if (yazi.publishedAt > new Date()) return "planli";
+  return "yayinda";
+}
+
 export default async function AdminYazilarPage({
   searchParams,
 }: {
@@ -57,13 +62,17 @@ export default async function AdminYazilarPage({
 
   const orderBy = SIRALAMA_OPTIONS[siralama] ?? SIRALAMA_OPTIONS["createdAt-desc"];
 
+  const now = new Date();
   const where: Prisma.YaziWhereInput = {};
-  if (durum === "yayinda") where.publishedAt = { not: null };
+  const ownerWhere: Prisma.YaziWhereInput = isAdmin ? {} : { authorId: session?.user?.id };
+  Object.assign(where, ownerWhere);
+  if (durum === "yayinda") where.publishedAt = { not: null, lte: now };
   if (durum === "taslak") where.publishedAt = null;
-  if (yazarId) where.authorId = yazarId;
+  if (durum === "planli") where.publishedAt = { gt: now };
+  if (isAdmin && yazarId) where.authorId = yazarId;
   if (q) where.title = { contains: q, mode: "insensitive" };
 
-  const [yazilar, totalCount, yazarlar, yayindaCount, taslakCount, toplamOkunma] = await runInBatches([
+  const [yazilar, totalCount, yazarlar, yayindaCount, taslakCount, planliCount, toplamOkunma] = await runInBatches([
     () =>
       prisma.yazi.findMany({
         where,
@@ -77,6 +86,7 @@ export default async function AdminYazilarPage({
     () => prisma.yazi.count({ where }),
     () =>
       prisma.yazar.findMany({
+        where: isAdmin ? undefined : { id: session?.user?.id },
         orderBy: [
           { sortOrder: "asc" },
           { yazilar: { _count: "desc" } },
@@ -84,9 +94,10 @@ export default async function AdminYazilarPage({
         ] as any,
         select: { id: true, name: true }
       }),
-    () => prisma.yazi.count({ where: { publishedAt: { not: null } } }),
-    () => prisma.yazi.count({ where: { publishedAt: null } }),
-    () => prisma.yazi.aggregate({ where: { publishedAt: { not: null } }, _sum: { viewCount: true } }),
+    () => prisma.yazi.count({ where: { ...ownerWhere, publishedAt: { not: null, lte: now } } }),
+    () => prisma.yazi.count({ where: { ...ownerWhere, publishedAt: null } }),
+    () => prisma.yazi.count({ where: { ...ownerWhere, publishedAt: { gt: now } } }),
+    () => prisma.yazi.aggregate({ where: { ...ownerWhere, publishedAt: { not: null } }, _sum: { viewCount: true } }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / YAZILAR_PER_PAGE));
@@ -116,7 +127,7 @@ export default async function AdminYazilarPage({
       </div>
 
       {/* İstatistik Kartları */}
-      <div className={`grid gap-4 sm:grid-cols-2 ${isAdmin ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
+      <div className={`grid gap-4 sm:grid-cols-2 ${isAdmin ? "xl:grid-cols-5" : "lg:grid-cols-4"}`}>
         <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
@@ -124,7 +135,7 @@ export default async function AdminYazilarPage({
             </div>
             <div>
               <p className="text-xs font-medium text-gray-600">Toplam Yazı</p>
-              <p className="text-2xl font-bold text-gray-900">{yayindaCount + taslakCount}</p>
+              <p className="text-2xl font-bold text-gray-900">{yayindaCount + taslakCount + planliCount}</p>
             </div>
           </div>
         </div>
@@ -150,6 +161,19 @@ export default async function AdminYazilarPage({
             </div>
           </div>
         </div>
+        {planliCount > 0 && (
+          <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                <Icons.Calendar className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600">Planlandı</p>
+                <p className="text-2xl font-bold text-gray-900">{planliCount}</p>
+              </div>
+            </div>
+          </div>
+        )}
         {isAdmin && (
           <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-violet-50 to-white p-4 shadow-sm">
             <div className="flex items-center gap-3">
@@ -175,6 +199,7 @@ export default async function AdminYazilarPage({
             options: [
               { label: "Tümü", value: "" },
               { label: "Yayında", value: "yayinda" },
+              { label: "Planlandı", value: "planli" },
               { label: "Taslak", value: "taslak" },
             ],
           },
@@ -230,256 +255,22 @@ export default async function AdminYazilarPage({
           )}
         </div>
       ) : (
-        <>
-          {/* Mobil Kart Görünümü */}
-          <div className="space-y-3 md:hidden">
-            {yazilar.map((yazi) => (
-              <div
-                key={yazi.id}
-                className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <Link
-                    href={`/admin/yazilar/${yazi.id}`}
-                    className="font-medium text-gray-900 hover:text-primary transition-colors line-clamp-2 flex-1"
-                  >
-                    {yazi.title}
-                  </Link>
-                  <span
-                    className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${yazi.publishedAt
-                      ? "bg-green-100 text-green-800"
-                      : "bg-amber-100 text-amber-800"
-                      }`}
-                  >
-                    {yazi.publishedAt ? (
-                      <><Icons.CheckCircle className="h-3 w-3" />Yayında</>
-                    ) : (
-                      <><Icons.Tag className="h-3 w-3" />Taslak</>
-                    )}
-                  </span>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-500">
-                  <span className="flex items-center gap-1.5">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
-                      {yazi.author.name.charAt(0).toUpperCase()}
-                    </div>
-                    {yazi.author.name}
-                  </span>
-                  <span>{yazi.publishedAt ? formatDate(yazi.publishedAt) : formatDate(yazi.createdAt)}</span>
-                  {isAdmin && (
-                    <span className="flex items-center gap-1">
-                      <Icons.Eye className="h-3.5 w-3.5 text-gray-400" />
-                      {yazi.viewCount}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3">
-                  <Link
-                    href={`/admin/yazilar/${yazi.id}/preview`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
-                  >
-                    <Icons.Magazine className="h-3.5 w-3.5" />
-                    Önizle
-                  </Link>
-                  <Link
-                    href={`/admin/yazilar/${yazi.id}`}
-                    className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
-                  >
-                    <Icons.Article className="h-3.5 w-3.5" />
-                    Düzenle
-                  </Link>
-                  <form action={deleteYazi.bind(null, yazi.id)} className="inline ml-auto">
-                    <DeleteConfirmButton
-                      confirmMessage="Bu yazıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
-                      className="inline-flex items-center gap-1 rounded-md bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors"
-                    />
-                  </form>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Masaüstü Tablo Görünümü */}
-          <div className="hidden md:block overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="px-4 py-3 font-semibold text-gray-700">Başlık</th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">Yazar</th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">Tarih</th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">Durum</th>
-                    {isAdmin && <th className="px-4 py-3 font-semibold text-gray-700 text-center" title="Kaç kez okundu">Okunma</th>}
-                    <th className="px-4 py-3 font-semibold text-gray-700 text-right">İşlemler</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {yazilar.map((yazi) => (
-                    <tr
-                      key={yazi.id}
-                      className="group hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-4 py-4">
-                        <Link
-                          href={`/admin/yazilar/${yazi.id}`}
-                          className="font-medium text-gray-900 hover:text-primary transition-colors line-clamp-2"
-                        >
-                          {yazi.title}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                            {yazi.author.name.charAt(0).toUpperCase()}
-                          </div>
-                          <span className="text-gray-700">{yazi.author.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-gray-600">
-                        <div className="text-xs">
-                          {yazi.publishedAt ? (
-                            <>
-                              <div className="font-medium text-gray-700">
-                                {formatDate(yazi.publishedAt)}
-                              </div>
-                              <div className="text-gray-500">Yayınlandı</div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="font-medium text-gray-700">
-                                {formatDate(yazi.createdAt)}
-                              </div>
-                              <div className="text-gray-500">Oluşturuldu</div>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${yazi.publishedAt
-                            ? "bg-green-100 text-green-800"
-                            : "bg-amber-100 text-amber-800"
-                            }`}
-                        >
-                          {yazi.publishedAt ? (
-                            <>
-                              <Icons.CheckCircle className="h-3 w-3" />
-                              Yayında
-                            </>
-                          ) : (
-                            <>
-                              <Icons.Tag className="h-3 w-3" />
-                              Taslak
-                            </>
-                          )}
-                        </span>
-                      </td>
-                      {isAdmin && (
-                        <td className="px-4 py-4 text-center">
-                          <span className="inline-flex items-center justify-center gap-1.5 text-gray-600" title="Okunma sayısı">
-                            <Icons.Eye className="h-4 w-4 text-gray-400" />
-                            <span className="font-medium tabular-nums">{yazi.viewCount}</span>
-                          </span>
-                        </td>
-                      )}
-                      <td className="px-4 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link
-                            href={`/admin/yazilar/${yazi.id}/preview`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
-                            title="Önizleme"
-                          >
-                            <Icons.Magazine className="h-3.5 w-3.5" />
-                            Önizle
-                          </Link>
-                          <Link
-                            href={`/admin/yazilar/${yazi.id}`}
-                            className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
-                          >
-                            <Icons.Article className="h-3.5 w-3.5" />
-                            Düzenle
-                          </Link>
-                          <form action={deleteYazi.bind(null, yazi.id)} className="inline">
-                            <DeleteConfirmButton
-                              confirmMessage="Bu yazıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
-                              className="inline-flex items-center gap-1 rounded-md bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors"
-                            />
-                          </form>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Pagination */}
-          {
-            yazilar.length > 0 && totalPages > 1 && (
-              <nav
-                className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm"
-                aria-label="Sayfa navigasyonu"
-              >
-                <p className="text-sm text-gray-600">
-                  <strong className="font-semibold text-gray-900">{totalCount}</strong> yazı içinden{" "}
-                  <strong className="font-semibold text-gray-900">{sayfa}</strong> / {totalPages} sayfa
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  {sayfa > 1 ? (
-                    <Link
-                      href={paginationUrl(sayfa - 1, paginationParams)}
-                      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      ← Önceki
-                    </Link>
-                  ) : (
-                    <span className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-400">
-                      ← Önceki
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter((p) => p === 1 || p === totalPages || (p >= sayfa - 2 && p <= sayfa + 2))
-                      .reduce<number[]>((acc, p) => (acc.length && acc[acc.length - 1] !== p - 1 ? [...acc, -1, p] : [...acc, p]), [])
-                      .map((p) =>
-                        p === -1 ? (
-                          <span key="ellipsis" className="px-1 text-gray-400">…</span>
-                        ) : (
-                          <Link
-                            key={p}
-                            href={paginationUrl(p, paginationParams)}
-                            className={`min-w-[2.25rem] rounded-lg px-3 py-2 text-center text-sm font-medium transition-colors ${p === sayfa
-                              ? "bg-primary text-white shadow-sm"
-                              : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                              }`}
-                          >
-                            {p}
-                          </Link>
-                        )
-                      )}
-                  </span>
-                  {sayfa < totalPages ? (
-                    <Link
-                      href={paginationUrl(sayfa + 1, paginationParams)}
-                      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      Sonraki →
-                    </Link>
-                  ) : (
-                    <span className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-400">
-                      Sonraki →
-                    </span>
-                  )}
-                </div>
-              </nav>
-            )
-          }
-        </>
+        <BulkActionsWrapper
+          yazilar={yazilar.map((y) => ({
+            id: y.id,
+            title: y.title,
+            authorName: y.author.name,
+            publishedAt: y.publishedAt,
+            createdAt: y.createdAt,
+            viewCount: y.viewCount,
+            slug: y.slug,
+          }))}
+          isAdmin={isAdmin}
+          totalCount={totalCount}
+          totalPages={totalPages}
+          sayfa={sayfa}
+          paginationParams={paginationParams}
+        />
       )}
     </div>
   );

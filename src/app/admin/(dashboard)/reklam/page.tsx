@@ -1,7 +1,9 @@
 import { getAdMetrics, getAdPreviewPostPath, getAdSlots } from "../../actions";
 import { ReklamForm } from "@/components/admin/ReklamForm";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 export default async function ReklamPage() {
+  await requireAdminPage();
   const adSlots = await getAdSlots();
   const adMetrics = await getAdMetrics();
   const previewPostPath = await getAdPreviewPostPath();

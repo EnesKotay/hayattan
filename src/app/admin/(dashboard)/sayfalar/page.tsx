@@ -4,6 +4,7 @@ import { deletePage } from "../../actions";
 import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
 import { AdminFeedback } from "@/components/admin/AdminFeedback";
 import { Icons } from "@/components/admin/Icons";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 type PageRow = { id: string; title: string; slug: string; showInMenu: boolean; menuOrder: number; publishedAt: Date | null };
 
@@ -12,6 +13,7 @@ export default async function AdminSayfalarPage({
 }: {
   searchParams: Promise<{ success?: string; deleted?: string; error?: string }>;
 }) {
+  await requireAdminPage();
   const params = await searchParams;
   let pages: PageRow[] = [];
   try {

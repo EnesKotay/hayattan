@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
-import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
+import { isExternalImageUrl, normalizeImageUrl, getBlurDataUrl } from "@/lib/image";
 
 interface ArticleImageProps {
   src: string | null | undefined;
@@ -10,6 +10,8 @@ interface ArticleImageProps {
   sizes?: string;
   priority?: boolean;
 }
+
+const BLUR_DATA_URL = getBlurDataUrl();
 
 export function ArticleImage({ src, alt, className, sizes, priority }: ArticleImageProps) {
   const [hasError, setHasError] = useState(false);
@@ -33,6 +35,8 @@ export function ArticleImage({ src, alt, className, sizes, priority }: ArticleIm
       className={className ?? "object-cover"}
       sizes={sizes}
       priority={priority}
+      placeholder="blur"
+      blurDataURL={BLUR_DATA_URL}
       unoptimized={isExternalImageUrl(src)}
       onError={() => setHasError(true)}
     />

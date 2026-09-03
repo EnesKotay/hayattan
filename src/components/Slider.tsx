@@ -1,12 +1,10 @@
 "use client";
 
-import { normalizeImageUrl } from "@/lib/image";
-import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { ArticleImage } from "@/components/ArticleImage";
 
-/** Ana sayfa haber slider'ında gösterilecek öğe (Haber veya Yazi'den map edilir) */
+/** Ana sayfa manşetinde gösterilecek öğe (Haber veya Yazı). */
 export type SliderItem = {
   id: string;
   title: string;
@@ -22,260 +20,261 @@ type SliderProps = {
   emptyMessage?: string;
 };
 
-function splitTitle(title: string): { part1: string; part2: string } {
-  const words = title.trim().split(/\s+/);
-  if (words.length <= 1) return { part1: "HABER", part2: title };
-  const mid = Math.ceil(words.length / 2);
-  return {
-    part1: words.slice(0, mid).join(" "),
-    part2: words.slice(mid).join(" "),
-  };
+function formatDate(value: Date | null) {
+  if (!value) return null;
+  return new Date(value).toLocaleDateString("tr-TR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
+
+function StoryLink({ item, className, children }: {
+  item: SliderItem;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  if (item.link.startsWith("http")) {
+    return (
+      <a href={item.link} target="_blank" rel="noopener noreferrer" className={className}>
+        {children}
+      </a>
+    );
+  }
+
+  return <Link href={item.link} className={className}>{children}</Link>;
+}
+
+const AUTOPLAY_INTERVAL = 5000;
 
 export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
-  const markImageError = useCallback((id: string) => {
-    setImageErrors((prev) => new Set(prev).add(id));
-  }, []);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const goTo = useCallback(
+    (index: number) => {
+      if (isAnimating || index === activeIndex) return;
+      setIsAnimating(true);
+      setActiveIndex((index + items.length) % items.length);
+      setTimeout(() => setIsAnimating(false), 400);
+    },
+    [activeIndex, isAnimating, items.length]
+  );
+
+  const move = useCallback(
+    (direction: -1 | 1) => {
+      goTo(activeIndex + direction);
+    },
+    [activeIndex, goTo]
+  );
+
+  // Autoplay
   useEffect(() => {
-    if (items.length <= 1) return;
-    const id = setTimeout(() => setProgress(0), 0);
-    const duration = 5000;
-    const start = Date.now();
-    const timer = setInterval(() => {
-      const elapsed = Date.now() - start;
-      setProgress(Math.min((elapsed / duration) * 100, 100));
-    }, 50);
+    if (items.length <= 1 || isPaused) return;
+    timerRef.current = setInterval(() => move(1), AUTOPLAY_INTERVAL);
     return () => {
-      clearTimeout(id);
-      clearInterval(timer);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [activeIndex, items.length]);
+  }, [items.length, isPaused, move]);
 
-  useEffect(() => {
-    if (items.length <= 1) return;
-    const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % items.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [items.length]);
-
-  const goTo = (index: number, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setActiveIndex(index);
+  // Touch / swipe handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    setIsPaused(true);
   };
 
-  const goPrev = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setActiveIndex((prev) => (prev - 1 + items.length) % items.length);
-  };
-
-  const goNext = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setActiveIndex((prev) => (prev + 1) % items.length);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    // Only horizontal swipes (ignore accidental vertical)
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      move(dx < 0 ? 1 : -1);
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+    setIsPaused(false);
   };
 
   if (items.length === 0) {
     return (
-      <section className="bg-muted-bg py-16">
-        <div className="container mx-auto px-4">
-          <div className="flex aspect-[16/9] w-full items-center justify-center rounded-2xl border border-border bg-background md:aspect-[2.4/1]">
-            <p className="text-muted">{emptyMessage}</p>
+      <section className="py-6 md:py-8">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex min-h-72 items-center justify-center rounded-[18px] border border-dashed border-border bg-muted-bg/60">
+            <p className="text-base text-muted">{emptyMessage}</p>
           </div>
         </div>
       </section>
     );
   }
 
+  const lead = items[activeIndex % items.length];
+  const sideItems = items.filter((_, index) => index !== activeIndex).slice(0, 2);
+
   return (
-    <section className="relative w-full overflow-hidden py-2">
-      <div className="container mx-auto px-4">
-        <div className="group/card relative overflow-hidden rounded-xl shadow-lg ring-1 ring-black/[0.06] transition-shadow hover:shadow-xl">
-          <div className="relative aspect-[16/10] w-full md:aspect-[2.4/1]">
-            {items.map((item, index) => {
-              const isExternal = item.link.startsWith("http");
-              const slideClass = `absolute inset-0 block transition-opacity duration-700 ease-out ${index === activeIndex ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none"
-                }`;
-              const inner = (
-                <>
-                  {/* Arka plan ve Görseller */}
-                  <div className="absolute inset-0 overflow-hidden bg-muted-bg">
-                    {item.imageUrl && !imageErrors.has(item.id) ? (
-                      <>
-                        <Image
-                          src={normalizeImageUrl(item.imageUrl)!}
-                          alt=""
-                          fill
-                          className="scale-110 object-cover opacity-50 blur-2xl filter"
-                          aria-hidden="true"
-                        />
-                        <Image
-                          src={normalizeImageUrl(item.imageUrl)!}
-                          alt={item.title}
-                          fill
-                          className="object-contain transition-transform duration-700 group-hover/card:scale-[1.01]"
-                          sizes="(max-width: 768px) 100vw, 1200px"
-                          priority={index === 0}
-                          onError={() => markImageError(item.id)}
-                        />
-                      </>
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-light to-primary/10 text-primary/40">
-                        <span className="font-serif text-4xl">Y</span>
-                      </div>
-                    )}
-                    {/* Modern Gradient Overlay */}
-                    <div
-                      className="absolute inset-0"
-                      style={{
-                        background:
-                          "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 30%, transparent 100%)",
-                      }}
-                    />
-                  </div>
-
-                  {/* İçerik Katmanı - Cinematic & Premium */}
-                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-6 md:p-10 lg:p-12">
-                    <motion.div
-                      key={activeIndex}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-                      className="max-w-4xl space-y-4"
-                    >
-                      {/* Üst Kategori Badge */}
-                      <span className="inline-block rounded-full bg-primary px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-lg md:text-xs">
-                        {splitTitle(item.title).part1}
-                      </span>
-
-                      {/* Başlık - Larger and airier */}
-                      <h2 className="font-serif text-2xl font-extrabold leading-[1.05] text-white drop-shadow-2xl md:text-5xl lg:text-6xl tracking-tight">
-                        {splitTitle(item.title).part2}
-                      </h2>
-
-                      {/* Açıklama ve Yazar - Airy Layout */}
-                      <div className="flex flex-col gap-3 pt-3 md:gap-8 md:pt-6 md:flex-row md:items-center">
-                        {/* Açıklama */}
-                        {item.excerpt && (
-                          <div className="relative border-l-2 border-primary/40 pl-4 md:pl-8 backdrop-blur-[2px]">
-                            <p className="line-clamp-2 text-base font-medium text-white/90 md:text-xl md:leading-relaxed italic font-serif opacity-90">
-                              "{item.excerpt}"
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Yazar Bilgisi */}
-                        <div className="flex items-center gap-4 text-white/80 md:border-l md:border-white/20 md:pl-8">
-                          <div className="h-10 w-10 rounded-full bg-white/10 p-0.5 backdrop-blur-md">
-                            <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/20 font-bold text-white text-xs">
-                              {item.authorName.charAt(0)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col text-xs md:text-sm">
-                            <span className="font-bold text-white tracking-wide">{item.authorName}</span>
-                            {item.publishedAt && (
-                              <span className="text-white/60">
-                                {new Date(item.publishedAt).toLocaleDateString("tr-TR", {
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                })}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </div>
-                </>
-              );
-              return isExternal ? (
-                <a
-                  key={item.id}
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={slideClass}
-                >
-                  {inner}
-                </a>
-              ) : (
-                <Link key={item.id} href={item.link} className={slideClass}>
-                  {inner}
-                </Link>
-              );
-            })}
+    <section
+      className="py-5 md:py-8"
+      aria-label="Öne çıkan içerikler"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <div className="container mx-auto px-4 md:px-6">
+        <div className="mb-4 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-primary">Hayattan seçkiler</p>
+            <h2 className="mt-1 font-serif text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+              Öne çıkanlar
+            </h2>
           </div>
 
-          {/* Önceki / Sonraki okları */}
           {items.length > 1 && (
-            <>
-              <motion.button
-                whileHover={{ scale: 1.1, x: -5 }}
-                whileTap={{ scale: 0.9 }}
+            <div className="flex items-center gap-2">
+              <span className="mr-2 hidden text-sm text-muted sm:inline">
+                {activeIndex + 1} / {items.length}
+              </span>
+              <button
                 type="button"
-                onClick={goPrev}
-                className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/30 w-12 h-12 flex items-center justify-center text-white/90 backdrop-blur-md border border-white/10 transition-colors hover:bg-primary hover:text-white"
-                aria-label="Önceki slide"
+                onClick={() => move(-1)}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-foreground shadow-sm hover:border-primary/30 hover:text-primary active:scale-95"
+                aria-label="Önceki manşet"
               >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                </svg>
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1, x: 5 }}
-                whileTap={{ scale: 0.9 }}
+                <span aria-hidden>←</span>
+              </button>
+              <button
                 type="button"
-                onClick={goNext}
-                className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/30 w-12 h-12 flex items-center justify-center text-white/90 backdrop-blur-md border border-white/10 transition-colors hover:bg-primary hover:text-white"
-                aria-label="Sonraki slide"
+                onClick={() => move(1)}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-foreground shadow-sm hover:border-primary/30 hover:text-primary active:scale-95"
+                aria-label="Sonraki manşet"
               >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                </svg>
-              </motion.button>
-            </>
-          )}
-
-          {/* Pagination + progress bar */}
-          {items.length > 1 && (
-            <div className="absolute bottom-0 left-0 right-0 z-20 p-4 md:p-6 bg-gradient-to-t from-black/40 to-transparent">
-              <div className="flex flex-col items-center gap-3">
-                <div className="h-1 w-full max-w-[240px] overflow-hidden rounded-full bg-white/10 backdrop-blur-sm">
-                  <motion.div
-                    className="h-full rounded-full bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)]"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <nav
-                  className="flex items-center gap-2 rounded-full bg-white/5 p-2 backdrop-blur-md border border-white/10"
-                  aria-label="Slider sayfa navigasyonu"
-                >
-                  {items.map((_, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={(e) => goTo(index, e)}
-                      className={`group relative h-2 transition-all duration-500 ${index === activeIndex ? "w-8" : "w-2 hover:w-4"
-                        }`}
-                      aria-label={`Slide ${index + 1}`}
-                      aria-current={index === activeIndex ? "true" : undefined}
-                    >
-                      <span className={`absolute inset-0 rounded-full transition-all duration-300 ${index === activeIndex ? "bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" : "bg-white/40 group-hover:bg-white/60"
-                        }`} />
-                    </button>
-                  ))}
-                </nav>
-              </div>
+                <span aria-hidden>→</span>
+              </button>
             </div>
           )}
         </div>
+
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.8fr)_minmax(280px,0.72fr)]">
+          {/* Main lead card with touch support */}
+          <div
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            className="select-none"
+          >
+            <StoryLink
+              key={lead.id}
+              item={lead}
+              className="group relative block min-h-[390px] overflow-hidden rounded-[20px] bg-foreground shadow-premium md:min-h-[510px]"
+            >
+              <div
+                className="absolute inset-0 transition-opacity duration-400"
+                style={{ opacity: isAnimating ? 0 : 1 }}
+              >
+                <ArticleImage
+                  src={lead.imageUrl}
+                  alt={lead.title}
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 70vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/5" />
+              <div
+                className="absolute inset-x-0 bottom-0 max-w-4xl p-6 md:p-9 lg:p-11 transition-all duration-400"
+                style={{ opacity: isAnimating ? 0 : 1, transform: isAnimating ? "translateY(8px)" : "translateY(0)" }}
+              >
+                <span className="inline-flex rounded-full bg-white/92 px-3 py-1.5 text-sm font-semibold text-primary">
+                  Manşet
+                </span>
+                <h3 className="mt-4 max-w-3xl font-serif text-3xl font-bold leading-[1.12] tracking-tight text-white md:text-5xl">
+                  {lead.title}
+                </h3>
+                {lead.excerpt && (
+                  <p className="mt-4 max-w-2xl line-clamp-2 text-base leading-relaxed text-white/82 md:text-lg">
+                    {lead.excerpt}
+                  </p>
+                )}
+                <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/72">
+                  {lead.authorName && <span className="font-semibold text-white">{lead.authorName}</span>}
+                  {lead.authorName && lead.publishedAt && <span aria-hidden>•</span>}
+                  {lead.publishedAt && <time dateTime={new Date(lead.publishedAt).toISOString()}>{formatDate(lead.publishedAt)}</time>}
+                </div>
+              </div>
+
+              {/* Dot indicators — shown on mobile inside the card */}
+              {items.length > 1 && (
+                <div className="absolute bottom-4 right-4 flex gap-1.5 lg:hidden">
+                  {items.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); goTo(i); }}
+                      aria-label={`Slide ${i + 1}`}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        i === activeIndex
+                          ? "w-6 bg-white"
+                          : "w-2 bg-white/40 hover:bg-white/70"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </StoryLink>
+          </div>
+
+          {sideItems.length > 0 && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+              {sideItems.map((item) => (
+                <StoryLink
+                  key={item.id}
+                  item={item}
+                  className="group card grid min-h-[210px] grid-cols-[120px_1fr] overflow-hidden sm:block lg:grid lg:grid-cols-[150px_1fr]"
+                >
+                  <div className="image-container relative min-h-full bg-muted-bg sm:aspect-[16/9] lg:aspect-auto">
+                    <ArticleImage
+                      src={item.imageUrl}
+                      alt={item.title}
+                      sizes="(max-width: 640px) 120px, (max-width: 1024px) 50vw, 150px"
+                    />
+                  </div>
+                  <div className="flex min-w-0 flex-col justify-center p-4 md:p-5">
+                    <p className="text-sm font-semibold text-primary">Editörün seçimi</p>
+                    <h3 className="mt-2 line-clamp-3 font-serif text-lg font-bold leading-snug text-foreground group-hover:text-primary md:text-xl">
+                      {item.title}
+                    </h3>
+                    <div className="mt-3 text-sm text-muted">
+                      {item.authorName || formatDate(item.publishedAt)}
+                    </div>
+                  </div>
+                </StoryLink>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Dot indicators — desktop below slider */}
+        {items.length > 1 && (
+          <div className="mt-4 hidden justify-center gap-2 lg:flex" role="tablist" aria-label="Slide seçimi">
+            {items.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                role="tab"
+                aria-selected={i === activeIndex}
+                aria-label={`Slide ${i + 1}`}
+                onClick={() => goTo(i)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === activeIndex
+                    ? "w-7 bg-primary"
+                    : "w-2 bg-border hover:bg-primary/40"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

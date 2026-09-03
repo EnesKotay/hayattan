@@ -12,6 +12,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma, runInBatches } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { logDataDeletion, logDataModification } from "@/lib/security-logger";
 import { type AdSlotContent, type AdSlotCreative, AD_SLOT_KEYS, adMetricKey, adSlotIdFromKey, adSlotKey, parseAdSlotValue, serializeAdSlotContent } from "@/lib/ad-slots";
 import { sanitizeHtml, sanitizeAdHtml, sanitizeText, sanitizeUrl } from "@/lib/sanitize";
 import { titleCase } from "@/lib/text-case";
@@ -51,11 +52,22 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-async function requireAuth() {
+type AuthenticatedAdminUser = { id: string; role: "ADMIN" | "AUTHOR" };
+
+async function requireAuth(
+  allowedRoles: Array<AuthenticatedAdminUser["role"]> = ["ADMIN", "AUTHOR"],
+): Promise<AuthenticatedAdminUser> {
   const session = await auth();
-  if (!session?.user?.role || !["ADMIN", "AUTHOR"].includes(session.user.role)) {
+  const role = session?.user?.role;
+  const id = session?.user?.id;
+  if (!id || (role !== "ADMIN" && role !== "AUTHOR") || !allowedRoles.includes(role)) {
     throw new Error("Yetkisiz erişim");
   }
+  return { id, role };
+}
+
+async function requireAdmin() {
+  return requireAuth(["ADMIN"]);
 }
 
 // ==========================================
@@ -160,7 +172,7 @@ export const getAdSlots = unstable_cache(
 );
 
 export async function getAdMetrics() {
-  await requireAuth();
+  await requireAdmin();
   const rows = await db.siteSetting.findMany({
     where: {
       key: {
@@ -186,7 +198,7 @@ export async function getAdMetrics() {
 }
 
 export async function getAdPreviewPostPath() {
-  await requireAuth();
+  await requireAdmin();
   const post = await db.yazi.findFirst({
     where: { publishedAt: { lte: new Date() } },
     orderBy: { publishedAt: "desc" },
@@ -198,7 +210,7 @@ export async function getAdPreviewPostPath() {
 // ... existing code ...
 
 export async function setMenuOrder(order: string[]) {
-  await requireAuth();
+  await requireAdmin();
   await db.siteSetting.upsert({
     where: { key: "menu_order" },
     update: { value: JSON.stringify(order) },
@@ -213,7 +225,7 @@ export async function setMenuOrder(order: string[]) {
 
 
 export async function createPage(formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
   const title = titleCase(sanitizeText((formData.get("title") as string)?.trim() ?? ""));
   const slug = (formData.get("slug") as string)?.trim() || slugify(title) || "sayfa";
   const content = (formData.get("content") as string)?.trim() || "<p></p>";
@@ -237,7 +249,7 @@ export async function createPage(formData: FormData) {
 }
 
 export async function updatePage(id: string, formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
   const title = titleCase(sanitizeText((formData.get("title") as string)?.trim() ?? ""));
   const slug = (formData.get("slug") as string)?.trim() ?? "";
   const content = (formData.get("content") as string)?.trim() || "<p></p>";
@@ -262,7 +274,7 @@ export async function updatePage(id: string, formData: FormData) {
 }
 
 export async function deletePage(id: string) {
-  await requireAuth();
+  await requireAdmin();
   await db.$executeRaw`DELETE FROM "Page" WHERE id = ${id}`;
   revalidateTag("menu-items", { expire: 0 });
   revalidatePath("/");
@@ -352,7 +364,7 @@ function revalidateAdPages() {
 }
 
 export async function saveAdSlot(slotId: string, formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
   if (!AD_SLOT_KEYS.includes(slotId as (typeof AD_SLOT_KEYS)[number])) {
     throw new Error("Geçersiz reklam alanı.");
   }
@@ -363,7 +375,7 @@ export async function saveAdSlot(slotId: string, formData: FormData) {
 }
 
 export async function saveAllAdSlots(formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
   for (const slotId of AD_SLOT_KEYS) {
     await persistAdSlot(slotId, formData);
   }
@@ -383,6 +395,18 @@ async function generateUniqueSlug(baseSlug: string, ignoreId?: string) {
     slug = `${baseSlug}-${counter}`;
     counter++;
   }
+}
+
+async function assertCanManageYazi(user: AuthenticatedAdminUser, yaziId: string) {
+  const yazi = await db.yazi.findUnique({
+    where: { id: yaziId },
+    select: { id: true, authorId: true },
+  });
+  if (!yazi) throw new Error("Yazı bulunamadı");
+  if (user.role !== "ADMIN" && yazi.authorId !== user.id) {
+    throw new Error("Bu yazıyı yönetme yetkiniz yok");
+  }
+  return yazi as { id: string; authorId: string };
 }
 
 async function upsertEtiketler(etiketlerRaw: string): Promise<string[]> {
@@ -405,7 +429,7 @@ async function upsertEtiketler(etiketlerRaw: string): Promise<string[]> {
 }
 
 export async function createYazi(formData: FormData) {
-  await requireAuth();
+  const currentUser = await requireAuth();
   const rawTitle = formData.get("title") as string;
   const title = titleCase(sanitizeText(rawTitle || ""));
   const rawSlug = (formData.get("slug") as string) || slugify(title);
@@ -413,7 +437,8 @@ export async function createYazi(formData: FormData) {
   const excerpt = formData.get("excerpt") as string | null;
   const rawContent = formData.get("content") as string;
   const content = rawContent ? sanitizeHtml(rawContent) : "<p></p>";
-  const authorId = formData.get("authorId") as string;
+  const requestedAuthorId = formData.get("authorId") as string;
+  const authorId = currentUser.role === "ADMIN" ? requestedAuthorId : currentUser.id;
   const kategoriIds = formData.getAll("kategoriIds") as string[];
   const etiketlerRaw = (formData.get("etiketler") as string) || "";
   const publishedAtRaw = (formData.get("publishedAt") as string) || "";
@@ -480,7 +505,8 @@ export async function createYazi(formData: FormData) {
 }
 
 export async function updateYazi(id: string, formData: FormData) {
-  await requireAuth();
+  const currentUser = await requireAuth();
+  await assertCanManageYazi(currentUser, id);
   const rawTitle = formData.get("title") as string;
   const title = titleCase(sanitizeText(rawTitle || ""));
   const rawSlug = formData.get("slug") as string;
@@ -488,7 +514,8 @@ export async function updateYazi(id: string, formData: FormData) {
   const excerpt = formData.get("excerpt") as string | null;
   const rawContent = formData.get("content") as string;
   const content = rawContent ? sanitizeHtml(rawContent) : "<p></p>";
-  const authorId = formData.get("authorId") as string;
+  const requestedAuthorId = formData.get("authorId") as string;
+  const authorId = currentUser.role === "ADMIN" ? requestedAuthorId : currentUser.id;
   const kategoriIds = formData.getAll("kategoriIds") as string[];
   const etiketlerRaw = (formData.get("etiketler") as string) || "";
   const publishedAtRaw = (formData.get("publishedAt") as string) || "";
@@ -563,8 +590,10 @@ export async function updateYazi(id: string, formData: FormData) {
 }
 
 export async function deleteYazi(id: string) {
-  await requireAuth();
+  const currentUser = await requireAuth();
+  await assertCanManageYazi(currentUser, id);
   await db.yazi.delete({ where: { id } });
+  await logDataDeletion(currentUser.id, "yazi", id);
   revalidatePath("/");
   revalidatePath("/yazilar");
   revalidatePath("/admin/yazilar");
@@ -572,8 +601,51 @@ export async function deleteYazi(id: string) {
   redirect("/admin/yazilar?deleted=1");
 }
 
+export async function bulkUpdateYazilar(
+  ids: string[],
+  action: "yayinla" | "taslak" | "sil"
+): Promise<{ success: boolean; count: number; error?: string }> {
+  try {
+    const admin = await requireAdmin();
+    if (!ids.length) return { success: false, count: 0, error: "Hiç yazı seçilmedi." };
+    if (ids.length > 100) return { success: false, count: 0, error: "En fazla 100 yazı seçilebilir." };
+
+    let count = 0;
+    if (action === "yayinla") {
+      const result = await db.yazi.updateMany({
+        where: { id: { in: ids }, publishedAt: null },
+        data: { publishedAt: new Date() },
+      });
+      count = result.count;
+      await logDataModification(admin.id, "update", "yazi_bulk_yayinla", `${ids.length} yazi`);
+    } else if (action === "taslak") {
+      const result = await db.yazi.updateMany({
+        where: { id: { in: ids } },
+        data: { publishedAt: null },
+      });
+      count = result.count;
+      await logDataModification(admin.id, "update", "yazi_bulk_taslak", `${ids.length} yazi`);
+    } else if (action === "sil") {
+      const result = await db.yazi.deleteMany({ where: { id: { in: ids } } });
+      count = result.count;
+      await logDataDeletion(admin.id, "yazi_bulk_sil", `${ids.length} yazi`);
+    }
+
+    revalidatePath("/");
+    revalidatePath("/yazilar");
+    revalidatePath("/admin/yazilar");
+    revalidatePath("/sitemap.xml");
+    return { success: true, count };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Bilinmeyen hata";
+    return { success: false, count: 0, error: message };
+  }
+}
+
+
 export async function duplicateYazi(id: string) {
-  await requireAuth();
+  const currentUser = await requireAuth();
+  await assertCanManageYazi(currentUser, id);
   const original = await db.yazi.findUnique({
     where: { id },
     include: { kategoriler: true },
@@ -622,7 +694,7 @@ async function generateUniqueYazarSlug(baseSlug: string): Promise<string> {
 
 // YAZAR
 export async function createYazar(formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
   const name = titleCase((formData.get("name") as string)?.trim() ?? "");
   const rawSlug = (formData.get("slug") as string)?.trim() || slugify(name);
   const slug = await generateUniqueYazarSlug(slugify(rawSlug) || slugify(name) || "yazar");
@@ -659,7 +731,7 @@ export async function createYazar(formData: FormData) {
 }
 
 export async function updateYazar(id: string, formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
   const name = titleCase((formData.get("name") as string)?.trim() ?? "");
   let slug = (formData.get("slug") as string)?.trim() ?? "";
   slug = slugify(slug) || slugify(name);
@@ -704,7 +776,7 @@ export async function updateYazar(id: string, formData: FormData) {
 }
 
 export async function deleteYazar(id: string) {
-  await requireAuth();
+  await requireAdmin();
   // Önce bu yazara ait tüm yazıları sil (foreign key), sonra yazarı sil
   await db.$transaction(async (tx: typeof db) => {
     await tx.yazi.deleteMany({ where: { authorId: id } });
@@ -722,7 +794,7 @@ export async function deleteYazar(id: string) {
 
 // KATEGORİ
 export async function createKategori(formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
   const name = titleCase((formData.get("name") as string)?.trim() ?? "");
   const slug = (formData.get("slug") as string)?.trim() || slugify(name);
   const description = formData.get("description") as string | null;
@@ -742,7 +814,7 @@ export async function createKategori(formData: FormData) {
 }
 
 export async function updateKategori(id: string, formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
   const name = titleCase((formData.get("name") as string)?.trim() ?? "");
   const slug = (formData.get("slug") as string)?.trim() ?? "";
   const description = formData.get("description") as string | null;
@@ -763,7 +835,7 @@ export async function updateKategori(id: string, formData: FormData) {
 }
 
 export async function deleteKategori(id: string) {
-  await requireAuth();
+  await requireAdmin();
   await db.kategori.delete({ where: { id } });
   revalidatePath("/");
   revalidatePath("/kategoriler");
@@ -806,6 +878,7 @@ export async function getMenuOrder(): Promise<string[]> {
 
 /** Admin için menü öğelerini sırayla döndürür (label ile). */
 export async function getMenuEntriesForAdmin(): Promise<MenuEntryForAdmin[]> {
+  await requireAdmin();
   const order = await getMenuOrder();
   const pagesById = new Map<string, { title: string }>();
   try {
@@ -876,7 +949,7 @@ export async function getPageBySlug(slug: string) {
 
 // HABER – Ana sayfa slider'da gösterilen haberler
 export async function createHaber(formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
   const title = titleCase(sanitizeText((formData.get("title") as string)?.trim() ?? ""));
   const excerptRaw = (formData.get("excerpt") as string)?.trim() || null;
   const excerpt = excerptRaw ? sanitizeText(excerptRaw) : null;
@@ -898,7 +971,7 @@ export async function createHaber(formData: FormData) {
 }
 
 export async function updateHaber(id: string, formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
   const title = titleCase(sanitizeText((formData.get("title") as string)?.trim() ?? ""));
   const excerptRaw = (formData.get("excerpt") as string)?.trim() || null;
   const excerpt = excerptRaw ? sanitizeText(excerptRaw) : null;
@@ -922,7 +995,7 @@ export async function updateHaber(id: string, formData: FormData) {
 }
 
 export async function deleteHaber(id: string) {
-  await requireAuth();
+  await requireAdmin();
   await db.haber.delete({ where: { id } });
   revalidatePath("/");
   revalidatePath("/admin/haberler");
@@ -1042,7 +1115,7 @@ export async function getHakkimizdaContent(): Promise<HakkimizdaContent> {
 
 /** Hakkımızda içeriğini kaydeder */
 export async function saveHakkimizdaContent(formData: FormData) {
-  await requireAuth();
+  await requireAdmin();
 
   const entries: [string, string][] = [
     [HAKKIMIZDA_KEYS.mainTitle, sanitizeText((formData.get("mainTitle") as string) ?? "")],
@@ -1076,7 +1149,7 @@ export type DashboardStats = {
 };
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  await requireAuth();
+  await requireAdmin();
 
   // 1. Last 30 days activity (Content creation)
   const thirtyDaysAgo = new Date();

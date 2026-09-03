@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { updateYazi } from "../../../actions";
 import { YaziForm } from "@/components/admin/YaziForm";
 
@@ -10,6 +11,7 @@ export default async function YaziDuzenlePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await auth();
   const yazi = await prisma.yazi.findUnique({
     where: { id },
     include: {
@@ -20,9 +22,11 @@ export default async function YaziDuzenlePage({
   });
 
   if (!yazi) notFound();
+  if (session?.user?.role !== "ADMIN" && yazi.authorId !== session?.user?.id) notFound();
 
   const [yazarlar, kategoriler] = await Promise.all([
     prisma.yazar.findMany({
+      where: session?.user?.role === "ADMIN" ? undefined : { id: session?.user?.id },
       orderBy: [
         { sortOrder: "asc" },
         { yazilar: { _count: "desc" } },

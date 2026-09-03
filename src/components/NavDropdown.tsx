@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDownIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
@@ -15,7 +15,16 @@ type NavDropdownProps = {
 
 export function NavDropdown({ label, items, active = false }: NavDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        const closeOnOutsideClick = (event: MouseEvent) => {
+            if (!containerRef.current?.contains(event.target as Node)) setIsOpen(false);
+        };
+        document.addEventListener("mousedown", closeOnOutsideClick);
+        return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+    }, []);
 
     const handleMouseEnter = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -30,34 +39,42 @@ export function NavDropdown({ label, items, active = false }: NavDropdownProps) 
 
     return (
         <div
+            ref={containerRef}
             className="relative"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
             <button
-                className={`group flex items-center justify-center gap-1 w-10 h-10 rounded-full transition-all duration-300 z-10 ${isOpen || active
-                    ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
-                    : "bg-muted-bg text-foreground/70 hover:bg-primary/10 hover:text-primary hover:scale-110"
+                type="button"
+                onClick={() => setIsOpen((open) => !open)}
+                onKeyDown={(event) => {
+                    if (event.key === "Escape") setIsOpen(false);
+                }}
+                className={`group z-10 flex h-10 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition-colors ${isOpen || active
+                    ? "bg-primary-light text-primary"
+                    : "text-foreground/70 hover:bg-muted-bg hover:text-primary"
                     }`}
-                aria-label="Daha fazla seçenek"
+                aria-label="Diğer sayfaları göster"
+                aria-expanded={isOpen}
+                aria-haspopup="menu"
             >
-                <div className="relative">
-                    {label}
-                </div>
+                <span>{label}</span>
+                <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
             </button>
 
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 15, scale: 0.95, filter: "blur(10px)" }}
-                        animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                        exit={{ opacity: 0, y: 15, scale: 0.95, filter: "blur(10px)" }}
-                        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                        className="absolute right-0 mt-3 w-64 origin-top-right rounded-[24px] border border-primary/5 bg-background/95 p-3 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-2xl z-50"
+                        initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                        transition={{ duration: 0.18, ease: "easeOut" }}
+                        className="absolute right-0 z-50 mt-3 w-64 origin-top-right rounded-[16px] border border-border bg-background/96 p-2 shadow-premium-xl backdrop-blur-xl"
+                        role="menu"
                     >
                         <div className="flex flex-col gap-1.5">
                             <div className="px-3 py-2">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60">KEŞFET</span>
+                                <span className="text-xs font-semibold text-muted">Keşfet</span>
                             </div>
                             {items.map((item, index) => (
                                 <motion.div
@@ -68,10 +85,11 @@ export function NavDropdown({ label, items, active = false }: NavDropdownProps) 
                                 >
                                     <Link
                                         href={item.href}
-                                        className="group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-foreground/80 transition-all hover:bg-primary hover:text-white active:scale-[0.97]"
+                                        role="menuitem"
+                                        className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-foreground/80 hover:bg-primary hover:text-white"
                                         onClick={() => setIsOpen(false)}
                                     >
-                                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted-bg group-hover:bg-white/20 transition-colors">
+                                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted-bg transition-colors group-hover:bg-white/20">
                                             {item.icon ? <item.icon className="w-4 h-4" /> : <ArrowRightIcon className="w-4 h-4" />}
                                         </span>
                                         <span className="flex-1 tracking-tight">{item.label}</span>

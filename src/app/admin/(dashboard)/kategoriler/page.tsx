@@ -5,12 +5,14 @@ import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
 import { AdminFeedback } from "@/components/admin/AdminFeedback";
 import { AdminFilters } from "@/components/admin/AdminFilters";
 import { Icons } from "@/components/admin/Icons";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 export default async function AdminKategorilerPage({
     searchParams,
 }: {
     searchParams: Promise<{ success?: string; deleted?: string; error?: string; q?: string }>;
 }) {
+    await requireAdminPage();
     const params = await searchParams;
     const q = (params.q ?? "").trim();
 

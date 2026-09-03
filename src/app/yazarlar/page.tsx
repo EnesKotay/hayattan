@@ -13,11 +13,17 @@ export async function generateMetadata({
 }) {
   const { misafir } = await searchParams;
   if (misafir === "1") {
-    return { title: "Misafir Yazıları | Hayattan.Net", description: "Misafir yazarların yazıları." };
+    return {
+      title: "Misafir Yazıları",
+      description: "Misafir yazarların yazıları.",
+      alternates: { canonical: "/misafir-yazarlar" },
+      robots: { index: false, follow: true },
+    };
   }
   return {
-    title: "Yazarlar | Hayattan.Net",
-    description: "Hayattan.Net - Yazarlarımız",
+    title: "Yazarlar",
+    description: "Hayattan.Net yazarlarını, uzmanlık alanlarını ve yayımlanan tüm yazılarını keşfedin.",
+    alternates: { canonical: "/yazarlar" },
   };
 }
 

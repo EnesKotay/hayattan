@@ -13,16 +13,39 @@ type Props = {
 
 const YAZILAR_PER_PAGE = 12;
 
-export async function generateMetadata({ params }: Props) {
+/** Bu sayının altındaki etiket sayfaları "thin content" sayılıp indexlenmiyor */
+const MIN_INDEXABLE_YAZI = 3;
+
+export async function generateMetadata({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { sayfa } = await searchParams;
   const etiket = await (prisma as any).etiket.findUnique({
     where: { slug },
     select: { name: true },
   });
   if (!etiket) return { title: "Etiket Bulunamadı" };
+
+  const yaziSayisi = await prisma.yazi.count({
+    where: {
+      etiketler: { some: { slug } },
+      publishedAt: { lte: new Date() },
+    } as any,
+  });
+
+  const page = Math.max(1, parseInt(sayfa ?? "1", 10) || 1);
+  const canonical = page > 1 ? `/etiketler/${slug}?sayfa=${page}` : `/etiketler/${slug}`;
+  const pageSuffix = page > 1 ? ` — Sayfa ${page}` : "";
+  const description = `"${etiket.name}" etiketiyle yazılmış ${yaziSayisi} içerik — Hayattan.Net`;
+
   return {
-    title: `${etiket.name} | Etiket | Hayattan.Net`,
-    description: `"${etiket.name}" etiketiyle yazılmış içerikler — Hayattan.Net`,
+    title: `${etiket.name} Etiketi${pageSuffix}`,
+    description,
+    alternates: { canonical },
+    robots: {
+      index: yaziSayisi >= MIN_INDEXABLE_YAZI,
+      follow: true,
+    },
+    openGraph: { type: "website", url: canonical, title: `${etiket.name} Etiketi${pageSuffix}`, description },
   };
 }
 

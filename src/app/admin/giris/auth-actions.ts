@@ -1,15 +1,16 @@
 "use server";
 
 import { hash } from "bcryptjs";
-import { randomUUID } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { sendPasswordResetEmail } from "@/lib/mail";
+import { validatePassword } from "@/lib/password-validator";
 
 const db = prisma as any;
 
 export async function forgotPassword(formData: FormData) {
-    const email = (formData.get("email") as string) || "";
+    const email = ((formData.get("email") as string) || "").trim().toLowerCase();
     if (!email) redirect("/admin/giris/sifremi-unuttum?error=eksik");
 
     const yazar = await db.yazar.findUnique({
@@ -18,13 +19,15 @@ export async function forgotPassword(formData: FormData) {
 
     if (!yazar) redirect("/admin/giris/sifremi-unuttum?success=1");
 
-    const token = randomUUID();
+    const token = randomBytes(32).toString("hex");
+    const tokenHash = createHash("sha256").update(token).digest("hex");
     const expires = new Date(Date.now() + 3600 * 1000); // 1 saat geçerli
 
+    await db.passwordResetToken.deleteMany({ where: { email } });
     await db.passwordResetToken.create({
         data: {
             email,
-            token,
+            tokenHash,
             expires,
         },
     });
@@ -47,8 +50,14 @@ export async function resetPassword(formData: FormData) {
         redirect(`/admin/giris/sifre-sifirla?token=${token}&error=uyusmuyor`);
     }
 
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+        redirect(`/admin/giris/sifre-sifirla?token=${encodeURIComponent(token)}&error=zayif`);
+    }
+
+    const tokenHash = createHash("sha256").update(token).digest("hex");
     const resetToken = await db.passwordResetToken.findUnique({
-        where: { token },
+        where: { tokenHash },
     });
 
     if (!resetToken || resetToken.expires < new Date()) {
@@ -57,13 +66,14 @@ export async function resetPassword(formData: FormData) {
 
     const hashedPassword = await hash(password, 12);
 
-    await db.yazar.update({
-        where: { email: resetToken.email },
-        data: { password: hashedPassword },
-    });
-
-    await db.passwordResetToken.delete({
-        where: { id: resetToken.id },
+    await db.$transaction(async (tx: typeof db) => {
+        await tx.yazar.update({
+            where: { email: resetToken.email },
+            data: { password: hashedPassword },
+        });
+        await tx.passwordResetToken.deleteMany({
+            where: { email: resetToken.email },
+        });
     });
 
     redirect("/admin/giris?resetSuccess=1");

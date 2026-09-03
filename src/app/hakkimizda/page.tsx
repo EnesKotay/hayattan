@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getHakkimizdaContent } from "@/app/admin/actions";
+import { normalizeImageUrl } from "@/lib/image";
 
 export const metadata: Metadata = {
-  title: "Hakkımızda | Hayattan.Net",
-  description: "Hayattan.Net - Hayatın Engelsiz Tarafı hakkında",
+  title: "Hakkımızda",
+  description: "Hayattan.Net’in yayın yaklaşımı, değerleri ve Hayatın Engelsiz Tarafı anlayışı hakkında bilgi edinin.",
+  alternates: { canonical: "/hakkimizda" },
 };
 
 export default async function HakkimizdaPage() {
@@ -13,11 +16,15 @@ export default async function HakkimizdaPage() {
     <div className="container mx-auto max-w-4xl px-4 py-12">
       {/* Kapak Görseli */}
       {content.imageUrl && (
-        <div className="mb-10 overflow-hidden rounded-2xl shadow-xl">
-          <img
-            src={content.imageUrl}
-            alt="Hakkımızda"
-            className="h-auto w-full object-cover"
+        <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-2xl shadow-xl">
+          {/* Sabit en-boy oranı, görsel yüklenmeden önce yeri ayırıp CLS'i önlüyor */}
+          <Image
+            src={normalizeImageUrl(content.imageUrl) ?? content.imageUrl}
+            alt="Hayattan.Net ekibi"
+            fill
+            priority
+            sizes="(max-width: 896px) 100vw, 896px"
+            className="object-cover"
           />
         </div>
       )}

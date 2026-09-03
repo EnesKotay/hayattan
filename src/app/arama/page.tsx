@@ -14,13 +14,16 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
   const query = q?.trim();
 
   return {
-    title: query ? `"${query}" araması | Hayattan.Net` : "Arama | Hayattan.Net",
+    title: query ? `"${query}" araması` : "Arama",
     description: query
       ? `Hayattan.Net içinde "${query}" araması için yazı, yazar ve kategori sonuçları.`
       : "Hayattan.Net yazı, yazar ve kategori araması.",
     alternates: {
-      canonical: query ? `/arama?q=${encodeURIComponent(query)}` : "/arama",
+      canonical: "/arama",
     },
+    // Arama sonuç sayfaları indexlenmemeli: sonsuz sayıda düşük kaliteli URL üretir
+    // ve Google'ın site içi arama sonucu yönergesine aykırı. Linkler yine izlensin.
+    robots: { index: false, follow: true },
   };
 }
 

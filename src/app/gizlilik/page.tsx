@@ -1,8 +1,9 @@
 import Link from "next/link";
 
 export const metadata = {
-    title: "Gizlilik Politikası | Hayattan.Net",
+    title: "Gizlilik Politikası",
     description: "Hayattan.Net gizlilik politikası ve veri güvenliği bilgilendirmesi.",
+    alternates: { canonical: "/gizlilik" },
 };
 
 export default function GizlilikPage() {

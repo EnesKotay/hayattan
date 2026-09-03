@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export function NewsletterForm() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "warning" | "error">("idle");
   const [message, setMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
@@ -18,8 +18,8 @@ export function NewsletterForm() {
       });
       const data = await res.json();
       if (res.ok) {
-        setStatus("success");
-        setMessage("Abone oldunuz! Yeni yazılarımızdan haberdar olacaksınız.");
+        setStatus(data.emailSent ? "success" : "warning");
+        setMessage(data.message ?? data.warning ?? "Aboneliğiniz kaydedildi.");
         setEmail("");
       } else {
         setStatus("error");
@@ -33,33 +33,33 @@ export function NewsletterForm() {
 
   return (
     <div>
-      <h3 className="mb-4 font-serif text-xl font-bold tracking-tight">Bülten</h3>
-      <p className="mb-4 text-sm text-muted/80">
+      <h3 className="mb-2 font-serif text-lg font-bold tracking-tight">Bülten</h3>
+      <p className="mb-4 text-sm leading-relaxed text-muted">
         Yeni yazılarımızdan haberdar olmak için abone olun.
       </p>
-      {status === "success" ? (
-        <p className="rounded-lg bg-green-500/10 px-4 py-3 text-sm text-green-600 dark:text-green-400">
+      {status === "success" || status === "warning" ? (
+        <p className={"rounded-lg px-4 py-3 text-sm " + (status === "success" ? "bg-green-500/10 text-green-600 dark:text-green-400" : "bg-amber-500/10 text-amber-700 dark:text-amber-400")}>
           {message}
         </p>
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row lg:flex-col xl:flex-row">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="E-posta adresiniz"
             required
-            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none"
+            className="min-h-11 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none"
           />
           <button
             type="submit"
             disabled={status === "loading"}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
+            className="min-h-11 shrink-0 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
           >
             {status === "loading" ? "Kaydediliyor..." : "Abone Ol"}
           </button>
           {status === "error" && (
-            <p className="text-xs text-red-500">{message}</p>
+            <p className="text-[13px] text-red-500 sm:col-span-2">{message}</p>
           )}
         </form>
       )}

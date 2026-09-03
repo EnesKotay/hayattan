@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { updateYazar } from "@/app/admin/actions";
 import { FormField, FormSection } from "@/components/admin/FormField";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 export default async function YazarDuzenlePage({
   params,
@@ -12,6 +13,7 @@ export default async function YazarDuzenlePage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
+  await requireAdminPage();
   const { id } = await params;
   const searchParamsRes = await searchParams;
   const error = searchParamsRes.error;

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const session = await auth();
-  if (!session) {
+  if (session?.user?.role !== "ADMIN") {
     return new NextResponse("Yetkisiz", { status: 401 });
   }
 

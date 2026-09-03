@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { prisma } from "@/lib/db";
-import { shareCountKey, parseCounter } from "@/lib/engagement";
+import { shareCountKey } from "@/lib/engagement";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,24 +11,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Geçersiz yazı kimliği." }, { status: 400 });
     }
 
-    const key = shareCountKey(articleId);
-
-    await prisma.$transaction(async (tx) => {
-      const existing = await tx.siteSetting.findUnique({ where: { key } });
-      const nextValue = String(parseCounter(existing?.value) + 1);
-
-      if (existing) {
-        await tx.siteSetting.update({
-          where: { key },
-          data: { value: nextValue },
-        });
-        return;
-      }
-
-      await tx.siteSetting.create({
-        data: { key, value: nextValue },
-      });
+    const article = await prisma.yazi.findFirst({
+      where: { id: articleId, publishedAt: { lte: new Date() } },
+      select: { id: true },
     });
+    if (!article) {
+      return NextResponse.json({ error: "Yazı bulunamadı." }, { status: 404 });
+    }
+
+    const key = shareCountKey(articleId);
+    await prisma.$executeRaw`
+      INSERT INTO "SiteSetting" ("id", "key", "value")
+      VALUES (${randomUUID()}, ${key}, '1')
+      ON CONFLICT ("key") DO UPDATE
+      SET "value" = (COALESCE(NULLIF("SiteSetting"."value", ''), '0')::integer + 1)::text
+    `;
 
     return NextResponse.json({ success: true });
   } catch {

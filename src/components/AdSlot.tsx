@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { AdSlotAlign, AdSlotContent, AdSlotCreative, AdMetricType } from "@/lib/ad-slots";
 import { isAdSlotLive } from "@/lib/ad-slots";
 import { AdSlotRenderer } from "./AdSlotRenderer";
@@ -21,11 +21,11 @@ const alignClasses: Record<AdSlotAlign, string> = {
 };
 
 const sizeStyles = {
-  leaderboard: "h-[110px] w-full max-w-full mx-auto",
-  rectangle: "h-[300px] w-full max-w-full mx-auto",
+  leaderboard: "h-[96px] w-full max-w-[970px] mx-auto",
+  rectangle: "h-[260px] w-full max-w-[640px] mx-auto",
   skyscraper: "h-[600px] w-full max-w-[300px]",
-  mobile: "h-[100px] w-full max-w-full mx-auto",
-  banner: "h-[180px] w-full max-w-full mx-auto",
+  mobile: "h-[96px] w-full max-w-full mx-auto",
+  banner: "h-[132px] w-full max-w-[970px] mx-auto",
 };
 
 function convertToPx(value: string | undefined): string | undefined {
@@ -51,11 +51,21 @@ function sendAdMetric(slotId: string, event: AdMetricType) {
   }).catch(() => undefined);
 }
 
+function subscribeToMobileViewport(onChange: () => void) {
+  const mediaQuery = window.matchMedia("(max-width: 639px)");
+  mediaQuery.addEventListener("change", onChange);
+  return () => mediaQuery.removeEventListener("change", onChange);
+}
+
+function getMobileViewportSnapshot() {
+  return window.matchMedia("(max-width: 639px)").matches;
+}
+
 function AdCreative({ creative }: { creative: AdSlotCreative }) {
   if (creative.type === "html") return <AdSlotRenderer html={creative.content} />;
 
   if (creative.type === "text") {
-    return <div className="flex h-full w-full items-center justify-center bg-gray-50 p-3 text-center text-sm text-foreground">{creative.content}</div>;
+    return <div className="flex h-full w-full items-center justify-center bg-transparent p-3 text-center text-sm text-foreground">{creative.content}</div>;
   }
 
   const image = (
@@ -80,24 +90,16 @@ export function AdSlot({
   showPlaceholder = false,
   forceDevice,
 }: AdSlotProps) {
-  const [isMobile, setIsMobile] = useState(forceDevice === "mobile");
+  const viewportIsMobile = useSyncExternalStore(
+    subscribeToMobileViewport,
+    getMobileViewportSnapshot,
+    () => false
+  );
+  const isMobile = forceDevice ? forceDevice === "mobile" : viewportIsMobile;
   const [scheduleTime, setScheduleTime] = useState(() => Date.now());
   const impressionSent = useRef(false);
   const showSlots = process.env.NEXT_PUBLIC_SHOW_AD_SLOTS !== "false";
   const anchorId = slotId ? "ad-slot-" + slotId : undefined;
-
-  useEffect(() => {
-    if (forceDevice) {
-      setIsMobile(forceDevice === "mobile");
-      return;
-    }
-
-    const mediaQuery = window.matchMedia("(max-width: 639px)");
-    const updateDevice = () => setIsMobile(mediaQuery.matches);
-    updateDevice();
-    mediaQuery.addEventListener("change", updateDevice);
-    return () => mediaQuery.removeEventListener("change", updateDevice);
-  }, [forceDevice]);
 
   useEffect(() => {
     const now = Date.now();
@@ -152,7 +154,7 @@ export function AdSlot({
   return (
     <div id={anchorId} className={alignClasses[align] + " scroll-mt-36"}>
       <aside
-        className={"overflow-hidden rounded-md " + (!creative.width && !creative.height ? sizeStyles[size] : "") + " " + className}
+        className={"relative overflow-hidden rounded-xl border border-border/70 bg-muted-bg/45 p-1 " + (!creative.width && !creative.height ? sizeStyles[size] : "") + " " + className}
         style={customStyle}
         aria-label="Reklam alanı"
         onClick={() => {
@@ -161,7 +163,12 @@ export function AdSlot({
           }
         }}
       >
-        <AdCreative creative={creative} />
+        <span className="pointer-events-none absolute left-2 top-2 z-10 rounded bg-background/85 px-2 py-1 text-xs font-medium text-muted backdrop-blur-sm">
+          Reklam
+        </span>
+        <div className="h-full w-full overflow-hidden rounded-lg">
+          <AdCreative creative={creative} />
+        </div>
       </aside>
     </div>
   );

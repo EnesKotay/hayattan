@@ -3,12 +3,14 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { updateKategori } from "../../../actions";
 import { FormField, FormSection } from "@/components/admin/FormField";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 export default async function KategoriDuzenlePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireAdminPage();
   const { id } = await params;
   const kategori = await prisma.kategori.findUnique({ where: { id } });
 
