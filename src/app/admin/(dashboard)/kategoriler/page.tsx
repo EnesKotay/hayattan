@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { deleteKategori } from "../../actions";
+import { getHomeCategories } from "@/lib/home-categories";
+import { deleteKategori, saveHomeCategories } from "../../actions";
 import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
 import { AdminFeedback } from "@/components/admin/AdminFeedback";
 import { AdminFilters } from "@/components/admin/AdminFilters";
@@ -22,9 +23,31 @@ export default async function AdminKategorilerPage({
         include: { _count: { select: { yazilar: true } } },
     });
 
+    const [homeCategories, allCategories] = await Promise.all([
+        getHomeCategories(),
+        prisma.kategori.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    ]);
+
     return (
         <div className="space-y-6">
             <AdminFeedback initialSuccess={params.success} initialDeleted={params.deleted} initialError={params.error} />
+
+            <form action={saveHomeCategories} className="space-y-4 rounded-2xl border border-border bg-background p-5">
+                <h2 className="text-xl font-bold">Ana sayfa konuları</h2>
+                <p className="text-sm text-muted">En fazla altı kategoriyi görünmesini istediğiniz sırayla seçin. Seçimler yeni yazılar yayınlandığında değişmez. Boş alanlar gösterilmez.</p>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 6 }, (_, index) => (
+                        <label key={index} className="space-y-2 text-sm font-medium">
+                            <span>{index + 1}. konu</span>
+                            <select name={`homeCategory${index}`} defaultValue={homeCategories[index]?.id ?? ""} className="min-h-11 w-full rounded-lg border border-border bg-background px-3">
+                                <option value="">Gösterme</option>
+                                {allCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                            </select>
+                        </label>
+                    ))}
+                </div>
+                <button type="submit" className="min-h-11 rounded-lg bg-primary px-5 py-2 text-white">Ana sayfa konularını kaydet</button>
+            </form>
 
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useAccessibility } from "@/components/providers/AccessibilityProvider";
+import { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
 import { ArticleImage } from "@/components/ArticleImage";
 
 /** Ana sayfa manşetinde gösterilecek öğe (Haber veya Yazı). */
@@ -46,10 +47,22 @@ function StoryLink({ item, className, children }: {
 }
 
 const AUTOPLAY_INTERVAL = 5000;
+function subscribeMotion(callback: () => void) {
+  const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+}
+
 
 export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const { settings, isReady } = useAccessibility();
+  const systemReducedMotion = useSyncExternalStore(subscribeMotion,
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches, () => true);
+  const reducedMotion = systemReducedMotion || settings.motion === "reduced";
+  const rotationStopped = isPaused || isHovered || reducedMotion || !isReady;
   const [isAnimating, setIsAnimating] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -57,12 +70,12 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
 
   const goTo = useCallback(
     (index: number) => {
-      if (isAnimating || index === activeIndex) return;
-      setIsAnimating(true);
+      if (items.length < 2 || index === activeIndex) return;
+      setIsAnimating(!reducedMotion);
       setActiveIndex((index + items.length) % items.length);
       setTimeout(() => setIsAnimating(false), 400);
     },
-    [activeIndex, isAnimating, items.length]
+    [activeIndex, reducedMotion, items.length]
   );
 
   const move = useCallback(
@@ -74,12 +87,12 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
 
   // Autoplay
   useEffect(() => {
-    if (items.length <= 1 || isPaused) return;
+    if (items.length <= 1 || rotationStopped) return;
     timerRef.current = setInterval(() => move(1), AUTOPLAY_INTERVAL);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [items.length, isPaused, move]);
+  }, [items.length, rotationStopped, move]);
 
   // Touch / swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -98,7 +111,6 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
     }
     touchStartX.current = null;
     touchStartY.current = null;
-    setIsPaused(false);
   };
 
   if (items.length === 0) {
@@ -120,11 +132,15 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
     <section
       className="py-5 md:py-8"
       aria-label="Öne çıkan içerikler"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      aria-roledescription="slayt gösterisi"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocusCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsPaused(true);
+      }}
     >
       <div className="container mx-auto px-4 md:px-6">
-        <div className="mb-4 flex items-end justify-between gap-4">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-primary">Hayattan seçkiler</p>
             <h2 className="mt-1 font-serif text-2xl font-bold tracking-tight text-foreground md:text-3xl">
@@ -133,13 +149,19 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
           </div>
 
           {items.length > 1 && (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" disabled={reducedMotion}
+                onClick={() => setIsPaused(!isPaused)}
+                className="min-h-11 rounded-full border border-border px-4 text-sm font-semibold disabled:opacity-60"
+                aria-label={reducedMotion || isPaused ? "Otomatik manşet geçişini başlat" : "Otomatik manşet geçişini durdur"}>
+                {reducedMotion ? "Hareket kapalı" : isPaused ? "Başlat" : "Duraklat"}
+              </button>
               <span className="mr-2 hidden text-sm text-muted sm:inline">
                 {activeIndex + 1} / {items.length}
               </span>
               <button
                 type="button"
-                onClick={() => move(-1)}
+                onClick={() => { setIsPaused(true); move(-1); }}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-foreground shadow-sm hover:border-primary/30 hover:text-primary active:scale-95"
                 aria-label="Önceki manşet"
               >
@@ -147,7 +169,7 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
               </button>
               <button
                 type="button"
-                onClick={() => move(1)}
+                onClick={() => { setIsPaused(true); move(1); }}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-foreground shadow-sm hover:border-primary/30 hover:text-primary active:scale-95"
                 aria-label="Sonraki manşet"
               >
@@ -162,10 +184,9 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
           <div
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
-            className="select-none"
+            className="min-w-0" aria-live={rotationStopped ? "polite" : "off"} aria-atomic="true"
           >
             <StoryLink
-              key={lead.id}
               item={lead}
               className="group relative block min-h-[390px] overflow-hidden rounded-[20px] bg-foreground shadow-premium md:min-h-[510px]"
             >
@@ -183,10 +204,10 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/5" />
               <div
-                className="absolute inset-x-0 bottom-0 max-w-4xl p-6 md:p-9 lg:p-11 transition-all duration-400"
+                className="relative flex min-h-[390px] flex-col justify-end max-w-4xl p-5 md:min-h-[510px] md:p-9 lg:p-11 transition-all duration-400"
                 style={{ opacity: isAnimating ? 0 : 1, transform: isAnimating ? "translateY(8px)" : "translateY(0)" }}
               >
-                <span className="inline-flex rounded-full bg-white/92 px-3 py-1.5 text-sm font-semibold text-primary">
+                <span className="inline-flex self-start rounded-full bg-white/92 px-3 py-1.5 text-sm font-semibold text-primary">
                   Manşet
                 </span>
                 <h3 className="mt-4 max-w-3xl font-serif text-3xl font-bold leading-[1.12] tracking-tight text-white md:text-5xl">
@@ -204,24 +225,6 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
                 </div>
               </div>
 
-              {/* Dot indicators — shown on mobile inside the card */}
-              {items.length > 1 && (
-                <div className="absolute bottom-4 right-4 flex gap-1.5 lg:hidden">
-                  {items.map((_, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={(e) => { e.preventDefault(); goTo(i); }}
-                      aria-label={`Slide ${i + 1}`}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        i === activeIndex
-                          ? "w-6 bg-white"
-                          : "w-2 bg-white/40 hover:bg-white/70"
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
             </StoryLink>
           </div>
 
@@ -255,23 +258,22 @@ export function Slider({ items, emptyMessage = "Henüz haber yok." }: SliderProp
           )}
         </div>
 
-        {/* Dot indicators — desktop below slider */}
+        {/* Manşet seçimi — tüm ekranlarda erişilebilir düğmeler */}
         {items.length > 1 && (
-          <div className="mt-4 hidden justify-center gap-2 lg:flex" role="tablist" aria-label="Slide seçimi">
+          <div className="mt-4 flex flex-wrap justify-center gap-1" role="group" aria-label="Manşet seçimi">
             {items.map((_, i) => (
               <button
                 key={i}
                 type="button"
-                role="tab"
-                aria-selected={i === activeIndex}
-                aria-label={`Slide ${i + 1}`}
-                onClick={() => goTo(i)}
-                className={`h-2 rounded-full transition-all duration-300 ${
+                aria-pressed={i === activeIndex}
+                aria-label={`${i + 1}. manşet: ${items[i].title}`}
+                onClick={() => { setIsPaused(true); goTo(i); }}
+                className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold ${
                   i === activeIndex
-                    ? "w-7 bg-primary"
-                    : "w-2 bg-border hover:bg-primary/40"
+                    ? "bg-primary text-white border-primary"
+                    : "border-border hover:bg-primary/10"
                 }`}
-              />
+              >{i + 1}</button>
             ))}
           </div>
         )}

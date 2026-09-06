@@ -487,3 +487,24 @@ button:active:not(:disabled) {
     content: "";
   }
 }
+
+/* Yazı gövdesi: dar ekranlarda rahat okuma ve taşmayan medya. */
+.yazi-icerik.prose-reading {
+  font-size: 1.125rem;
+  line-height: 1.85;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+}
+.yazi-icerik p, .yazi-icerik li { line-height: inherit; }
+.yazi-icerik img, .yazi-icerik video {
+  max-width: 100% !important;
+  height: auto !important;
+}
+.yazi-icerik iframe { max-width: 100%; }
+.yazi-icerik table, .yazi-icerik pre {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.yazi-icerik p + p { margin-top: 1.25em; }
+summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }

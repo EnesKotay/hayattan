@@ -8,6 +8,7 @@ import { YazarlarBolumu } from "@/components/YazarlarBolumu";
 import type { Metadata } from "next";
 import { generateWebSiteSchema, serializeJsonLd } from "@/lib/seo";
 import Link from "next/link";
+import { getHomeCategories } from "@/lib/home-categories";
 
 export const metadata: Metadata = {
   alternates: {
@@ -113,7 +114,7 @@ async function getFeaturedYazilar(): Promise<HaberRow[]> {
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [haberler, featuredYazilar, sonYazilar, yazarlar, adSlots] = await runInBatches([
+  const [haberler, featuredYazilar, sonYazilar, yazarlar, adSlots, categoryLinks] = await runInBatches([
     () => getHaberler(),
     () => getFeaturedYazilar(),
     () =>
@@ -134,6 +135,7 @@ export default async function HomePage() {
       }),
     () => getYazarlar(),
     () => getAdSlots(),
+    () => getHomeCategories(),
   ]);
 
   const allSliderItemsRaw = [...haberler, ...featuredYazilar];
@@ -147,13 +149,7 @@ export default async function HomePage() {
     authorName: h.authorName ?? "",
     publishedAt: h.publishedAt,
   }));
-  const categoryLinks = [
-    ...new Map(
-      sonYazilar
-        .flatMap((yazi) => yazi.kategoriler)
-        .map((kategori) => [kategori.slug, kategori] as const)
-    ).values(),
-  ].slice(0, 6);
+
 
   return (
     <div>
@@ -188,7 +184,7 @@ export default async function HomePage() {
                 </h2>
               </div>
               {/* Mobile: horizontal scroll chip strip */}
-              <div className="scrollbar-hide -mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:px-0 md:pb-0">
+              <div className="flex flex-wrap gap-2">
                 {categoryLinks.map((kategori) => (
                   <Link
                     key={kategori.slug}

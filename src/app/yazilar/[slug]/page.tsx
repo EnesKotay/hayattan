@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getAdSlots } from "@/app/admin/actions";
 import { AdSlot } from "@/components/AdSlot";
+import { AccessibilityControls } from "@/components/AccessibilityControls";
 import { SesliOkuButton } from "@/components/SesliOkuButton";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -216,7 +217,7 @@ export default async function YaziDetayPage({ params }: Props) {
           {yazi.title}
         </h1>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6 text-sm text-muted">
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
             <Link
               href={`/yazarlar/${yazi.author.slug}`}
               className="flex items-center gap-2 hover:text-primary"
@@ -264,6 +265,11 @@ export default async function YaziDetayPage({ params }: Props) {
       <div className="sm:hidden mb-6">
         <AuthorFollowButton authorId={yazi.authorId} authorName={yazi.author.name} className="w-full" />
       </div>
+
+      <details className="mb-6 rounded-2xl border border-border p-4">
+        <summary className="min-h-11 cursor-pointer py-2 font-semibold text-primary">Okuma ayarları: yazı boyutu ve kontrast</summary>
+        <div className="pt-4"><AccessibilityControls variant="inline" /></div>
+      </details>
 
       <SesliOkuButton
         title={yazi.title}
@@ -324,7 +330,7 @@ export default async function YaziDetayPage({ params }: Props) {
       )}
 
       <div
-        className="yazi-icerik prose-reading space-y-4 text-foreground scroll-smooth [&_h2]:scroll-mt-28 [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:scroll-mt-28 [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-bold [&_p]:leading-relaxed [&_a]:text-primary [&_a]:underline [&_a:hover]:no-underline [&_ul]:list-inside [&_ul]:list-disc [&_ol]:list-inside [&_ol]:list-decimal [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted"
+        className="yazi-icerik prose-reading space-y-4 text-foreground scroll-smooth [&_h2]:scroll-mt-28 [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:scroll-mt-28 [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-bold [&_a]:text-primary [&_a]:underline [&_a:hover]:no-underline [&_ul]:list-inside [&_ul]:list-disc [&_ol]:list-inside [&_ol]:list-decimal [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted"
         dangerouslySetInnerHTML={{ __html: contentWithHeadingIds }}
       />
 

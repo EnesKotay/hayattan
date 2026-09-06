@@ -1208,3 +1208,23 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     categoryDistribution,
   };
 }
+
+/** Ana sayfadaki altı konu, editörün seçtiği sırayla saklanır. */
+export async function saveHomeCategories(formData: FormData) {
+  await requireAdmin();
+  const ids = Array.from({ length: 6 }, (_, index) => formData.get(`homeCategory${index}`))
+    .filter((id): id is string => typeof id === "string" && id.length > 0);
+  const uniqueIds = [...new Set(ids)];
+  const categories = await prisma.kategori.findMany({ where: { id: { in: uniqueIds } }, select: { id: true } });
+  if (categories.length !== uniqueIds.length) {
+    redirect("/admin/kategoriler?error=" + encodeURIComponent("Seçilen kategori bulunamadı. Listeyi yenileyin."));
+  }
+  await prisma.siteSetting.upsert({
+    where: { key: "home-category-ids" },
+    create: { key: "home-category-ids", value: JSON.stringify(uniqueIds) },
+    update: { value: JSON.stringify(uniqueIds) },
+  });
+  revalidatePath("/");
+  revalidatePath("/admin/kategoriler");
+  redirect("/admin/kategoriler?success=1");
+}

@@ -134,7 +134,7 @@ export function AdSlot({
   const customStyle: React.CSSProperties = {};
   if (creative?.width) customStyle.width = convertToPx(creative.width);
   if (creative?.height) customStyle.height = convertToPx(creative.height);
-  if (creative?.width || creative?.height) customStyle.maxWidth = "none";
+  if (creative?.width || creative?.height) customStyle.maxWidth = "100%";
 
   if (!creative?.content?.trim() && showPlaceholder) {
     return (
@@ -154,7 +154,7 @@ export function AdSlot({
   return (
     <div id={anchorId} className={alignClasses[align] + " scroll-mt-36"}>
       <aside
-        className={"relative overflow-hidden rounded-xl border border-border/70 bg-muted-bg/45 p-1 " + (!creative.width && !creative.height ? sizeStyles[size] : "") + " " + className}
+        className={"relative min-w-0 max-w-full overflow-hidden rounded-xl border border-border/70 bg-muted-bg/45 p-1 " + (!creative.width && !creative.height ? sizeStyles[size] : "") + " " + className}
         style={customStyle}
         aria-label="Reklam alanı"
         onClick={() => {

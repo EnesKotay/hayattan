@@ -35,7 +35,7 @@ export function AccessibilityControls({ variant = "panel" }: AccessibilityContro
         <button
           type="button"
           onClick={resetSettings}
-          className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-muted transition-colors hover:border-primary hover:text-primary"
+          className="min-h-11 rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-muted transition-colors hover:border-primary hover:text-primary"
         >
           Sıfırla
         </button>
@@ -50,8 +50,9 @@ export function AccessibilityControls({ variant = "panel" }: AccessibilityContro
                 key={option.value}
                 type="button"
                 onClick={() => setFontSize(option.value)}
+                aria-label={option.value === "md" ? "Normal yazı boyutu" : option.value === "lg" ? "Büyük yazı boyutu" : "En büyük yazı boyutu"}
                 aria-pressed={settings.fontSize === option.value}
-                className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
+                className={`min-h-11 min-w-11 rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
                   settings.fontSize === option.value
                     ? "bg-background text-primary shadow-sm"
                     : "text-muted hover:text-foreground"
@@ -71,14 +72,15 @@ export function AccessibilityControls({ variant = "panel" }: AccessibilityContro
           <button
             type="button"
             role="switch"
+            aria-label="Yüksek kontrast"
             aria-checked={settings.contrast === "high"}
             onClick={() => setContrast(settings.contrast === "high" ? "normal" : "high")}
-            className={`relative h-7 w-12 rounded-full transition-colors ${
+            className={`relative h-11 w-12 shrink-0 rounded-full transition-colors ${
               settings.contrast === "high" ? "bg-primary" : "bg-border"
             }`}
           >
             <span
-              className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-transform ${
+              className={`absolute left-0 top-3 h-5 w-5 rounded-full bg-white transition-transform ${
                 settings.contrast === "high" ? "translate-x-6" : "translate-x-1"
               }`}
             />
@@ -93,14 +95,15 @@ export function AccessibilityControls({ variant = "panel" }: AccessibilityContro
           <button
             type="button"
             role="switch"
+            aria-label="Disleksi dostu mod"
             aria-checked={settings.readingMode === "dyslexia"}
             onClick={() => setReadingMode(settings.readingMode === "dyslexia" ? "default" : "dyslexia")}
-            className={`relative h-7 w-12 rounded-full transition-colors ${
+            className={`relative h-11 w-12 shrink-0 rounded-full transition-colors ${
               settings.readingMode === "dyslexia" ? "bg-primary" : "bg-border"
             }`}
           >
             <span
-              className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-transform ${
+              className={`absolute left-0 top-3 h-5 w-5 rounded-full bg-white transition-transform ${
                 settings.readingMode === "dyslexia" ? "translate-x-6" : "translate-x-1"
               }`}
             />
@@ -118,12 +121,12 @@ export function AccessibilityControls({ variant = "panel" }: AccessibilityContro
             aria-label="Hareket efektlerini azalt"
             aria-checked={settings.motion === "reduced"}
             onClick={() => setMotion(settings.motion === "reduced" ? "normal" : "reduced")}
-            className={`relative h-7 w-12 rounded-full transition-colors ${
+            className={`relative h-11 w-12 shrink-0 rounded-full transition-colors ${
               settings.motion === "reduced" ? "bg-primary" : "bg-border"
             }`}
           >
             <span
-              className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-transform ${
+              className={`absolute left-0 top-3 h-5 w-5 rounded-full bg-white transition-transform ${
                 settings.motion === "reduced" ? "translate-x-6" : "translate-x-1"
               }`}
             />
