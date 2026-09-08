@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Serve originals directly so exhausted Vercel transformation quotas cannot
+    // prevent article images and author photos from loading.
+    unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "*.r2.cloudflarestorage.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
