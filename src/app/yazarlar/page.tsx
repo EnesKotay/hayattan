@@ -1,8 +1,8 @@
-import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
+import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/shared/media/image";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { repository } from "@/backend/modules/data/repository";
 
 export const revalidate = 60;
 
@@ -38,7 +38,7 @@ export default async function YazarlarPage({
   }
 
   const [yazarlar, misafirYazarlar] = await Promise.all([
-    prisma.yazar.findMany({
+    repository.yazar.findMany({
       where: { misafir: false, ayrilmis: false },
       orderBy: [
         { sortOrder: "asc" },
@@ -56,7 +56,7 @@ export default async function YazarlarPage({
         _count: { select: { yazilar: true } },
       },
     }),
-    prisma.yazar.findMany({
+    repository.yazar.findMany({
       where: { misafir: true },
       orderBy: [
         { sortOrder: "asc" },

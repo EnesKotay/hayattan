@@ -1,9 +1,9 @@
-import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
+import { isExternalImageUrl, normalizeImageUrl } from "@/shared/media/image";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { SiteBreadcrumb } from "@/components/SiteBreadcrumb";
+import { repository } from "@/backend/modules/data/repository";
+import { SiteBreadcrumb } from "@/frontend/ui/SiteBreadcrumb";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -15,7 +15,7 @@ const YAZILAR_PER_PAGE = 12;
 export async function generateMetadata({ params, searchParams }: Props) {
   const { slug } = await params;
   const { sayfa } = await searchParams;
-  const kategori = await prisma.kategori.findUnique({
+  const kategori = await repository.kategori.findUnique({
     where: { slug },
     select: { name: true, description: true },
   });
@@ -48,7 +48,7 @@ export default async function KategoriDetayPage({ params, searchParams }: Props)
   const skip = (page - 1) * YAZILAR_PER_PAGE;
 
   const [kategori, yazilar, totalCount] = await Promise.all([
-    prisma.kategori.findUnique({
+    repository.kategori.findUnique({
       where: { slug },
       select: {
         id: true,
@@ -57,7 +57,7 @@ export default async function KategoriDetayPage({ params, searchParams }: Props)
         description: true,
       },
     }),
-    prisma.yazi.findMany({
+    repository.yazi.findMany({
       where: {
         kategoriler: { some: { slug } },
         publishedAt: { lte: new Date() },
@@ -77,7 +77,7 @@ export default async function KategoriDetayPage({ params, searchParams }: Props)
         kategoriler: { select: { name: true, slug: true } },
       },
     }),
-    prisma.yazi.count({
+    repository.yazi.count({
       where: {
         kategoriler: { some: { slug } },
         publishedAt: { lte: new Date() },

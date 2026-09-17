@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPageBySlug } from "@/app/admin/actions";
-import { EskiYazilarArsivi } from "@/components/EskiYazilarArsivi";
-import { sanitizeHtml } from "@/lib/sanitize";
-import { createExcerptFromHtml } from "@/lib/article-utils";
-import { isExternalImageUrl, normalizeImageUrl } from "@/lib/image";
-import { isFotoğrafhanePageSlug, FOTOGRAFHANE_CATEGORY_WHERE } from "@/lib/site-categories";
-import { prisma } from "@/lib/db";
+import { getPageBySlug } from "@/backend/modules/pages/queries";
+import { EskiYazilarArsivi } from "@/frontend/features/archive/EskiYazilarArsivi";
+import { sanitizeHtml } from "@/backend/security/sanitize";
+import { createExcerptFromHtml } from "@/backend/modules/articles/utils";
+import { isExternalImageUrl, normalizeImageUrl } from "@/shared/media/image";
+import { isFotoğrafhanePageSlug, FOTOGRAFHANE_CATEGORY_WHERE } from "@/backend/modules/categories/site-categories";
+import { repository } from "@/backend/modules/data/repository";
 
 export const dynamic = "force-dynamic";
 
@@ -95,7 +95,7 @@ export default async function SayfaPage({ params, searchParams }: Props) {
   let fotoğrafhanePage = 1;
 
   if (isFotoğrafhane) {
-    const kategori = await prisma.kategori.findFirst({
+    const kategori = await repository.kategori.findFirst({
       where: FOTOGRAFHANE_CATEGORY_WHERE,
     });
     fotoğrafhanePage = Math.max(1, parseInt(sayfaParam, 10) || 1);
@@ -103,7 +103,7 @@ export default async function SayfaPage({ params, searchParams }: Props) {
 
     if (kategori) {
       const [yazilar, totalCount] = await Promise.all([
-        prisma.yazi.findMany({
+        repository.yazi.findMany({
           where: {
             kategoriler: { some: { id: kategori.id } },
             publishedAt: { lte: new Date() },
@@ -122,7 +122,7 @@ export default async function SayfaPage({ params, searchParams }: Props) {
             kategoriler: { select: { name: true, slug: true } },
           },
         }),
-        prisma.yazi.count({
+        repository.yazi.count({
           where: {
             kategoriler: { some: { id: kategori.id } },
             publishedAt: { lte: new Date() },

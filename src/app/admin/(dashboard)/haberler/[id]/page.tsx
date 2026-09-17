@@ -1,8 +1,8 @@
 import { notFound, redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { updateHaber } from "@/app/admin/actions";
-import { HaberForm } from "@/components/admin/HaberForm";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { repository } from "@/backend/modules/data/repository";
+import { updateHaber } from "@/backend/modules/news/actions";
+import { HaberForm } from "@/frontend/admin/news/HaberForm";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 export default async function HaberDuzenlePage({
     params,
@@ -11,7 +11,7 @@ export default async function HaberDuzenlePage({
 }) {
     await requireAdminPage();
     const { id } = await params;
-    const haber = await prisma.haber.findUnique({
+    const haber = await repository.haber.findUnique({
         where: { id },
     });
 

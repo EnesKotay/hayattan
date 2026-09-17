@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { SiteBreadcrumb } from "@/components/SiteBreadcrumb";
+import { repository } from "@/backend/modules/data/repository";
+import { SiteBreadcrumb } from "@/frontend/ui/SiteBreadcrumb";
 
 export const revalidate = 60;
 
@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default async function EtiketlerPage() {
-  const etiketler = await (prisma as any).etiket.findMany({
+  const etiketler = await (repository as any).etiket.findMany({
     orderBy: { name: "asc" },
     select: {
       id: true,

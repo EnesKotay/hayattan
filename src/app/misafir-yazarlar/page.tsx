@@ -1,13 +1,13 @@
-import { ArticleImage } from "@/components/ArticleImage";
-import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/lib/image";
+import { ArticleImage } from "@/frontend/features/articles/ArticleImage";
+import { isExternalImageUrl, isValidImageSrc, normalizeImageUrl } from "@/shared/media/image";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/db";
-import { getAdSlots } from "@/app/admin/actions";
-import { AdSlot } from "@/components/AdSlot";
-import { MISAFIR_YAZARLAR_CATEGORY_WHERE } from "@/lib/site-categories";
+import { repository } from "@/backend/modules/data/repository";
+import { getAdSlots } from "@/backend/modules/advertising/actions";
+import { AdSlot } from "@/frontend/features/advertising/AdSlot";
+import { MISAFIR_YAZARLAR_CATEGORY_WHERE } from "@/backend/modules/categories/site-categories";
 
 const YAZILAR_PER_PAGE = 12;
 
@@ -47,7 +47,7 @@ export default async function MisafirYazarlarPage({
     };
 
     const [yazilar, totalCount, adSlots] = await Promise.all([
-        prisma.yazi.findMany({
+        repository.yazi.findMany({
             where: whereConditions,
             orderBy: { publishedAt: "desc" },
             skip,
@@ -63,7 +63,7 @@ export default async function MisafirYazarlarPage({
                 kategoriler: { select: { name: true, slug: true } },
             },
         }),
-        prisma.yazi.count({ where: whereConditions }),
+        repository.yazi.count({ where: whereConditions }),
         getAdSlots(),
     ]);
 

@@ -5,8 +5,10 @@
 
 import "dotenv/config";
 import { hash } from "bcryptjs";
-import { prisma } from "../src/lib/db";
-import { validatePassword } from "../src/lib/password-validator";
+import { PrismaClient } from "@prisma/client";
+import { validatePassword } from "../src/backend/security/password-validator";
+
+const prisma = new PrismaClient();
 
 async function main() {
   const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();

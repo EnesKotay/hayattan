@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { r2 } from "@/lib/r2";
+import { auth } from "@/backend/modules/auth/auth";
+import { r2 } from "@/backend/infrastructure/storage/r2";
 import { HeadObjectCommand } from "@aws-sdk/client-s3";
 
 export const runtime = "nodejs";
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
         // 2. PARSE REQUEST
         const { key } = await req.json();
         
-        if (!key || typeof key !== 'string') {
+        if (!key || typeof key !== 'string' || !key.startsWith("uploads/") || key.includes("..")) {
             return NextResponse.json({ error: "Invalid key" }, { status: 400 });
         }
 

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { createHaber } from "@/app/admin/actions";
-import { HaberForm } from "@/components/admin/HaberForm";
+import { createHaber } from "@/backend/modules/news/actions";
+import { HaberForm } from "@/frontend/admin/news/HaberForm";
 import Loading from "../../loading";
 
 export default function YeniHaberPage() {

@@ -1,25 +1,26 @@
-import { isValidImageSrc, normalizeImageUrl } from "@/lib/image";
-import { ArticleImage } from "@/components/ArticleImage";
+import { isValidImageSrc, normalizeImageUrl } from "@/shared/media/image";
+import { ArticleImage } from "@/frontend/features/articles/ArticleImage";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { getAdSlots } from "@/app/admin/actions";
-import { AdSlot } from "@/components/AdSlot";
-import { AccessibilityControls } from "@/components/AccessibilityControls";
-import { SesliOkuButton } from "@/components/SesliOkuButton";
-import { FavoriteButton } from "@/components/FavoriteButton";
-import { ShareButtons } from "@/components/ShareButtons";
-import { ReadingProgressBar } from "@/components/ReadingProgressBar";
-import { SiteBreadcrumb } from "@/components/SiteBreadcrumb";
-import { YaziViewTracker } from "@/components/YaziViewTracker";
-import { NewsletterForm } from "@/components/NewsletterForm";
-import { ArticleFeedbackCard } from "@/components/ArticleFeedbackCard";
-import { MostSharedArticles } from "@/components/MostSharedArticles";
-import { AuthorFollowButton } from "@/components/AuthorFollowButton";
-import { addHeadingIds, estimateReadingMinutes, extractHeadings, lazyLoadContentImages } from "@/lib/article-utils";
-import { generateYaziMetadata, generateArticleSchema, generateBreadcrumbSchema, serializeJsonLd } from "@/lib/seo";
-import { feedbackCountKey, parseCounter } from "@/lib/engagement";
+import { repository } from "@/backend/modules/data/repository";
+import { getAdSlots } from "@/backend/modules/advertising/actions";
+import { AdSlot } from "@/frontend/features/advertising/AdSlot";
+import { AccessibilityControls } from "@/frontend/features/accessibility/AccessibilityControls";
+import { SesliOkuButton } from "@/frontend/features/articles/SesliOkuButton";
+import { FavoriteButton } from "@/frontend/features/articles/FavoriteButton";
+import { ShareButtons } from "@/frontend/features/articles/ShareButtons";
+import { ReadingProgressBar } from "@/frontend/features/articles/ReadingProgressBar";
+import { SiteBreadcrumb } from "@/frontend/ui/SiteBreadcrumb";
+import { ReaderTracker } from "@/frontend/features/articles/ReaderTracker";
+import { YaziViewTracker } from "@/frontend/features/articles/YaziViewTracker";
+import { NewsletterForm } from "@/frontend/features/newsletter/NewsletterForm";
+import { ArticleFeedbackCard } from "@/frontend/features/articles/ArticleFeedbackCard";
+import { MostSharedArticles } from "@/frontend/features/articles/MostSharedArticles";
+import { AuthorFollowButton } from "@/frontend/features/authors/AuthorFollowButton";
+import { addHeadingIds, estimateReadingMinutes, extractHeadings, lazyLoadContentImages } from "@/backend/modules/articles/utils";
+import { generateYaziMetadata, generateArticleSchema, generateBreadcrumbSchema, serializeJsonLd } from "@/backend/modules/content/seo";
+import { feedbackCountKey, parseCounter } from "@/shared/engagement/counters";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -29,7 +30,7 @@ export const revalidate = 60;
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const yazi = await prisma.yazi.findFirst({
+  const yazi = await repository.yazi.findFirst({
     where: { slug, publishedAt: { lte: new Date() } },
     select: {
       title: true,
@@ -58,7 +59,7 @@ export default async function YaziDetayPage({ params }: Props) {
   const { slug } = await params;
 
   const [yaziData, adSlots] = await Promise.all([
-    prisma.yazi.findFirst({
+    repository.yazi.findFirst({
       where: { slug, publishedAt: { lte: new Date() } },
       select: {
         id: true,
@@ -92,16 +93,16 @@ export default async function YaziDetayPage({ params }: Props) {
   const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hayattan.net").replace(/\/$/, "");
   const articleUrl = `${baseUrl}/yazilar/${yazi.slug}`;
 
-  const kategoriIds = yazi.kategoriler.map((k) => k.id);
-  const [ilgiliYaziAdaylari, oncekiYazi, sonrakiYazi, feedbackRows] = await Promise.all([
-    prisma.yazi.findMany({
+  const kategoriIds = yazi.kategoriler
+    .filter(category => !["slider", "yazarlar", "genel"].includes(category.slug))
+    .map(category => category.id);
+  const [ilgiliYaziAdaylari, oncekiYazi, sonrakiYazi, feedbackRows, authorArticles] = await Promise.all([
+    repository.yazi.findMany({
       where: {
         id: { not: yazi.id },
         publishedAt: { lte: new Date() },
-        OR: [
-          ...(kategoriIds.length > 0 ? [{ kategoriler: { some: { id: { in: kategoriIds } } } }] : []),
-          { authorId: yazi.authorId } as { authorId: string },
-        ],
+        author: { ayrilmis: false },
+        kategoriler: { some: { id: { in: kategoriIds } } },
       },
       orderBy: [{ publishedAt: "desc" }],
       take: 12,
@@ -118,7 +119,7 @@ export default async function YaziDetayPage({ params }: Props) {
         kategoriler: { select: { id: true } },
       },
     }),
-    prisma.yazi.findFirst({
+    repository.yazi.findFirst({
       where: {
         id: { not: yazi.id },
         publishedAt: yazi.publishedAt ? { lt: yazi.publishedAt } : { lte: new Date() },
@@ -127,7 +128,7 @@ export default async function YaziDetayPage({ params }: Props) {
       orderBy: { publishedAt: "desc" },
       select: { title: true, slug: true },
     }),
-    prisma.yazi.findFirst({
+    repository.yazi.findFirst({
       where: {
         id: { not: yazi.id },
         publishedAt: yazi.publishedAt ? { gt: yazi.publishedAt, lte: new Date() } : { lte: new Date() },
@@ -136,7 +137,7 @@ export default async function YaziDetayPage({ params }: Props) {
       orderBy: { publishedAt: "asc" },
       select: { title: true, slug: true },
     }),
-    prisma.siteSetting.findMany({
+    repository.siteSetting.findMany({
       where: {
         key: {
           in: [
@@ -147,9 +148,17 @@ export default async function YaziDetayPage({ params }: Props) {
       },
       select: { key: true, value: true },
     }),
+    repository.yazi.findMany({
+      where: { id: { not: yazi.id }, authorId: yazi.authorId, publishedAt: { lte: new Date() }, author: { ayrilmis: false } },
+      orderBy: [{ publishedAt: "desc" }, { id: "asc" }],
+      take: 6,
+      select: { id: true, title: true, slug: true, excerpt: true, featuredImage: true, publishedAt: true, author: { select: { name: true } } },
+    }),
   ]);
 
+  const authorRecommendations = authorArticles.slice(0, 2);
   const ilgiliYazilar = ilgiliYaziAdaylari
+    .filter(article => !authorRecommendations.some(other => other.id === article.id))
     .map((aday) => {
       const categoryScore = aday.kategoriler.filter((k) => kategoriIds.includes(k.id)).length * 3;
       const authorScore = aday.authorId === yazi.authorId ? 4 : 0;
@@ -159,6 +168,7 @@ export default async function YaziDetayPage({ params }: Props) {
     })
     .sort((a, b) => b.score - a.score || (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0))
     .slice(0, 4);
+
 
   const upFeedback = parseCounter(
     feedbackRows.find((row) => row.key === feedbackCountKey(yazi.id, "up"))?.value
@@ -187,6 +197,7 @@ export default async function YaziDetayPage({ params }: Props) {
   return (
     <article className="container mx-auto max-w-3xl px-4 py-12">
       <YaziViewTracker slug={yazi.slug} />
+      <ReaderTracker key={yazi.id} articleId={yazi.id} readingMinutes={readingMinutes} />
       {/* Schema.org JSON-LD for SEO */}
       <script
         type="application/ld+json"
@@ -330,6 +341,7 @@ export default async function YaziDetayPage({ params }: Props) {
       )}
 
       <div
+        id="article-body"
         className="yazi-icerik prose-reading space-y-4 text-foreground scroll-smooth [&_h2]:scroll-mt-28 [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:scroll-mt-28 [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-bold [&_a]:text-primary [&_a]:underline [&_a:hover]:no-underline [&_ul]:list-inside [&_ul]:list-disc [&_ol]:list-inside [&_ol]:list-decimal [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted"
         dangerouslySetInnerHTML={{ __html: contentWithHeadingIds }}
       />
@@ -350,49 +362,35 @@ export default async function YaziDetayPage({ params }: Props) {
         </div>
       )}
 
-      {/* Reklam - Yazı altı */}
-      <div className="mt-8 flex justify-center">
-        <AdSlot slotId="yazi-bottom" size="rectangle" content={adSlots["yazi-bottom"]} />
-      </div>
-
-      {ilgiliYazilar.length > 0 && (
-        <section className="mt-12 border-t border-border pt-10" aria-label="İlgili yazılar">
-          <h2 className="mb-6 font-serif text-xl font-bold text-foreground">Bunu da oku</h2>
-          <ul className="grid gap-6 sm:grid-cols-2">
-            {ilgiliYazilar.map((iy) => (
+      {[
+        { type: "topic", title: "Bu konuyu okumaya devam et", articles: ilgiliYazilar },
+        { type: "author", title: `${yazi.author.name}: diğer yazıları`, articles: authorRecommendations },
+      ].filter(group => group.articles.length > 0).map(group => (
+        <section key={group.type} className="mt-10 border-t border-border pt-8" aria-label={group.title} data-recommendation-group={group.type}>
+          <h2 className="mb-5 font-serif text-2xl font-bold text-foreground">{group.title}</h2>
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {group.articles.map(iy => (
               <li key={iy.id}>
-                <Link
-                  href={`/yazilar/${iy.slug}`}
-                  className="group flex gap-4 rounded-lg border border-border bg-background p-4 transition-shadow hover:shadow-md"
-                >
-                  <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded bg-muted-bg">
-                    <ArticleImage
-                      src={iy.featuredImage}
-                      alt={iy.title}
-                      className="object-cover transition-transform group-hover:scale-105"
-                      sizes="96px"
-                    />
+                <Link href={`/yazilar/${iy.slug}`} data-recommendation={group.type}
+                  className="group flex h-full gap-4 rounded-xl border border-border bg-background p-4 hover:shadow-md">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted-bg">
+                    <ArticleImage src={iy.featuredImage} alt="" sizes="80px" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-serif font-bold leading-tight text-foreground line-clamp-2 group-hover:text-primary">
-                      {iy.title}
-                    </h3>
-                    {iy.excerpt && (
-                      <p className="mt-1 line-clamp-2 text-sm text-muted">{iy.excerpt}</p>
-                    )}
-                    <p className="mt-2 text-xs text-muted">
-                      {iy.author.name}
-                      {iy.publishedAt && (
-                        <> · {new Date(iy.publishedAt).toLocaleDateString("tr-TR")}</>
-                      )}
-                    </p>
+                  <div className="min-w-0">
+                    <h3 className="font-serif font-bold leading-snug text-foreground group-hover:text-primary">{iy.title}</h3>
+                    <p className="mt-2 text-sm text-muted">{iy.author.name}</p>
+                    <span className="mt-3 inline-block text-sm font-semibold text-primary">Yazıyı oku <span aria-hidden>→</span></span>
                   </div>
                 </Link>
               </li>
             ))}
           </ul>
         </section>
-      )}
+      ))}
+
+      <div className="mt-8 flex justify-center">
+        <AdSlot slotId="yazi-bottom" size="rectangle" content={adSlots["yazi-bottom"]} />
+      </div>
 
       <div className="mt-12 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
         <ArticleFeedbackCard

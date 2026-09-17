@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { deleteYazar } from "@/app/admin/actions";
-import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
-import { AdminFeedback } from "@/components/admin/AdminFeedback";
-import { AdminFilters } from "@/components/admin/AdminFilters";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { repository } from "@/backend/modules/data/repository";
+import { deleteYazar } from "@/backend/modules/authors/actions";
+import { DeleteConfirmButton } from "@/frontend/admin/ui/DeleteConfirmButton";
+import { AdminFeedback } from "@/frontend/admin/ui/AdminFeedback";
+import { AdminFilters } from "@/frontend/admin/ui/AdminFilters";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 export default async function AdminYazarlarPage({
   searchParams,
@@ -14,7 +14,7 @@ export default async function AdminYazarlarPage({
   await requireAdminPage();
   const params = await searchParams;
   const q = (params.q ?? "").trim();
-  const tumu = await prisma.yazar.findMany({
+  const tumu = await repository.yazar.findMany({
     where: q ? { OR: [{ name: { contains: q, mode: "insensitive" } }, { slug: { contains: q, mode: "insensitive" } }] } : undefined,
     orderBy: [
       { sortOrder: "asc" },

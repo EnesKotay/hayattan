@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { isFotoğrafhanePageSlug, isBakisCategorySlug } from "@/lib/site-categories";
+import { repository } from "@/backend/modules/data/repository";
+import { isFotoğrafhanePageSlug, isBakisCategorySlug } from "@/backend/modules/categories/site-categories";
 
 export const revalidate = 60;
 
@@ -17,7 +17,7 @@ function getCategoryHref(slug: string): string {
 }
 
 export default async function KategorilerPage() {
-  const kategoriler = await prisma.kategori.findMany({
+  const kategoriler = await repository.kategori.findMany({
     orderBy: { name: "asc" },
     select: {
       id: true,

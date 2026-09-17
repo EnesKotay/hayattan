@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { r2 } from "@/lib/r2";
-import { auth } from "@/lib/auth";
+import { r2 } from "@/backend/infrastructure/storage/r2";
+import { auth } from "@/backend/modules/auth/auth";
 
 export const runtime = "nodejs";
 
@@ -14,8 +14,8 @@ export async function POST(req: Request) {
 
     const { filename, contentType, size } = await req.json();
 
-    if (!filename || !contentType) {
-        return NextResponse.json({ error: "filename/contentType required" }, { status: 400 });
+    if (!filename || typeof filename !== "string" || filename.length > 255 || !contentType) {
+        return NextResponse.json({ error: "Geçersiz dosya adı veya içerik türü" }, { status: 400 });
     }
 
     const allowed = new Set([
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     }
 
     const max = 100 * 1024 * 1024; // 100MB
-    if (typeof size === "number" && size > max) {
+    if (typeof size !== "number" || !Number.isFinite(size) || size <= 0 || size > max) {
         return NextResponse.json({ error: "File too large" }, { status: 400 });
     }
 
@@ -47,6 +47,7 @@ export async function POST(req: Request) {
         Bucket: process.env.R2_BUCKET_NAME!,
         Key: key,
         ContentType: contentType,
+        ContentLength: size,
         CacheControl: "public, max-age=31536000, immutable",
     });
 

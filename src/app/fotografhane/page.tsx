@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { prisma } from "@/lib/db";
-import { getAdSlots } from "@/app/admin/actions";
-import { AdSlot } from "@/components/AdSlot";
+import { repository } from "@/backend/modules/data/repository";
+import { getAdSlots } from "@/backend/modules/advertising/actions";
+import { AdSlot } from "@/frontend/features/advertising/AdSlot";
 
 const YAZILAR_PER_PAGE = 12;
 const FOTOGRAFHANE_IMAGE = "/fotografhane-kapak.jpg";
@@ -51,7 +51,7 @@ export default async function FotografhanePage({
     };
 
     const [yazilar, totalCount, adSlots] = await Promise.all([
-        prisma.yazi.findMany({
+        repository.yazi.findMany({
             where: whereConditions,
             orderBy: { publishedAt: "desc" },
             skip,
@@ -67,7 +67,7 @@ export default async function FotografhanePage({
                 kategoriler: { select: { name: true, slug: true } },
             },
         }),
-        prisma.yazi.count({ where: whereConditions }),
+        repository.yazi.count({ where: whereConditions }),
         getAdSlots(),
     ]);
 

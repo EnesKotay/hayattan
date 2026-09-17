@@ -1,11 +1,11 @@
-import { ArticleImage } from "@/components/ArticleImage";
+import { ArticleImage } from "@/frontend/features/articles/ArticleImage";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/db";
-import { getAdSlots } from "@/app/admin/actions";
-import { AdSlot } from "@/components/AdSlot";
-import { YazilarFiltre } from "@/components/YazilarFiltre";
-import { generateBreadcrumbSchema, serializeJsonLd } from "@/lib/seo";
+import { repository } from "@/backend/modules/data/repository";
+import { getAdSlots } from "@/backend/modules/advertising/actions";
+import { AdSlot } from "@/frontend/features/advertising/AdSlot";
+import { YazilarFiltre } from "@/frontend/features/articles/YazilarFiltre";
+import { generateBreadcrumbSchema, serializeJsonLd } from "@/backend/modules/content/seo";
 import {
   FOTOGRAFHANE_CATEGORY_WHERE,
   BAKIS_CATEGORY_WHERE,
@@ -13,7 +13,7 @@ import {
   isFotoğrafhanePageSlug,
   isBakisCategorySlug,
   isMisafirYazarlarCategorySlug,
-} from "@/lib/site-categories";
+} from "@/backend/modules/categories/site-categories";
 
 const YAZILAR_PER_PAGE = 12;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://hayattan.net";
@@ -100,7 +100,7 @@ export default async function YazilarPage({
         : { publishedAt: "desc" as const };
 
   const [yazilar, totalCount, kategoriler, yazarlar, adSlots] = await Promise.all([
-    prisma.yazi.findMany({
+    repository.yazi.findMany({
       where: whereConditions,
       orderBy,
       skip,
@@ -118,13 +118,13 @@ export default async function YazilarPage({
         etiketler: { select: { name: true, slug: true } },
       },
     }),
-    prisma.yazi.count({ where: whereConditions }),
-    prisma.kategori.findMany({
+    repository.yazi.count({ where: whereConditions }),
+    repository.kategori.findMany({
       where: { yazilar: { some: { publishedAt: { lte: new Date() } } } },
       orderBy: { name: "asc" },
       select: { name: true, slug: true },
     }),
-    prisma.yazar.findMany({
+    repository.yazar.findMany({
       where: { ayrilmis: false, yazilar: { some: { publishedAt: { lte: new Date() } } } } as any,
       orderBy: [
         { sortOrder: "asc" },

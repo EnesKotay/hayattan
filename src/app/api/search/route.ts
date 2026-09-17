@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { repository } from "@/backend/modules/data/repository";
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -9,17 +9,18 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ results: [] });
     }
 
-    const searchTerm = query.trim().toLowerCase();
+    const searchTerm = query.trim().slice(0, 120);
 
     try {
         // Search in yazılar (posts)
-        const posts = await prisma.yazi.findMany({
+        const posts = await repository.yazi.findMany({
             where: {
                 OR: [
                     { title: { contains: searchTerm, mode: "insensitive" } },
                     { content: { contains: searchTerm, mode: "insensitive" } },
                 ],
                 publishedAt: { lte: new Date() },
+                author: { ayrilmis: false },
             },
             select: {
                 id: true,
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
         });
 
         // Search in kategoriler (categories)
-        const categories = await prisma.kategori.findMany({
+        const categories = await repository.kategori.findMany({
             where: {
                 name: { contains: searchTerm, mode: "insensitive" },
             },
@@ -43,9 +44,10 @@ export async function GET(request: NextRequest) {
         });
 
         // Search in yazarlar (authors)
-        const authors = await prisma.yazar.findMany({
+        const authors = await repository.yazar.findMany({
             where: {
                 name: { contains: searchTerm, mode: "insensitive" },
+                ayrilmis: false,
             },
             orderBy: [
                 { sortOrder: "asc" },

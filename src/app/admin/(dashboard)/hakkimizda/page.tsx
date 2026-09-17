@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { getHakkimizdaContent } from "../../actions";
-import { HakkimizdaForm } from "@/components/admin/HakkimizdaForm";
-import { AdminFeedback } from "@/components/admin/AdminFeedback";
+import { getHakkimizdaContent } from "@/backend/modules/settings/about-actions";
+import { HakkimizdaForm } from "@/frontend/admin/settings/HakkimizdaForm";
+import { AdminFeedback } from "@/frontend/admin/ui/AdminFeedback";
 
 export default async function AdminHakkimizdaPage({
     searchParams,

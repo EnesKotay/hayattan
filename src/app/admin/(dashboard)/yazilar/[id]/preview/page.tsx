@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { repository } from "@/backend/modules/data/repository";
+import { auth } from "@/backend/modules/auth/auth";
 import Image from "next/image";
 import Link from "next/link";
-import { isExternalImageUrl, isValidImageSrc } from "@/lib/image";
+import { isExternalImageUrl, isValidImageSrc } from "@/shared/media/image";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -11,7 +11,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  const yazi = await prisma.yazi.findUnique({
+  const yazi = await repository.yazi.findUnique({
     where: { id },
     select: { title: true },
   });
@@ -29,7 +29,7 @@ export default async function YazıOnizlemePage({ params }: Props) {
   const { id } = await params;
   if (!id) notFound();
 
-  const yazi = await prisma.yazi.findUnique({
+  const yazi = await repository.yazi.findUnique({
     where: { id },
     include: {
       author: { select: { name: true, slug: true, photo: true } },

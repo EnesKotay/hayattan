@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import { prisma } from "@/lib/db";
-import { shareCountKey } from "@/lib/engagement";
+import { repository } from "@/backend/modules/data/repository";
+import { shareCountKey } from "@/shared/engagement/counters";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Geçersiz yazı kimliği." }, { status: 400 });
     }
 
-    const article = await prisma.yazi.findFirst({
+    const article = await repository.yazi.findFirst({
       where: { id: articleId, publishedAt: { lte: new Date() } },
       select: { id: true },
     });
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const key = shareCountKey(articleId);
-    await prisma.$executeRaw`
+    await repository.$executeRaw`
       INSERT INTO "SiteSetting" ("id", "key", "value")
       VALUES (${randomUUID()}, ${key}, '1')
       ON CONFLICT ("key") DO UPDATE

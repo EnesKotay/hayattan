@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { repository } from "@/backend/modules/data/repository";
 
 /**
  * Yazı sayfası görüntülendiğinde okunma sayısını +1 artırır.
@@ -24,7 +24,7 @@ export async function POST(
       return new NextResponse(null, { status: 204 });
     }
 
-    const result = await prisma.yazi.updateMany({
+    const result = await repository.yazi.updateMany({
       where: {
         slug: slug.trim(),
         publishedAt: { lte: new Date() },

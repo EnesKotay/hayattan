@@ -1,28 +1,28 @@
 import { MetadataRoute } from "next";
-import { prisma } from "@/lib/db";
-import { isValidImageSrc } from "@/lib/image";
-import { SITE_URL, toAbsoluteUrl } from "@/lib/seo";
-import { isFotoğrafhanePageSlug } from "@/lib/site-categories";
+import { repository } from "@/backend/modules/data/repository";
+import { isValidImageSrc } from "@/shared/media/image";
+import { SITE_URL, toAbsoluteUrl } from "@/backend/modules/content/seo";
+import { isFotoğrafhanePageSlug } from "@/backend/modules/categories/site-categories";
 
 const DUPLICATE_PAGE_SLUGS = new Set(["eski-yazar", "eski-yazarlar", "eski-yazilar"]);
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const db = prisma as any;
+  const db = repository as any;
   const [yazilar, yazarlar, kategoriler, etiketler, sayfalar] = await Promise.all([
-    prisma.yazi.findMany({
+    repository.yazi.findMany({
       where: { publishedAt: { lte: new Date() } },
       select: { slug: true, updatedAt: true, featuredImage: true },
     }),
-    prisma.yazar.findMany({
+    repository.yazar.findMany({
       select: { slug: true, updatedAt: true },
     }),
-    prisma.kategori.findMany({
+    repository.kategori.findMany({
       select: { slug: true, updatedAt: true },
     }),
     db.etiket.findMany({
       select: { slug: true, createdAt: true },
     }),
-    prisma.page.findMany({
+    repository.page.findMany({
       where: { publishedAt: { lte: new Date() } },
       select: { slug: true, updatedAt: true, featuredImage: true },
     }),

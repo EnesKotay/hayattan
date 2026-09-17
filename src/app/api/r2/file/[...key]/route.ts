@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
-import { r2 } from "@/lib/r2";
+import { r2 } from "@/backend/infrastructure/storage/r2";
 
 export const runtime = "nodejs";
 
@@ -23,7 +23,7 @@ export async function GET(
         const key = keyParts.join("/");
 
         // Güvenlik: path traversal önle
-        if (key.includes("..")) {
+        if (!key.startsWith("uploads/") || key.includes("..")) {
             return NextResponse.json({ error: "Geçersiz dosya yolu" }, { status: 400 });
         }
 
@@ -37,18 +37,33 @@ export async function GET(
         const totalSize = headResponse.ContentLength || 0;
         const contentType = headResponse.ContentType || "application/octet-stream";
 
+        if (totalSize <= 0) {
+            return NextResponse.json({ error: "Dosya boş veya bulunamadı" }, { status: 404 });
+        }
+
         // Range isteği varsa veya dosya büyükse (chunking yapalım)
         let start = 0;
         let end = totalSize - 1;
 
         if (rangeHeader) {
-            const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
-            if (match) {
-                start = parseInt(match[1], 10);
-                if (match[2]) {
-                    end = parseInt(match[2], 10);
-                }
+            const match = /^bytes=(\d+)-(\d*)$/.exec(rangeHeader);
+            if (!match) {
+                return new NextResponse(null, {
+                    status: 416,
+                    headers: { "Content-Range": `bytes */${totalSize}` },
+                });
             }
+            start = Number.parseInt(match[1], 10);
+            if (match[2]) {
+                end = Number.parseInt(match[2], 10);
+            }
+        }
+
+        if (start >= totalSize || end < start) {
+            return new NextResponse(null, {
+                status: 416,
+                headers: { "Content-Range": `bytes */${totalSize}` },
+            });
         }
 
         // Eğer rangeHeader varsa ve istenen aralık 5MB'dan büyükse, chunk boyutunu sınırla

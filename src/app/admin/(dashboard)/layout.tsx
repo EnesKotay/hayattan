@@ -1,11 +1,11 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/backend/modules/auth/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { AdminNav } from "@/components/admin/AdminNav";
-import { SignOutButton } from "@/components/admin/SignOutButton";
-import { ToastProvider } from "@/components/admin/ToastProvider";
-import { ToastContainer } from "@/components/admin/Toast";
-import { AdminWelcome } from "@/components/admin/AdminWelcome";
+import { AdminNav } from "@/frontend/admin/layout/AdminNav";
+import { SignOutButton } from "@/frontend/admin/layout/SignOutButton";
+import { ToastProvider } from "@/frontend/admin/ui/ToastProvider";
+import { ToastContainer } from "@/frontend/admin/ui/Toast";
+import { AdminWelcome } from "@/frontend/admin/layout/AdminWelcome";
 
 export default async function AdminLayout({
   children,

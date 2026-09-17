@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { updatePage } from "../../../actions";
-import { PageForm } from "@/components/admin/PageForm";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { repository } from "@/backend/modules/data/repository";
+import { updatePage } from "@/backend/modules/pages/actions";
+import { PageForm } from "@/frontend/admin/pages/PageForm";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 type PageRow = { id: string; title: string; slug: string; content: string; featuredImage: string | null; showInMenu: boolean; menuOrder: number; publishedAt: Date | null };
 
@@ -16,7 +16,7 @@ export default async function SayfaDuzenlePage({
   const { id } = await params;
   let page: PageRow | null = null;
   try {
-    const rows = await prisma.$queryRaw<PageRow[]>`
+    const rows = await repository.$queryRaw<PageRow[]>`
       SELECT id, title, slug, content, "featuredImage", "showInMenu", "menuOrder", "publishedAt"
       FROM "Page" WHERE id = ${id} LIMIT 1
     `;

@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { getHomeCategories } from "@/lib/home-categories";
-import { deleteKategori, saveHomeCategories } from "../../actions";
-import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
-import { AdminFeedback } from "@/components/admin/AdminFeedback";
-import { AdminFilters } from "@/components/admin/AdminFilters";
-import { Icons } from "@/components/admin/Icons";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { repository } from "@/backend/modules/data/repository";
+import { getHomeCategories } from "@/backend/modules/categories/home-categories";
+import { deleteKategori, saveHomeCategories } from "@/backend/modules/categories/actions";
+import { DeleteConfirmButton } from "@/frontend/admin/ui/DeleteConfirmButton";
+import { AdminFeedback } from "@/frontend/admin/ui/AdminFeedback";
+import { AdminFilters } from "@/frontend/admin/ui/AdminFilters";
+import { Icons } from "@/frontend/admin/ui/Icons";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 export default async function AdminKategorilerPage({
     searchParams,
@@ -17,7 +17,7 @@ export default async function AdminKategorilerPage({
     const params = await searchParams;
     const q = (params.q ?? "").trim();
 
-    const kategoriler = await prisma.kategori.findMany({
+    const kategoriler = await repository.kategori.findMany({
         where: q ? { OR: [{ name: { contains: q, mode: "insensitive" } }, { slug: { contains: q, mode: "insensitive" } }] } : undefined,
         orderBy: { name: "asc" },
         include: { _count: { select: { yazilar: true } } },
@@ -25,7 +25,7 @@ export default async function AdminKategorilerPage({
 
     const [homeCategories, allCategories] = await Promise.all([
         getHomeCategories(),
-        prisma.kategori.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+        repository.kategori.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
     ]);
 
     return (

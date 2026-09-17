@@ -1,14 +1,14 @@
-import { Reveal } from "@/components/Animations/Reveal";
-import { prisma, runInBatches } from "@/lib/db";
-import { getAdSlots } from "@/app/admin/actions";
-import { AdSlot } from "@/components/AdSlot";
-import { Slider, type SliderItem } from "@/components/Slider";
-import { SonYazilar } from "@/components/SonYazilar";
-import { YazarlarBolumu } from "@/components/YazarlarBolumu";
+import { Reveal } from "@/frontend/ui/Reveal";
+import { repository, runInBatches } from "@/backend/modules/data/repository";
+import { getAdSlots } from "@/backend/modules/advertising/actions";
+import { AdSlot } from "@/frontend/features/advertising/AdSlot";
+import { Slider, type SliderItem } from "@/frontend/features/home/Slider";
+import { SonYazilar } from "@/frontend/features/home/SonYazilar";
+import { YazarlarBolumu } from "@/frontend/features/authors/YazarlarBolumu";
 import type { Metadata } from "next";
-import { generateWebSiteSchema, serializeJsonLd } from "@/lib/seo";
+import { generateWebSiteSchema, serializeJsonLd } from "@/backend/modules/content/seo";
 import Link from "next/link";
-import { getHomeCategories } from "@/lib/home-categories";
+import { getHomeCategories } from "@/backend/modules/categories/home-categories";
 
 export const metadata: Metadata = {
   alternates: {
@@ -36,7 +36,7 @@ type YazarRow = {
 };
 
 async function getHaberler(): Promise<HaberRow[]> {
-  const rows = await prisma.haber.findMany({
+  const rows = await repository.haber.findMany({
     where: { publishedAt: { lte: new Date() } },
     orderBy: [{ sortOrder: "asc" }, { publishedAt: "desc" }],
     take: 10,
@@ -54,7 +54,7 @@ async function getHaberler(): Promise<HaberRow[]> {
 }
 /** Ana sayfa yazarları: misafir değil, ayrılmamış. */
 async function getYazarlar(): Promise<YazarRow[]> {
-  const rows = await prisma.yazar.findMany({
+  const rows = await repository.yazar.findMany({
     where: {
       misafir: false,
       ayrilmis: false,
@@ -80,7 +80,7 @@ async function getYazarlar(): Promise<YazarRow[]> {
 
 // Helper to fetch featured articles
 async function getFeaturedYazilar(): Promise<HaberRow[]> {
-  const yazilar = await prisma.yazi.findMany({
+  const yazilar = await repository.yazi.findMany({
     where: {
       publishedAt: { lte: new Date() },
       showInSlider: true,
@@ -118,7 +118,7 @@ export default async function HomePage() {
     () => getHaberler(),
     () => getFeaturedYazilar(),
     () =>
-      prisma.yazi.findMany({
+      repository.yazi.findMany({
         where: { publishedAt: { lte: new Date() }, author: { ayrilmis: false } },
         orderBy: { publishedAt: "desc" },
         take: 6,

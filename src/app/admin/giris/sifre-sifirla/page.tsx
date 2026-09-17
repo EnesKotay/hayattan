@@ -1,4 +1,4 @@
-import { resetPassword } from "../auth-actions";
+import { resetPassword } from "@/backend/modules/auth/password-actions";
 
 export default async function SifreSifirlaPage({
     searchParams,
@@ -48,7 +48,7 @@ export default async function SifreSifirlaPage({
                     )}
                     {params.error === "zayif" && (
                         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                            Şifre en az 8 karakter, bir büyük harf, bir küçük harf ve bir rakam içermelidir.
+                            Şifre en az 12 karakter; büyük/küçük harf, rakam ve özel karakter içermelidir.
                         </div>
                     )}
 
@@ -64,7 +64,8 @@ export default async function SifreSifirlaPage({
                             name="password"
                             type="password"
                             required
-                            minLength={8}
+                            minLength={12}
+                            autoComplete="new-password"
                             placeholder="••••••••"
                             className="mt-1.5 w-full rounded-lg border border-[#ddd] px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />
@@ -82,7 +83,8 @@ export default async function SifreSifirlaPage({
                             name="passwordConfirm"
                             type="password"
                             required
-                            minLength={8}
+                            minLength={12}
+                            autoComplete="new-password"
                             placeholder="••••••••"
                             className="mt-1.5 w-full rounded-lg border border-[#ddd] px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />

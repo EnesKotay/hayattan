@@ -1,6 +1,6 @@
-import { ArticleImage } from "@/components/ArticleImage";
+import { ArticleImage } from "@/frontend/features/articles/ArticleImage";
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { repository } from "@/backend/modules/data/repository";
 import type { Metadata } from "next";
 
 type Props = {
@@ -33,7 +33,7 @@ export default async function BakisDergisiPage({ searchParams }: Props) {
   const skip = (page - 1) * YAZILAR_PER_PAGE;
 
   // Önce kategori var mı diye kontrol et, yoksa uyar
-  const kategori = await prisma.kategori.findFirst({
+  const kategori = await repository.kategori.findFirst({
     where: {
       OR: [
         { slug: CATEGORY_SLUG },
@@ -59,7 +59,7 @@ export default async function BakisDergisiPage({ searchParams }: Props) {
   }
 
   const [yazilar, totalCount] = await Promise.all([
-    prisma.yazi.findMany({
+    repository.yazi.findMany({
       where: {
         kategoriler: { some: { id: kategori.id } },
         publishedAt: { lte: new Date() },
@@ -80,7 +80,7 @@ export default async function BakisDergisiPage({ searchParams }: Props) {
         kategoriler: { select: { name: true, slug: true } },
       },
     }),
-    prisma.yazi.count({
+    repository.yazi.count({
       where: {
         kategoriler: { some: { id: kategori.id } },
         publishedAt: { lte: new Date() },

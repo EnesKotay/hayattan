@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { auth } from "@/lib/auth";
-import { updatePassword } from "../../actions";
-import { FormField, FormSection } from "@/components/admin/FormField";
-import { AdminFeedback } from "@/components/admin/AdminFeedback";
+import { auth } from "@/backend/modules/auth/auth";
+import { updatePassword } from "@/backend/modules/auth/profile-actions";
+import { FormField, FormSection } from "@/frontend/admin/ui/FormField";
+import { AdminFeedback } from "@/frontend/admin/ui/AdminFeedback";
 
 const ERROR_MESSAGES: Record<string, string> = {
   eksik: "Tüm alanları doldurun.",
-  kisa: "Yeni şifre en az 6 karakter olmalıdır.",
+  kisa: "Yeni şifre en az 12 karakter olmalıdır.",
   uyusmuyor: "Yeni şifre ve tekrarı aynı değil.",
   yanlis: "Mevcut şifre hatalı.",
   bulunamadi: "Kullanıcı bulunamadı.",
@@ -45,12 +45,12 @@ export default async function ProfilPage({
               className="w-full rounded-lg border border-[#ddd] px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </FormField>
-          <FormField label="Yeni şifre" help="En az 6 karakter." required>
+          <FormField label="Yeni şifre" help="En az 12 karakter; büyük/küçük harf, rakam ve özel karakter içermeli." required>
             <input
               type="password"
               name="newPassword"
               required
-              minLength={6}
+              minLength={12}
               autoComplete="new-password"
               className="w-full rounded-lg border border-[#ddd] px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
@@ -60,7 +60,7 @@ export default async function ProfilPage({
               type="password"
               name="newPasswordConfirm"
               required
-              minLength={6}
+              minLength={12}
               autoComplete="new-password"
               className="w-full rounded-lg border border-[#ddd] px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />

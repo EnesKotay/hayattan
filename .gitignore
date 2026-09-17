@@ -155,5 +155,8 @@ package-lock 2.json
 .claude/
 .vercel
 
-# Migration yedekleri (yazı içerikleri — repoya girmemeli)
-scripts/.wp-media-backups/
+# Test artifacts
+test-results/
+playwright-report/
+tests/test-results/
+tests/playwright-report/

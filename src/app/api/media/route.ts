@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { readdir, stat, unlink } from "fs/promises";
 import path from "path";
 import { list, del } from "@vercel/blob";
-import { auth } from "@/lib/auth";
-import { r2 } from "@/lib/r2";
+import { auth } from "@/backend/modules/auth/auth";
+import { r2 } from "@/backend/infrastructure/storage/r2";
 import { ListObjectsV2Command, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 const UPLOAD_DIR = "public/uploads";
@@ -100,8 +100,8 @@ export async function GET(request: Request) {
 export async function DELETE(request: Request) {
     try {
         const session = await auth();
-        if (!session?.user?.role || !["ADMIN", "AUTHOR"].includes(session.user.role)) {
-            return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });
+        if (session?.user?.role !== "ADMIN") {
+            return NextResponse.json({ error: "Bu işlem için yönetici yetkisi gerekli." }, { status: 403 });
         }
 
         const body = await request.json();
@@ -122,6 +122,10 @@ export async function DELETE(request: Request) {
             }
             if (!key && filename) {
                 key = `uploads/${filename}`;
+            }
+
+            if (!key.startsWith("uploads/") || key.includes("..")) {
+                return NextResponse.json({ error: "Geçersiz dosya yolu." }, { status: 400 });
             }
 
             if (key) {

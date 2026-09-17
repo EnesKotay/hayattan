@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { repository } from "@/backend/modules/data/repository";
 import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
     // Cron secret doğrulaması
+    const cronSecret = process.env.CRON_SECRET;
     const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
         return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
 
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
         // publishedAt set edilmiş ama henüz "yayında" olarak değerlendirilmemiş olanlar
         // Aslında publishedAt zaten var ve tarih geçmişse sitede görünmeli,
         // ama cache'i temizleyip yeni içerik gösterilmesini sağlıyoruz
-        const scheduledPosts = await prisma.yazi.findMany({
+        const scheduledPosts = await repository.yazi.findMany({
             where: {
                 publishedAt: {
                     lte: now,

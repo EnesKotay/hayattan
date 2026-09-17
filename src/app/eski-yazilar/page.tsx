@@ -1,4 +1,4 @@
-import { EskiYazilarArsivi } from "@/components/EskiYazilarArsivi";
+import { EskiYazilarArsivi } from "@/frontend/features/archive/EskiYazilarArsivi";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";

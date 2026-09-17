@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@/backend/modules/auth/auth";
 import crypto from "crypto";
 
 export const runtime = "nodejs";
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
         // 2. PARSE AND VALIDATE REQUEST
         const { fileName, fileType, fileSize } = await req.json();
         
-        if (!fileName || !fileType || !fileSize) {
+        if (!fileName || typeof fileName !== "string" || fileName.length > 255 || !fileType) {
             return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
         }
 
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 
         // Validate file size (100MB max)
         const maxSize = 100 * 1024 * 1024;
-        if (fileSize > maxSize) {
+        if (typeof fileSize !== "number" || !Number.isFinite(fileSize) || fileSize <= 0 || fileSize > maxSize) {
             return NextResponse.json({ 
                 error: "File too large (max 100MB)" 
             }, { status: 400 });
@@ -96,8 +96,6 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         console.error("Presign error:", error);
-        return NextResponse.json({ 
-            error: "Presign failed: " + error.message 
-        }, { status: 500 });
+        return NextResponse.json({ error: "Presign failed" }, { status: 500 });
     }
 }

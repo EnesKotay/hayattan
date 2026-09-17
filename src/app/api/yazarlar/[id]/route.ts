@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { titleCase } from "@/lib/text-case";
+import { repository } from "@/backend/modules/data/repository";
+import { auth } from "@/backend/modules/auth/auth";
+import { titleCase } from "@/backend/modules/content/text-case";
 
 export const dynamic = "force-dynamic";
+
+const publicAuthorSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  photo: true,
+  biyografi: true,
+  misafir: true,
+  ayrilmis: true,
+  sortOrder: true,
+  _count: { select: { yazilar: true } },
+} as const;
 
 /** GET /api/yazarlar/[id] */
 export async function GET(
@@ -11,9 +23,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const yazar = await prisma.yazar.findUnique({
+  const yazar = await repository.yazar.findUnique({
     where: { id },
-    include: { _count: { select: { yazilar: true } } },
+    select: publicAuthorSelect,
   });
   if (!yazar) return NextResponse.json({ error: "Yazar bulunamadı" }, { status: 404 });
   return NextResponse.json(yazar);
@@ -25,12 +37,12 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session?.user?.role || !["ADMIN", "AUTHOR"].includes(session.user.role)) {
-    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
+  if (session?.user?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Bu işlem için yönetici yetkisi gerekli" }, { status: 403 });
   }
 
   const { id } = await params;
-  const existing = await prisma.yazar.findUnique({ where: { id } });
+  const existing = await repository.yazar.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: "Yazar bulunamadı" }, { status: 404 });
 
   let body: { name?: string; slug?: string; email?: string; photo?: string; biyografi?: string; misafir?: boolean; ayrilmis?: boolean };
@@ -44,7 +56,7 @@ export async function PATCH(
   const slug = (body.slug ?? existing.slug).trim();
   if (!name || !slug) return NextResponse.json({ error: "Ad ve slug gerekli" }, { status: 400 });
 
-  const yazar = await prisma.yazar.update({
+  const yazar = await repository.yazar.update({
     where: { id },
     data: {
       name,
@@ -66,15 +78,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session?.user?.role || !["ADMIN", "AUTHOR"].includes(session.user.role)) {
-    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
+  if (session?.user?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Bu işlem için yönetici yetkisi gerekli" }, { status: 403 });
   }
 
   const { id } = await params;
-  const existing = await prisma.yazar.findUnique({ where: { id } });
+  const existing = await repository.yazar.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: "Yazar bulunamadı" }, { status: 404 });
 
-  await prisma.$transaction(async (tx) => {
+  await repository.$transaction(async (tx) => {
     await tx.yazi.deleteMany({ where: { authorId: id } });
     await tx.yazar.delete({ where: { id } });
   });

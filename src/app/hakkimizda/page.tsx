@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { getHakkimizdaContent } from "@/app/admin/actions";
-import { normalizeImageUrl } from "@/lib/image";
+import { getHakkimizdaContent } from "@/backend/modules/settings/about-actions";
+import { normalizeImageUrl } from "@/shared/media/image";
 
 export const metadata: Metadata = {
   title: "Hakkımızda",

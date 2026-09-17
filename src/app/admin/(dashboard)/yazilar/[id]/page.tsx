@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { updateYazi } from "../../../actions";
-import { YaziForm } from "@/components/admin/YaziForm";
+import { repository } from "@/backend/modules/data/repository";
+import { auth } from "@/backend/modules/auth/auth";
+import { updateYazi } from "@/backend/modules/articles/actions";
+import { YaziForm } from "@/frontend/admin/articles/YaziForm";
 
 export default async function YaziDuzenlePage({
   params,
@@ -12,7 +12,7 @@ export default async function YaziDuzenlePage({
 }) {
   const { id } = await params;
   const session = await auth();
-  const yazi = await prisma.yazi.findUnique({
+  const yazi = await repository.yazi.findUnique({
     where: { id },
     include: {
       author: true,
@@ -25,7 +25,7 @@ export default async function YaziDuzenlePage({
   if (session?.user?.role !== "ADMIN" && yazi.authorId !== session?.user?.id) notFound();
 
   const [yazarlar, kategoriler] = await Promise.all([
-    prisma.yazar.findMany({
+    repository.yazar.findMany({
       where: session?.user?.role === "ADMIN" ? undefined : { id: session?.user?.id },
       orderBy: [
         { sortOrder: "asc" },
@@ -33,7 +33,7 @@ export default async function YaziDuzenlePage({
         { name: "asc" }
       ] as any
     }),
-    prisma.kategori.findMany({ orderBy: { name: "asc" } }),
+    repository.kategori.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   async function handleSubmit(formData: FormData) {

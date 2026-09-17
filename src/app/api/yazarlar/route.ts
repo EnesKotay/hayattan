@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { titleCase } from "@/lib/text-case";
+import { repository } from "@/backend/modules/data/repository";
+import { auth } from "@/backend/modules/auth/auth";
+import { titleCase } from "@/backend/modules/content/text-case";
 
 export const dynamic = "force-dynamic";
+
+const publicAuthorSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  photo: true,
+  biyografi: true,
+  misafir: true,
+  ayrilmis: true,
+  sortOrder: true,
+  _count: { select: { yazilar: true } },
+} satisfies Prisma.YazarSelect;
 
 /** GET /api/yazarlar — Tüm yazarları listele (admin veya public) */
 export async function GET(request: Request) {
@@ -22,24 +34,24 @@ export async function GET(request: Request) {
   if (ayrilmis === "1") where.ayrilmis = true;
   else if (ayrilmis === "0") where.ayrilmis = false;
 
-  const yazarlar = await prisma.yazar.findMany({
+  const yazarlar = await repository.yazar.findMany({
     where: Object.keys(where).length ? where : undefined,
     orderBy: [
       { sortOrder: "asc" },
       { yazilar: { _count: "desc" } },
       { name: "asc" }
     ] as any,
-    include: { _count: { select: { yazilar: true } } },
+    select: publicAuthorSelect,
   });
 
   return NextResponse.json(yazarlar);
 }
 
-/** POST /api/yazarlar — Yeni yazar (sadece admin/yazar) */
+/** POST /api/yazarlar — Yeni yazar (sadece yönetici) */
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session?.user?.role || !["ADMIN", "AUTHOR"].includes(session.user.role)) {
-    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
+  if (session?.user?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Bu işlem için yönetici yetkisi gerekli" }, { status: 403 });
   }
 
   let body: { name: string; slug?: string; email?: string; photo?: string; biyografi?: string; misafir?: boolean; ayrilmis?: boolean };
@@ -67,12 +79,12 @@ export async function POST(request: Request) {
   let slug = (body.slug ?? "").trim() || slugify(name);
   slug = slugify(slug);
   let counter = 1;
-  while (await prisma.yazar.findUnique({ where: { slug } })) {
+  while (await repository.yazar.findUnique({ where: { slug } })) {
     slug = `${slugify(name)}-${counter}`;
     counter++;
   }
 
-  const yazar = await prisma.yazar.create({
+  const yazar = await repository.yazar.create({
     data: {
       name,
       slug,

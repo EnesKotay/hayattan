@@ -17,6 +17,54 @@ export default defineConfig([
       "react-hooks/immutability": "warn",
     },
   },
+  {
+    files: ["src/backend/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/frontend/**", "@/app/**"],
+              message: "Backend katmanı frontend veya route katmanına bağımlı olamaz.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/shared/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/frontend/**", "@/backend/**", "@/app/**"],
+              message: "Shared katmanı yalnızca bağımsız, ortak kod içermelidir.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/app/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/backend/infrastructure/database/**"],
+              message: "Route katmanı Prisma altyapısına doğrudan erişemez; backend repository veya query modülü kullanın.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   globalIgnores([
     ".next/**",
     "node_modules/**",

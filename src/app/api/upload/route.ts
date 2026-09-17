@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { writeFile, mkdir, stat } from "fs/promises";
 import path from "path";
-import { auth } from "@/lib/auth";
-import { r2 } from "@/lib/r2";
+import { auth } from "@/backend/modules/auth/auth";
+import { r2 } from "@/backend/infrastructure/storage/r2";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 const UPLOAD_DIR = "public/uploads";

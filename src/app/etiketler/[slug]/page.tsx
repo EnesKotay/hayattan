@@ -1,8 +1,8 @@
-import { ArticleImage } from "@/components/ArticleImage";
+import { ArticleImage } from "@/frontend/features/articles/ArticleImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { SiteBreadcrumb } from "@/components/SiteBreadcrumb";
+import { repository } from "@/backend/modules/data/repository";
+import { SiteBreadcrumb } from "@/frontend/ui/SiteBreadcrumb";
 
 export const revalidate = 60;
 
@@ -19,13 +19,13 @@ const MIN_INDEXABLE_YAZI = 3;
 export async function generateMetadata({ params, searchParams }: Props) {
   const { slug } = await params;
   const { sayfa } = await searchParams;
-  const etiket = await (prisma as any).etiket.findUnique({
+  const etiket = await (repository as any).etiket.findUnique({
     where: { slug },
     select: { name: true },
   });
   if (!etiket) return { title: "Etiket Bulunamadı" };
 
-  const yaziSayisi = await prisma.yazi.count({
+  const yaziSayisi = await repository.yazi.count({
     where: {
       etiketler: { some: { slug } },
       publishedAt: { lte: new Date() },
@@ -55,7 +55,7 @@ export default async function EtiketDetayPage({ params, searchParams }: Props) {
   const page = Math.max(1, parseInt(sayfa, 10) || 1);
   const skip = (page - 1) * YAZILAR_PER_PAGE;
 
-  const db = prisma as any;
+  const db = repository as any;
 
   const [etiket, yazilar, totalCount] = await Promise.all([
     db.etiket.findUnique({

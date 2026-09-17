@@ -74,9 +74,22 @@ export async function GET(
     const range = request.headers.get("range");
 
     if (range) {
-      const parts = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const match = /^bytes=(\d+)-(\d*)$/.exec(range);
+      if (!match) {
+        return new NextResponse(null, {
+          status: 416,
+          headers: { "Content-Range": `bytes */${fileSize}` },
+        });
+      }
+
+      const start = Number.parseInt(match[1], 10);
+      const end = match[2] ? Number.parseInt(match[2], 10) : fileSize - 1;
+      if (start >= fileSize || end < start || end >= fileSize) {
+        return new NextResponse(null, {
+          status: 416,
+          headers: { "Content-Range": `bytes */${fileSize}` },
+        });
+      }
       const chunksize = (end - start) + 1;
 
       const fileStream = streamFile(filePath, { start, end });

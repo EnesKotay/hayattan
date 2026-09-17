@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createYazar } from "@/app/admin/actions";
-import { FormField, FormSection } from "@/components/admin/FormField";
-import { ImageUpload } from "@/components/admin/ImageUpload";
-import { Icons } from "@/components/admin/Icons";
+import { createYazar } from "@/backend/modules/authors/actions";
+import { FormField, FormSection } from "@/frontend/admin/ui/FormField";
+import { ImageUpload } from "@/frontend/admin/media/ImageUpload";
+import { Icons } from "@/frontend/admin/ui/Icons";
 
 // Slug oluşturma
 function generateSlug(name: string): string {

@@ -1,4 +1,4 @@
-import { SkeletonGrid } from "@/components/Skeletons/SkeletonArticle";
+import { SkeletonGrid } from "@/frontend/ui/SkeletonArticle";
 
 export default function Loading() {
     return (

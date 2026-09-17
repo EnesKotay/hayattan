@@ -1,18 +1,18 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/backend/modules/auth/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { prisma, runInBatches } from "@/lib/db";
+import { repository, runInBatches } from "@/backend/modules/data/repository";
 
-import { DashboardCard, type Card } from "@/components/admin/DashboardCard";
-import { DashboardStats, type StatItem } from "@/components/admin/DashboardStats";
-import { DashboardQuickActions, type QuickAction } from "@/components/admin/DashboardQuickActions";
-import { RecentActivity } from "@/components/admin/RecentActivity";
+import { DashboardCard, type Card } from "@/frontend/admin/dashboard/DashboardCard";
+import { DashboardStats, type StatItem } from "@/frontend/admin/dashboard/DashboardStats";
+import { DashboardQuickActions, type QuickAction } from "@/frontend/admin/dashboard/DashboardQuickActions";
+import { RecentActivity } from "@/frontend/admin/dashboard/RecentActivity";
 import {
   FEEDBACK_DOWN_PREFIX,
   FEEDBACK_UP_PREFIX,
   SHARE_COUNT_PREFIX,
   parseCounter,
-} from "@/lib/engagement";
+} from "@/shared/engagement/counters";
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("tr-TR").format(value);
@@ -35,16 +35,17 @@ export default async function AdminDashboardPage() {
     enCokOkunanlar,
   ] =
     // Not: Supabase pgbouncer havuzu (connection_limit) sınırlı olduğu için
-    // çok sayıda prisma sorgusunu tek Promise.all ile aynı anda ateşlemek
+    // çok sayıda repository sorgusunu tek Promise.all ile aynı anda ateşlemek
     // havuzu tüketip 500 hatasına yol açabiliyor. runInBatches sorguları
-    // küçük gruplar halinde sırayla çalıştırır (bkz. src/lib/db.ts).
+    // küçük gruplar halinde sırayla çalıştırır
+    // (bkz. src/backend/infrastructure/database/db.ts).
     await runInBatches([
-      () => prisma.yazi.count(),
-      () => prisma.yazar.count(),
-      () => prisma.kategori.count(),
-      () => prisma.haber.count(),
+      () => repository.yazi.count(),
+      () => repository.yazar.count(),
+      () => repository.kategori.count(),
+      () => repository.haber.count(),
       () =>
-        prisma.yazi.findMany({
+        repository.yazi.findMany({
           take: 5,
           orderBy: { createdAt: "desc" },
           select: {
@@ -57,7 +58,7 @@ export default async function AdminDashboardPage() {
           },
         }),
       () =>
-        prisma.haber.findMany({
+        repository.haber.findMany({
           take: 3,
           orderBy: { createdAt: "desc" },
           select: {
@@ -66,10 +67,10 @@ export default async function AdminDashboardPage() {
             createdAt: true,
           },
         }),
-      () => prisma.yazi.aggregate({ _sum: { viewCount: true } }),
-      () => prisma.newsletterSubscriber.count({ where: { active: true } }),
+      () => repository.yazi.aggregate({ _sum: { viewCount: true } }),
+      () => repository.newsletterSubscriber.count({ where: { active: true } }),
       () =>
-        prisma.siteSetting.findMany({
+        repository.siteSetting.findMany({
           where: {
             OR: [
               { key: { startsWith: SHARE_COUNT_PREFIX } },
@@ -80,7 +81,7 @@ export default async function AdminDashboardPage() {
           select: { key: true, value: true },
         }),
       () =>
-        prisma.yazi.findMany({
+        repository.yazi.findMany({
           where: { publishedAt: { lte: new Date() } },
           orderBy: [{ viewCount: "desc" }, { publishedAt: "desc" }],
           take: 5,
@@ -96,14 +97,14 @@ export default async function AdminDashboardPage() {
     ]);
 
   // Taslak sayısı
-  const taslakCount = await prisma.yazi.count({
+  const taslakCount = await repository.yazi.count({
     where: { publishedAt: null },
   });
 
   // Bugün yayınlanan
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const bugunYayinlanan = await prisma.yazi.count({
+  const bugunYayinlanan = await repository.yazi.count({
     where: {
       publishedAt: {
         gte: today,

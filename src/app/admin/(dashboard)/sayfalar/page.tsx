@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { deletePage } from "../../actions";
-import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
-import { AdminFeedback } from "@/components/admin/AdminFeedback";
-import { Icons } from "@/components/admin/Icons";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { repository } from "@/backend/modules/data/repository";
+import { deletePage } from "@/backend/modules/pages/actions";
+import { DeleteConfirmButton } from "@/frontend/admin/ui/DeleteConfirmButton";
+import { AdminFeedback } from "@/frontend/admin/ui/AdminFeedback";
+import { Icons } from "@/frontend/admin/ui/Icons";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 type PageRow = { id: string; title: string; slug: string; showInMenu: boolean; menuOrder: number; publishedAt: Date | null };
 
@@ -17,7 +17,7 @@ export default async function AdminSayfalarPage({
   const params = await searchParams;
   let pages: PageRow[] = [];
   try {
-    pages = await prisma.$queryRaw<PageRow[]>`
+    pages = await repository.$queryRaw<PageRow[]>`
       SELECT id, title, slug, "showInMenu", "menuOrder", "publishedAt"
       FROM "Page"
       ORDER BY "menuOrder" ASC, title ASC

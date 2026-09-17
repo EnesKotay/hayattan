@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { createKategori } from "../../../actions";
-import { FormField, FormSection } from "@/components/admin/FormField";
+import { createKategori } from "@/backend/modules/categories/actions";
+import { FormField, FormSection } from "@/frontend/admin/ui/FormField";
 
 export default function YeniKategoriPage() {
   return (

@@ -1,5 +1,5 @@
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { auth } from "@/backend/modules/auth/auth";
+import { repository } from "@/backend/modules/data/repository";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -8,7 +8,7 @@ export async function GET() {
     return new NextResponse("Yetkisiz", { status: 401 });
   }
 
-  const aboneler = await (prisma as any).newsletterSubscriber.findMany({
+  const aboneler = await (repository as any).newsletterSubscriber.findMany({
     orderBy: { createdAt: "desc" },
   });
 
@@ -21,12 +21,18 @@ export async function GET() {
     ]),
   ];
 
-  const csv = rows.map((row) => row.map((cell: string) => `"${cell.replace(/"/g, '""')}"`).join(",")).join("\n");
+  const escapeCsvCell = (cell: string) => {
+    // Prevent spreadsheet formula execution when an exported CSV is opened.
+    const safe = /^[=+\-@]/.test(cell) ? `'${cell}` : cell;
+    return `"${safe.replace(/"/g, '""')}"`;
+  };
+  const csv = rows.map((row) => row.map(escapeCsvCell).join(",")).join("\n");
 
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="bulten-aboneleri-${new Date().toISOString().slice(0, 10)}.csv"`,
+      "Cache-Control": "private, no-store, max-age=0",
     },
   });
 }

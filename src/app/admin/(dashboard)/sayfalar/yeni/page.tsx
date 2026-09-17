@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { createPage } from "../../../actions";
-import { PageForm } from "@/components/admin/PageForm";
+import { createPage } from "@/backend/modules/pages/actions";
+import { PageForm } from "@/frontend/admin/pages/PageForm";
 
 export default function YeniSayfaPage() {
   return (

@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/db";
+import { repository } from "@/backend/modules/data/repository";
 import Link from "next/link";
-import { Icons } from "@/components/admin/Icons";
-import { AdminFilters } from "@/components/admin/AdminFilters";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { Icons } from "@/frontend/admin/ui/Icons";
+import { AdminFilters } from "@/frontend/admin/ui/AdminFilters";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -26,12 +26,12 @@ export default async function AdminBultenPage({
   if (durum === "pasif") where.active = false;
 
   const [aboneler, toplamAktif, toplamPasif] = await Promise.all([
-    (prisma as any).newsletterSubscriber.findMany({
+    (repository as any).newsletterSubscriber.findMany({
       where,
       orderBy: { createdAt: "desc" },
     }),
-    (prisma as any).newsletterSubscriber.count({ where: { active: true } }),
-    (prisma as any).newsletterSubscriber.count({ where: { active: false } }),
+    (repository as any).newsletterSubscriber.count({ where: { active: true } }),
+    (repository as any).newsletterSubscriber.count({ where: { active: false } }),
   ]);
 
   const toplam = toplamAktif + toplamPasif;

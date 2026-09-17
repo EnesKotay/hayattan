@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { isMailConfigured, sendNewsletterWelcomeEmail } from "@/lib/mail";
-import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
+import { repository } from "@/backend/modules/data/repository";
+import { isMailConfigured, sendNewsletterWelcomeEmail } from "@/backend/infrastructure/email/mail";
+import { checkRateLimit, getClientIdentifier } from "@/backend/security/rate-limit";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -24,16 +24,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Geçerli bir e-posta adresi giriniz." }, { status: 400 });
     }
 
-    const existing = await (prisma as any).newsletterSubscriber.findUnique({ where: { email } });
+    const existing = await (repository as any).newsletterSubscriber.findUnique({ where: { email } });
 
     if (existing?.active) {
       return NextResponse.json({ error: "Bu e-posta zaten kayıtlı." }, { status: 409 });
     }
 
     if (existing) {
-      await (prisma as any).newsletterSubscriber.update({ where: { email }, data: { active: true } });
+      await (repository as any).newsletterSubscriber.update({ where: { email }, data: { active: true } });
     } else {
-      await (prisma as any).newsletterSubscriber.create({ data: { email } });
+      await (repository as any).newsletterSubscriber.create({ data: { email } });
     }
 
     if (!isMailConfigured()) {

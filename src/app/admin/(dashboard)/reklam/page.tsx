@@ -1,6 +1,6 @@
-import { getAdMetrics, getAdPreviewPostPath, getAdSlots } from "../../actions";
-import { ReklamForm } from "@/components/admin/ReklamForm";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { getAdMetrics, getAdPreviewPostPath, getAdSlots } from "@/backend/modules/advertising/actions";
+import { ReklamForm } from "@/frontend/admin/advertising/ReklamForm";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 export default async function ReklamPage() {
   await requireAdminPage();

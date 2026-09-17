@@ -1,6 +1,53 @@
 import type { NextConfig } from "next";
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
+// A nonce-based CSP would force every page to render dynamically. Keep the
+// current static/CDN-friendly rendering model and explicitly allow only the
+// browser-side services used by the application.
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  [
+    "script-src 'self' 'unsafe-inline'",
+    isDevelopment ? "'unsafe-eval'" : "",
+    "https://www.googletagmanager.com",
+    "https://pagead2.googlesyndication.com",
+    "https://securepubads.g.doubleclick.net",
+    "https://tpc.googlesyndication.com",
+  ]
+    .filter(Boolean)
+    .join(" "),
+  "script-src-attr 'none'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "media-src 'self' blob: https:",
+  [
+    "connect-src 'self'",
+    "https://*.google-analytics.com",
+    "https://*.analytics.google.com",
+    "https://*.googlesyndication.com",
+    "https://*.r2.cloudflarestorage.com",
+    "https://hayattan-upload-worker.hayattan.workers.dev",
+  ].join(" "),
+  [
+    "frame-src",
+    "https://www.youtube.com",
+    "https://www.youtube-nocookie.com",
+    "https://googleads.g.doubleclick.net",
+    "https://tpc.googlesyndication.com",
+  ].join(" "),
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  ...(isDevelopment ? [] : ["upgrade-insecure-requests"]),
+].join("; ");
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   images: {
     // Serve originals directly so exhausted Vercel transformation quotas cannot
     // prevent article images and author photos from loading.
@@ -40,6 +87,10 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           {
+            key: "Content-Security-Policy",
+            value: contentSecurityPolicy,
+          },
+          {
             key: "X-Frame-Options",
             value: "DENY",
           },
@@ -53,7 +104,23 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+            value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()",
+          },
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
+          },
+          {
+            key: "Origin-Agent-Cluster",
+            value: "?1",
+          },
+          {
+            key: "X-DNS-Prefetch-Control",
+            value: "off",
+          },
+          {
+            key: "X-Permitted-Cross-Domain-Policies",
+            value: "none",
           },
           {
             key: "Strict-Transport-Security",
@@ -61,7 +128,25 @@ const nextConfig: NextConfig = {
           },
           {
             key: "X-XSS-Protection",
-            value: "1; mode=block",
+            value: "0",
+          },
+        ],
+      },
+      {
+        source: "/admin/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-store, max-age=0",
+          },
+        ],
+      },
+      {
+        source: "/api/auth/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-store, max-age=0",
           },
         ],
       },

@@ -1,11 +1,13 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { auth } from "@/lib/auth";
+import { auth } from "@/backend/modules/auth/auth";
 
 const f = createUploadthing();
 
 const authMiddleware = async () => {
     const session = await auth();
-    if (!session?.user) throw new Error("Yetkisiz erişim");
+    if (!session?.user?.role || !["ADMIN", "AUTHOR"].includes(session.user.role)) {
+        throw new Error("Yetkisiz erişim");
+    }
     return { userId: session.user.id };
 };
 

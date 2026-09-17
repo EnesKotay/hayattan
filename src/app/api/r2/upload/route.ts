@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { r2 } from "@/lib/r2";
-import { auth } from "@/lib/auth";
+import { r2 } from "@/backend/infrastructure/storage/r2";
+import { auth } from "@/backend/modules/auth/auth";
 
 export const runtime = "nodejs";
 
@@ -83,8 +83,6 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         console.error("R2 upload error:", error);
-        return NextResponse.json({
-            error: "Upload hatası: " + error.message
-        }, { status: 500 });
+        return NextResponse.json({ error: "Dosya yüklenemedi" }, { status: 500 });
     }
 }

@@ -1,14 +1,14 @@
-import { isValidImageSrc, normalizeImageUrl } from "@/lib/image";
+import { isValidImageSrc, normalizeImageUrl } from "@/shared/media/image";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { NewsletterForm } from "@/components/NewsletterForm";
-import { AuthorFollowButton } from "@/components/AuthorFollowButton";
-import { SiteBreadcrumb } from "@/components/SiteBreadcrumb";
-import { auth } from "@/lib/auth";
-import { createExcerptFromHtml } from "@/lib/article-utils";
-import { generateAuthorSchema, serializeJsonLd } from "@/lib/seo";
+import { repository } from "@/backend/modules/data/repository";
+import { NewsletterForm } from "@/frontend/features/newsletter/NewsletterForm";
+import { AuthorFollowButton } from "@/frontend/features/authors/AuthorFollowButton";
+import { SiteBreadcrumb } from "@/frontend/ui/SiteBreadcrumb";
+import { auth } from "@/backend/modules/auth/auth";
+import { createExcerptFromHtml } from "@/backend/modules/articles/utils";
+import { generateAuthorSchema, serializeJsonLd } from "@/backend/modules/content/seo";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -20,7 +20,7 @@ const YAZILAR_PER_PAGE = 12;
 export async function generateMetadata({ params, searchParams }: Props) {
   const { slug } = await params;
   const { sayfa } = await searchParams;
-  const yazar = await prisma.yazar.findUnique({
+  const yazar = await repository.yazar.findUnique({
     where: { slug },
     select: { name: true, biyografi: true, photo: true },
   });
@@ -57,7 +57,7 @@ export default async function YazarDetayPage({ params, searchParams }: Props) {
   const skip = (page - 1) * YAZILAR_PER_PAGE;
 
   const [yazar, yazilar, allAuthorPosts] = await Promise.all([
-    prisma.yazar.findUnique({
+    repository.yazar.findUnique({
       where: { slug },
       select: {
         id: true,
@@ -69,7 +69,7 @@ export default async function YazarDetayPage({ params, searchParams }: Props) {
         misafir: true,
       },
     }),
-    prisma.yazi.findMany({
+    repository.yazi.findMany({
       where: {
         author: { slug },
         publishedAt: { lte: new Date() },
@@ -87,7 +87,7 @@ export default async function YazarDetayPage({ params, searchParams }: Props) {
         kategoriler: { select: { name: true, slug: true } },
       },
     }),
-    prisma.yazi.findMany({
+    repository.yazi.findMany({
       where: {
         author: { slug },
         publishedAt: { lte: new Date() },

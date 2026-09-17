@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { deleteHaber } from "../../actions";
-import { DeleteConfirmButton } from "@/components/admin/DeleteConfirmButton";
-import { AdminFeedback } from "@/components/admin/AdminFeedback";
+import { repository } from "@/backend/modules/data/repository";
+import { deleteHaber } from "@/backend/modules/news/actions";
+import { DeleteConfirmButton } from "@/frontend/admin/ui/DeleteConfirmButton";
+import { AdminFeedback } from "@/frontend/admin/ui/AdminFeedback";
 import { Haber } from "@prisma/client";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 export default async function AdminHaberlerPage({
     searchParams,
@@ -14,7 +14,7 @@ export default async function AdminHaberlerPage({
     await requireAdminPage();
     const params = await searchParams;
 
-    const haberler = await prisma.haber.findMany({
+    const haberler = await repository.haber.findMany({
         orderBy: { sortOrder: "asc" },
     });
 

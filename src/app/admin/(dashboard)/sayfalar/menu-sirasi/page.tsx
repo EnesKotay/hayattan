@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { getMenuEntriesForAdmin, setMenuOrder } from "../../../actions";
-import { AdminFeedback } from "@/components/admin/AdminFeedback";
-import { MenuOrderForm } from "@/components/admin/MenuOrderForm";
+import { getMenuEntriesForAdmin, setMenuOrder } from "@/backend/modules/navigation/actions";
+import { AdminFeedback } from "@/frontend/admin/ui/AdminFeedback";
+import { MenuOrderForm } from "@/frontend/admin/pages/MenuOrderForm";
 
 export default async function MenuSirasiPage({
   searchParams,

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { forgotPassword } from "../auth-actions";
+import { forgotPassword } from "@/backend/modules/auth/password-actions";
 
 export default async function SifremiUnuttumPage({
     searchParams,

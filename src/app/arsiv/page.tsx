@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { repository } from "@/backend/modules/data/repository";
 
 export const metadata = {
   title: "Arşiv",
@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default async function ArsivPage() {
-  const yazilar = await prisma.yazi.findMany({
+  const yazilar = await repository.yazi.findMany({
     where: { publishedAt: { lte: new Date() }, author: { ayrilmis: false } } as any,
     orderBy: { publishedAt: "desc" },
     select: {

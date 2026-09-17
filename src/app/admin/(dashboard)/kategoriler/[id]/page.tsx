@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { updateKategori } from "../../../actions";
-import { FormField, FormSection } from "@/components/admin/FormField";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { repository } from "@/backend/modules/data/repository";
+import { updateKategori } from "@/backend/modules/categories/actions";
+import { FormField, FormSection } from "@/frontend/admin/ui/FormField";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 export default async function KategoriDuzenlePage({
   params,
@@ -12,7 +12,7 @@ export default async function KategoriDuzenlePage({
 }) {
   await requireAdminPage();
   const { id } = await params;
-  const kategori = await prisma.kategori.findUnique({ where: { id } });
+  const kategori = await repository.kategori.findUnique({ where: { id } });
 
   if (!kategori) notFound();
 

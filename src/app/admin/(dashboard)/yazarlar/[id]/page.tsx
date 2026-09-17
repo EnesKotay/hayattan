@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { updateYazar } from "@/app/admin/actions";
-import { FormField, FormSection } from "@/components/admin/FormField";
-import { ImageUpload } from "@/components/admin/ImageUpload";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { repository } from "@/backend/modules/data/repository";
+import { updateYazar } from "@/backend/modules/authors/actions";
+import { FormField, FormSection } from "@/frontend/admin/ui/FormField";
+import { ImageUpload } from "@/frontend/admin/media/ImageUpload";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 export default async function YazarDuzenlePage({
   params,
@@ -17,7 +17,7 @@ export default async function YazarDuzenlePage({
   const { id } = await params;
   const searchParamsRes = await searchParams;
   const error = searchParamsRes.error;
-  const yazar = await prisma.yazar.findUnique({ where: { id } });
+  const yazar = await repository.yazar.findUnique({ where: { id } });
 
   if (!yazar) notFound();
 

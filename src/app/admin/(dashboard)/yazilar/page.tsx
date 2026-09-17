@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { prisma, runInBatches } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { repository, runInBatches } from "@/backend/modules/data/repository";
+import { auth } from "@/backend/modules/auth/auth";
 import type { Prisma } from "@prisma/client";
-import { AdminFeedback } from "@/components/admin/AdminFeedback";
-import { AdminFilters } from "@/components/admin/AdminFilters";
-import { Icons } from "@/components/admin/Icons";
-import { BulkActionsWrapper } from "@/components/admin/BulkActionsWrapper";
+import { AdminFeedback } from "@/frontend/admin/ui/AdminFeedback";
+import { AdminFilters } from "@/frontend/admin/ui/AdminFilters";
+import { Icons } from "@/frontend/admin/ui/Icons";
+import { BulkActionsWrapper } from "@/frontend/admin/articles/BulkActionsWrapper";
 
 const YAZILAR_PER_PAGE = 20;
 
@@ -74,7 +74,7 @@ export default async function AdminYazilarPage({
 
   const [yazilar, totalCount, yazarlar, yayindaCount, taslakCount, planliCount, toplamOkunma] = await runInBatches([
     () =>
-      prisma.yazi.findMany({
+      repository.yazi.findMany({
         where,
         orderBy,
         skip,
@@ -83,9 +83,9 @@ export default async function AdminYazilarPage({
           author: { select: { name: true } },
         },
       }),
-    () => prisma.yazi.count({ where }),
+    () => repository.yazi.count({ where }),
     () =>
-      prisma.yazar.findMany({
+      repository.yazar.findMany({
         where: isAdmin ? undefined : { id: session?.user?.id },
         orderBy: [
           { sortOrder: "asc" },
@@ -94,10 +94,10 @@ export default async function AdminYazilarPage({
         ] as any,
         select: { id: true, name: true }
       }),
-    () => prisma.yazi.count({ where: { ...ownerWhere, publishedAt: { not: null, lte: now } } }),
-    () => prisma.yazi.count({ where: { ...ownerWhere, publishedAt: null } }),
-    () => prisma.yazi.count({ where: { ...ownerWhere, publishedAt: { gt: now } } }),
-    () => prisma.yazi.aggregate({ where: { ...ownerWhere, publishedAt: { not: null } }, _sum: { viewCount: true } }),
+    () => repository.yazi.count({ where: { ...ownerWhere, publishedAt: { not: null, lte: now } } }),
+    () => repository.yazi.count({ where: { ...ownerWhere, publishedAt: null } }),
+    () => repository.yazi.count({ where: { ...ownerWhere, publishedAt: { gt: now } } }),
+    () => repository.yazi.aggregate({ where: { ...ownerWhere, publishedAt: { not: null } }, _sum: { viewCount: true } }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / YAZILAR_PER_PAGE));

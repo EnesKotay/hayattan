@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/db";
-import { createExcerptFromHtml } from "@/lib/article-utils";
-import { SITE_URL } from "@/lib/seo";
+import { repository } from "@/backend/modules/data/repository";
+import { createExcerptFromHtml } from "@/backend/modules/articles/utils";
+import { SITE_URL } from "@/backend/modules/content/seo";
 
 export const revalidate = 3600;
 
@@ -15,7 +15,7 @@ const escapeXml = (value: string) =>
 const cdata = (value: string) => `<![CDATA[${value.replace(/]]>/g, "]]]]><![CDATA[>")}]]>`;
 
 export async function GET() {
-  const yazilar = await prisma.yazi.findMany({
+  const yazilar = await repository.yazi.findMany({
     where: {
       publishedAt: { lte: new Date() },
       author: { ayrilmis: false },

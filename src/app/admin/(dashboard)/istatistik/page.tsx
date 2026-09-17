@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { prisma, runInBatches } from "@/lib/db";
-import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
+import { ReaderMetrics } from "@/frontend/admin/dashboard/ReaderMetrics";
+import { repository, runInBatches } from "@/backend/modules/data/repository";
+import { AdminBreadcrumbs } from "@/frontend/admin/layout/AdminBreadcrumbs";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { auth } from "@/backend/modules/auth/auth";
 
 const numberFormatter = new Intl.NumberFormat("tr-TR");
 const dateFormatter = new Intl.DateTimeFormat("tr-TR", {
@@ -75,28 +76,28 @@ export default async function IstatistikPage() {
     viewsLast30,
     newsletterCount,
   ] = await runInBatches([
-    () => prisma.yazi.count(),
-    () => prisma.haber.count(),
-    () => prisma.yazar.count({ where: { ayrilmis: false } }),
-    () => prisma.kategori.count(),
-    () => prisma.page.count(),
-    () => prisma.yazi.count({ where: { publishedAt: { lte: now } } }),
-    () => prisma.yazi.count({ where: { publishedAt: null } }),
-    () => prisma.yazi.count({ where: { publishedAt: { gt: now } } }),
-    () => prisma.haber.count({ where: { publishedAt: { lte: now } } }),
-    () => prisma.haber.count({ where: { publishedAt: null } }),
-    () => prisma.yazi.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
-    () => prisma.yazi.count({ where: { publishedAt: { gte: thirtyDaysAgo, lte: now } } }),
-    () => prisma.haber.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
-    () => prisma.yazi.count({ where: { kategoriler: { none: {} } } }),
-    () => prisma.yazi.aggregate({ _sum: { viewCount: true } }),
+    () => repository.yazi.count(),
+    () => repository.haber.count(),
+    () => repository.yazar.count({ where: { ayrilmis: false } }),
+    () => repository.kategori.count(),
+    () => repository.page.count(),
+    () => repository.yazi.count({ where: { publishedAt: { lte: now } } }),
+    () => repository.yazi.count({ where: { publishedAt: null } }),
+    () => repository.yazi.count({ where: { publishedAt: { gt: now } } }),
+    () => repository.haber.count({ where: { publishedAt: { lte: now } } }),
+    () => repository.haber.count({ where: { publishedAt: null } }),
+    () => repository.yazi.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+    () => repository.yazi.count({ where: { publishedAt: { gte: thirtyDaysAgo, lte: now } } }),
+    () => repository.haber.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+    () => repository.yazi.count({ where: { kategoriler: { none: {} } } }),
+    () => repository.yazi.aggregate({ _sum: { viewCount: true } }),
     () =>
-      prisma.yazi.findMany({
+      repository.yazi.findMany({
         where: { createdAt: { gte: thirtyDaysAgo } },
         select: { createdAt: true },
       }),
     () =>
-      prisma.yazi.findMany({
+      repository.yazi.findMany({
         where: { publishedAt: { lte: now } },
         take: 10,
         orderBy: [{ viewCount: "desc" }, { publishedAt: "desc" }],
@@ -107,7 +108,7 @@ export default async function IstatistikPage() {
         },
       }),
     () =>
-      prisma.yazar.findMany({
+      repository.yazar.findMany({
         where: { ayrilmis: false },
         select: {
           id: true, name: true, slug: true,
@@ -118,17 +119,17 @@ export default async function IstatistikPage() {
         },
       }),
     () =>
-      prisma.kategori.findMany({
+      repository.kategori.findMany({
         select: { id: true, name: true, _count: { select: { yazilar: true } } },
         orderBy: { yazilar: { _count: "desc" } },
         take: 10,
       }),
-    () => prisma.yazi.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
-    () => prisma.yazi.aggregate({
+    () => repository.yazi.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+    () => repository.yazi.aggregate({
       where: { publishedAt: { gte: thirtyDaysAgo, lte: now } },
       _sum: { viewCount: true },
     }),
-    () => prisma.newsletterSubscriber.count({ where: { active: true } }),
+    () => repository.newsletterSubscriber.count({ where: { active: true } }),
   ]);
 
   const totalViews = viewsAggregate._sum.viewCount ?? 0;
@@ -172,6 +173,8 @@ export default async function IstatistikPage() {
           </div>
         </div>
       </div>
+
+      <ReaderMetrics />
 
       {/* Ana Metrik Kartları */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

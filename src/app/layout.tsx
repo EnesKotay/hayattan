@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
 import { Source_Sans_3, Merriweather } from "next/font/google";
-import { Header } from "@/components/Header";
-import { getMenuItems } from "@/app/admin/actions";
-import { Footer } from "@/components/Footer";
-import { SessionProvider } from "@/components/providers/SessionProvider";
-import { SkipLink } from "@/components/SkipLink";
-import { BackToTop } from "@/components/BackToTop";
-import { ReadingProgress } from "@/components/ReadingProgress";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { AccessibilityProvider } from "@/components/providers/AccessibilityProvider";
-import { ToastProvider } from "@/components/Toast/ToastProvider";
-import { ToastContainer } from "@/components/Toast/Toast";
-import { CommandMenu } from "@/components/CommandMenu";
-import { ProgressBar } from "@/components/ProgressBar";
-import { GoogleAnalytics } from "@/components/GoogleAnalytics";
-import { PublicOnly } from "@/components/PublicOnly";
-import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
-import { generateOrganizationSchema, serializeJsonLd, SITE_URL } from "@/lib/seo";
+import { Header } from "@/frontend/layout/Header";
+import { getMenuItems } from "@/backend/modules/navigation/actions";
+import { Footer } from "@/frontend/layout/Footer";
+import { SessionProvider } from "@/frontend/providers/SessionProvider";
+import { SkipLink } from "@/frontend/ui/SkipLink";
+import { BackToTop } from "@/frontend/ui/BackToTop";
+import { ReadingProgress } from "@/frontend/ui/ReadingProgress";
+import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
+import { AccessibilityProvider } from "@/frontend/providers/AccessibilityProvider";
+import { ToastProvider } from "@/frontend/ui/toast/ToastProvider";
+import { ToastContainer } from "@/frontend/ui/toast/Toast";
+import { CommandMenu } from "@/frontend/layout/CommandMenu";
+import { ProgressBar } from "@/frontend/ui/ProgressBar";
+import { GoogleAnalytics } from "@/frontend/ui/GoogleAnalytics";
+import { PublicOnly } from "@/frontend/layout/PublicOnly";
+import { PwaInstallPrompt } from "@/frontend/ui/PwaInstallPrompt";
+import { generateOrganizationSchema, serializeJsonLd, SITE_URL } from "@/backend/modules/content/seo";
 import "./globals.css";
-import "@/styles/admin.css";
+import "@/frontend/styles/admin.css";
 
 const sourceSans = Source_Sans_3({
   variable: "--font-source-sans",

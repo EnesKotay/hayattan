@@ -1,9 +1,9 @@
-import { getRecentSecurityLogs, type SecurityEventType } from "@/lib/security-logger";
+import { getRecentSecurityLogs, type SecurityEventType } from "@/backend/security/security-logger";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
-import { Icons } from "@/components/admin/Icons";
-import { AdminFilters } from "@/components/admin/AdminFilters";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { Icons } from "@/frontend/admin/ui/Icons";
+import { AdminFilters } from "@/frontend/admin/ui/AdminFilters";
+import { requireAdminPage } from "@/backend/modules/auth/admin-guard";
 
 const EVENT_LABELS: Record<string, string> = {
   failed_login: "Hatalı Giriş",

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { AD_SLOT_KEYS, adMetricKey, type AdMetricType } from "@/lib/ad-slots";
+import { repository } from "@/backend/modules/data/repository";
+import { AD_SLOT_KEYS, adMetricKey, type AdMetricType } from "@/shared/advertising/ad-slots";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const key = adMetricKey(slotId, event);
-    await prisma.$transaction(async (transaction) => {
+    await repository.$transaction(async (transaction) => {
       const existing = await transaction.siteSetting.findUnique({ where: { key } });
       const nextValue = String(Math.max(0, Number.parseInt(existing?.value ?? "0", 10) || 0) + 1);
       if (existing) {

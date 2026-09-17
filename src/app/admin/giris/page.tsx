@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { auth } from "@/backend/modules/auth/auth";
 import GirisForm from "./GirisForm";
 
 export default async function GirisPage() {
