@@ -7,6 +7,11 @@ import { ToastProvider } from "@/frontend/admin/ui/ToastProvider";
 import { ToastContainer } from "@/frontend/admin/ui/Toast";
 import { AdminWelcome } from "@/frontend/admin/layout/AdminWelcome";
 
+// Tüm admin dashboard sayfalarının build anında prerender edilmesini engeller.
+// Prerender sırasında canlı DB bağlantısı olmadığından Prisma bağlantı havuzu
+// zaman aşımına uğrar (P2024). Bu direktif bunu önler.
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({
   children,
 }: {

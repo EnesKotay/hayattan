@@ -5,6 +5,8 @@ import { AdminBreadcrumbs } from "@/frontend/admin/layout/AdminBreadcrumbs";
 import { redirect } from "next/navigation";
 import { auth } from "@/backend/modules/auth/auth";
 
+export const dynamic = "force-dynamic";
+
 const numberFormatter = new Intl.NumberFormat("tr-TR");
 const dateFormatter = new Intl.DateTimeFormat("tr-TR", {
   day: "2-digit",
